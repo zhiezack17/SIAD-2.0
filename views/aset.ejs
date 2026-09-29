@@ -1,0 +1,284 @@
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 25px 30px;">
+    
+    <% if (status === 'success') { %>
+    <div style="background: #ecfdf5; border-left: 5px solid #10b981; color: #065f46; padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 18px;"></i>
+            <span>Data aset inventaris berhasil disimpan ke sistem!</span>
+        </div>
+        <a href="/aset" style="color: #065f46; text-decoration: none; font-size: 18px; line-height: 1;">&times;</a>
+    </div>
+    <% } %>
+
+    <% if (status === 'deleted') { %>
+    <div style="background: #fef2f2; border-left: 5px solid #ef4444; color: #991b1b; padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-trash-can" style="color: #ef4444; font-size: 18px;"></i>
+            <span>Data aset berhasil dihapus dari inventaris.</span>
+        </div>
+        <a href="/aset" style="color: #991b1b; text-decoration: none; font-size: 18px; line-height: 1;">&times;</a>
+    </div>
+    <% } %>
+
+    <% if (error) { %>
+    <div style="background: #fff1f2; border-left: 5px solid #f43f5e; color: #9f1239; padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-exclamation" style="color: #f43f5e; font-size: 18px;"></i>
+            <span>Perhatian: <%= error %></span>
+        </div>
+        <a href="/aset" style="color: #9f1239; text-decoration: none; font-size: 18px; line-height: 1;">&times;</a>
+    </div>
+    <% } %>
+
+    <!-- Tombol Kembali -->
+    <div style="margin-bottom: 20px;">
+        <a href="/dashboard" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: white; color: #0f172a; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 13.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+        </a>
+    </div>
+
+    <!-- Header Banner -->
+    <div style="background: white; border-radius: 14px; padding: 24px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); margin-bottom: 25px; border-left: 5px solid #0284c7;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0 0 6px 0; color: #0f172a; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <span>📦</span> Inventaris Aset Kepenghuluan (KIB)
+                </h2>
+                <p style="margin: 0; color: #64748b; font-size: 14px;">Pencatatan tertib aset & barang milik desa sesuai Permendagri No. 1/2016 tentang Pengelolaan Aset Desa.</p>
+            </div>
+            <div>
+                <button type="button" onclick="document.getElementById('inputNamaAset').focus(); window.scrollTo({top: 250, behavior: 'smooth'});" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2,132,199,0.25);">
+                    <i class="fa-solid fa-plus"></i> Tambah Aset Baru
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <% 
+        const totalAset = data ? data.length : 0;
+        const totalNilai = data ? data.reduce((acc, d) => acc + (Number(d.nilai_perolehan) || Number(d.nilai) || 0), 0) : 0;
+        const asetBaik = data ? data.filter(d => (d.kondisi || '').toLowerCase().includes('baik')).length : 0;
+        const asetRusak = totalAset - asetBaik;
+    %>
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 25px;">
+        <div class="stat-card" style="background: white; border-radius: 14px; padding: 20px 22px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size: 12.5px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Total Aset Terdaftar</div>
+            <div style="font-size: 30px; font-weight: 800; color: #0f172a;"><%= totalAset %> <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">Unit/Item</span></div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 14px; padding: 20px 22px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size: 12.5px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Kondisi Baik</div>
+            <div style="font-size: 30px; font-weight: 800; color: #10b981;"><%= asetBaik %> <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">Siap Pakai</span></div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 14px; padding: 20px 22px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size: 12.5px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Perlu Perbaikan / Rusak</div>
+            <div style="font-size: 30px; font-weight: 800; color: #f59e0b;"><%= asetRusak %> <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">Barang</span></div>
+        </div>
+        <div class="stat-card" style="background: white; border-radius: 14px; padding: 20px 22px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size: 12.5px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Estimasi Nilai Perolehan</div>
+            <div style="font-size: 24px; font-weight: 800; color: #2563eb;">Rp <%= totalNilai.toLocaleString('id-ID') %></div>
+        </div>
+    </div>
+
+    <!-- Area Konten: Form Tambah & Tabel Aset -->
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 25px; align-items: start;">
+        
+        <!-- Form Tambah Aset Baru -->
+        <div style="background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;">
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 17px; font-weight: 800; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-file-circle-plus" style="color: #0284c7;"></i> Input Aset Baru
+            </h3>
+
+            <form action="/aset" method="POST" style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Nama Aset / Barang <span style="color: #ef4444;">*</span></label>
+                    <input type="text" id="inputNamaAset" name="nama" required placeholder="Cth: Laptop Lenovo ThinkPad" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Kategori Aset</label>
+                        <select name="tipe" style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; outline: none; background: white;">
+                            <option value="Peralatan & Mesin">Peralatan & Mesin</option>
+                            <option value="Gedung & Bangunan">Gedung & Bangunan</option>
+                            <option value="Tanah Kas Desa">Tanah Kas Desa</option>
+                            <option value="Jalan & Irigasi">Jalan & Irigasi</option>
+                            <option value="Aset Tetap Lainnya">Aset Tetap Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Merk / Spesifikasi</label>
+                        <input type="text" name="merk" placeholder="Cth: Seri L14 / Intel i5" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Tahun Perolehan</label>
+                        <input type="number" name="tahun_perolehan" value="<%= new Date().getFullYear() %>" min="1990" max="2099" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Kondisi Fisik</label>
+                        <select name="kondisi" style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; outline: none; background: white;">
+                            <option value="baik">🟢 Baik</option>
+                            <option value="rusak_ringan">🟡 Rusak Ringan</option>
+                            <option value="rusak_berat">🔴 Rusak Berat</option>
+                            <option value="tidak_dapat_digunakan">⚫ Tidak Dpt Digunakan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Jumlah Unit</label>
+                        <input type="number" name="jumlah" value="1" min="1" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Satuan</label>
+                        <input type="text" name="satuan" value="unit" placeholder="unit / buah / set" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Nilai Perolehan (Rp)</label>
+                    <input type="number" name="nilai_perolehan" placeholder="Cth: 12500000" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Sumber Dana</label>
+                        <select name="sumber_dana" style="width: 100%; padding: 9px 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; box-sizing: border-box; outline: none; background: white;">
+                            <option value="Dana Desa (DDS)">Dana Desa (DDS)</option>
+                            <option value="Alokasi Dana Desa (ADD)">Alokasi Dana Desa (ADD)</option>
+                            <option value="BKK Provinsi">BKK Provinsi</option>
+                            <option value="PADes">PADes</option>
+                            <option value="Bagi Hasil Pajak">Bagi Hasil Pajak</option>
+                            <option value="Hibah / Lainnya">Hibah / Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Lokasi / Ruang</label>
+                        <input type="text" name="lokasi" placeholder="Cth: Kantor Desa" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px; color: #334155;">Keterangan Tambahan</label>
+                    <textarea name="keterangan" rows="2" placeholder="Catatan nomor seri, no sertifikat, kondisi khusus..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(16,185,129,0.25); transition: all 0.2s;">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Data Aset
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Daftar Aset -->
+        <div style="background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-boxes-stacked" style="color: #0284c7;"></i> Buku Register Inventaris Aset
+                </h3>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12.5px;"></i>
+                    <input type="text" id="searchAset" onkeyup="filterAsetTable()" placeholder="Cari nama/kode aset..." style="padding: 7px 12px 7px 34px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12.5px; outline: none; width: 220px;">
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="tabelAset" class="data-table" style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; width: 45px; color: #64748b;">No</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: left; color: #64748b;">Kode & Nama Aset</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: left; color: #64748b;">Kategori / Merk</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; color: #64748b;">Tahun</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; color: #64748b;">Kondisi</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; color: #64748b;">Jml</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: right; color: #64748b;">Nilai Perolehan</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: left; color: #64748b;">Lokasi</th>
+                            <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; width: 70px; color: #64748b;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (!data || data.length === 0) { %>
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                                <div style="font-size: 38px; margin-bottom: 8px;">📦</div>
+                                <div style="font-weight: 700; font-size: 15px; color: #475569;">Belum ada aset inventaris yang terdaftar</div>
+                                <div style="font-size: 13px; margin-top: 4px;">Gunakan form di samping kiri untuk menginput aset baru kepenghuluan.</div>
+                            </td>
+                        </tr>
+                        <% } else { %>
+                            <% data.forEach((item, index) => { 
+                                const k = (item.kondisi || '').toLowerCase();
+                                let badgeColor = '#10b981';
+                                let badgeBg = '#ecfdf5';
+                                let badgeText = 'Baik';
+                                if (k.includes('rusak_berat') || k.includes('berat')) {
+                                    badgeColor = '#ef4444'; badgeBg = '#fef2f2'; badgeText = 'Rusak Berat';
+                                } else if (k.includes('rusak_ringan') || k.includes('ringan')) {
+                                    badgeColor = '#f59e0b'; badgeBg = '#fffbeb'; badgeText = 'Rusak Ringan';
+                                } else if (k.includes('tidak_dapat') || k.includes('rusak')) {
+                                    badgeColor = '#6b7280'; badgeBg = '#f3f4f6'; badgeText = 'Tidak Digunakan';
+                                }
+                                const nilaiRp = Number(item.nilai_perolehan || item.nilai || 0);
+                            %>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 12px 14px; text-align: center; color: #64748b; font-weight: 600;"><%= index + 1 %></td>
+                                <td style="padding: 12px 14px;">
+                                    <div style="font-weight: 700; color: #0f172a;"><%= item.nama %></div>
+                                    <div style="font-size: 11.5px; color: #64748b; font-family: monospace; margin-top: 2px;"><%= item.kode || '-' %></div>
+                                </td>
+                                <td style="padding: 12px 14px;">
+                                    <div style="font-weight: 600; color: #334155;"><%= item.tipe || item.jenis || 'Aset Desa' %></div>
+                                    <div style="font-size: 12px; color: #94a3b8;"><%= item.merk || '-' %></div>
+                                </td>
+                                <td style="padding: 12px 14px; text-align: center; font-weight: 600; color: #475569;"><%= item.tahun_perolehan || item.tahun || '-' %></td>
+                                <td style="padding: 12px 14px; text-align: center;">
+                                    <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: <%= badgeBg %>; color: <%= badgeColor %>; border: 1px solid <%= badgeColor %>33;">
+                                        <%= badgeText %>
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 14px; text-align: center; font-weight: 600; color: #334155;"><%= item.jumlah || 1 %> <%= item.satuan || 'unit' %></td>
+                                <td style="padding: 12px 14px; text-align: right; font-weight: 700; color: #0f172a;">Rp <%= nilaiRp.toLocaleString('id-ID') %></td>
+                                <td style="padding: 12px 14px; font-size: 12.5px; color: #475569;">
+                                    <div><i class="fa-solid fa-location-dot" style="color: #0284c7; font-size: 11px;"></i> <%= item.lokasi || 'Kantor Desa' %></div>
+                                    <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;"><%= item.sumber_dana || 'DDS' %></div>
+                                </td>
+                                <td style="padding: 12px 14px; text-align: center;">
+                                    <form action="/aset/hapus/<%= item.id %>" method="POST" onsubmit="return confirm('Yakin ingin menghapus aset \'<%= item.nama %>\'?');" style="margin: 0; display: inline;">
+                                        <button type="submit" title="Hapus Aset" style="background: #fee2e2; border: 1px solid #fca5a5; color: #ef4444; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                            <i class="fa-solid fa-trash-can" style="font-size: 13px;"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterAsetTable() {
+    const input = document.getElementById('searchAset');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('tabelAset');
+    const trs = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < trs.length; i++) {
+        const rowText = trs[i].innerText.toLowerCase();
+        if (rowText.includes(filter)) {
+            trs[i].style.display = '';
+        } else {
+            trs[i].style.display = 'none';
+        }
+    }
+}
+</script>

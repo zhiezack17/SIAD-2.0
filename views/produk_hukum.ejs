@@ -1,0 +1,181 @@
+
+
+<div class="kembali-btn-wrapper" style="margin-bottom: 20px;">
+    <a href="/dashboard" style="display: inline-block; text-decoration: none; background: #e2e8f0; color: #334155; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #cbd5e1; transition: background 0.2s;">
+        ⬅️ Kembali ke Dashboard
+    </a>
+</div>
+<div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h2 style="margin:0; color: #1e293b;">Modul Produk Hukum</h2>
+            <p style="margin:5px 0 0 0; color: #64748b;">Manajemen Data Produk Hukum & Peraturan</p>
+        </div>
+        <button onclick="bukaModal()" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Tambah Data</button>
+    </div>
+
+    <% if(typeof status !== 'undefined' && status === 'success_add') { %>
+      <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bbf7d0;"><strong>Sukses!</strong> Data Produk Hukum berhasil ditambahkan.</div>
+    <% } %>
+    <% if(typeof status !== 'undefined' && status === 'success_edit') { %>
+      <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bbf7d0;"><strong>Sukses!</strong> Data berhasil diubah.</div>
+    <% } %>
+    <% if(typeof status !== 'undefined' && status === 'success_delete') { %>
+      <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bbf7d0;"><strong>Terhapus!</strong> Data dan file PDF berhasil dihapus.</div>
+    <% } %>
+    <% if(typeof status !== 'undefined' && status === 'error') { %>
+      <div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #fecaca;"><strong>Gagal!</strong> <%= msg %></div>
+    <% } %>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 800px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left;">
+                    <th style="padding: 12px;">No</th>
+                    <th style="padding: 12px;">Jenis & Nomor</th>
+                    <th style="padding: 12px;">Judul & Tentang</th>
+                    <th style="padding: 12px;">Status</th>
+                    <th style="padding: 12px;">File PDF</th>
+                    <th style="padding: 12px; text-align: center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(data && data.length > 0) { %>
+                    <% data.forEach((item, index) => { %>
+                        <tr style="border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                            <td style="padding: 12px;"><%= index + 1 %></td>
+                            <td style="padding: 12px;">
+                                <strong style="color: #0f172a;"><%= item.jenis.replace(/_/g, ' ').toUpperCase() %></strong><br>
+                                <span style="color: #64748b;">No: <%= item.nomor %> / <%= item.tahun %></span>
+                            </td>
+                            <td style="padding: 12px;">
+                                <strong style="color: #0f172a;"><%= item.judul %></strong><br>
+                                <span style="color: #64748b; font-size: 13px;"><%= item.tentang && item.tentang !== '-' && item.tentang.length > 50 ? item.tentang.substring(0,50)+'...' : item.tentang %></span>
+                            </td>
+                            <td style="padding: 12px;">
+                                <% if (item.status === 'ditetapkan') { %>
+                                    <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Ditetapkan</span>
+                                <% } else if (item.status === 'diundangkan') { %>
+                                    <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Diundangkan</span>
+                                <% } else if (item.status === 'dicabut') { %>
+                                    <span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Dicabut</span>
+                                <% } else { %>
+                                    <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Draft</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 12px;">
+                                <% if (item.drive_file_url) { %>
+                                    <a href="<%- item.drive_file_url && item.drive_file_url.includes('http') ? item.drive_file_url : '/uploads/produk_hukum/' + item.drive_file_url %>" target="_blank" target="_blank" style="color: #2563eb; text-decoration: none; display: inline-block; padding: 4px 8px; background: #eff6ff; border-radius: 4px; font-weight: 500;">
+                                        📄 Buka PDF
+                                    </a>
+                                <% } else { %>
+                                    <span style="color: #94a3b8; font-style: italic;">Tidak ada</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 12px; display: flex; gap: 8px; justify-content: center;">
+                                <button onclick="editModal('<%= item.id %>', '<%= item.jenis %>', '<%= item.nomor %>', '<%= item.tahun %>', '<%= item.judul %>', '<%= item.status %>')" style="background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Edit</button>
+                                <form action="/produk-hukum/hapus" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data ini secara permanen? File PDF juga akan ikut terhapus dari server.')">
+                                    <input type="hidden" name="id" value="<%= item.id %>">
+                                    <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data produk hukum.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Tambah/Edit -->
+<div id="modalPH" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 8px; width: 550px; max-width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0; color: #1e293b;">Tambah Produk Hukum</h3>
+            <button type="button" onclick="tutupModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
+        </div>
+        <form id="formPH" action="/produk-hukum/tambah" method="POST" enctype="multipart/form-data">
+            <input type="hidden" id="ph_id" name="id">
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Jenis Regulasi</label>
+                    <select name="jenis" id="ph_jenis" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white;">
+                        <option value="peraturan_kepenghuluan">Peraturan Kepenghuluan</option>
+                        <option value="peraturan_bersama_penghulu">Peraturan Bersama Penghulu</option>
+                        <option value="peraturan_penghulu">Peraturan Penghulu</option>
+                        <option value="keputusan_penghulu">Keputusan Penghulu</option>
+                        
+                        <option value="instruksi_penghulu">Instruksi Penghulu</option>
+                        <option value="peraturan_bupati">Peraturan Bupati (Perbup)</option>
+                        <option value="peraturan_menteri_desa">Peraturan Menteri Desa (Permendes)</option>
+                        <option value="peraturan_kepala_dinas">Peraturan Kepala Dinas</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Nomor</label>
+                        <input type="text" name="nomor" id="ph_nomor" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Tahun</label>
+                        <input type="number" name="tahun" id="ph_tahun" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Judul</label>
+                    <input type="text" name="judul" id="ph_judul" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Status</label>
+                    <select name="status" id="ph_status" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white;">
+                        <option value="draft">Draft (Konsep)</option>
+                        <option value="ditetapkan">Ditetapkan</option>
+                        <option value="diundangkan">Diundangkan</option>
+                        <option value="dicabut">Dicabut</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">File PDF (Opsional)</label>
+                    <input type="file" name="file_pdf" id="ph_file" accept=".pdf" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                    <small id="fileHelp" style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">Maksimal 5MB. Hanya format PDF.</small>
+                </div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="tutupModal()" style="background: #f1f5f9; color: #475569; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">Batal</button>
+                <button type="submit" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Simpan Data</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function bukaModal() {
+    document.getElementById('modalTitle').innerText = 'Tambah Produk Hukum';
+    document.getElementById('formPH').action = '/produk-hukum/tambah';
+    document.getElementById('formPH').reset();
+    document.getElementById('ph_id').value = '';
+    document.getElementById('fileHelp').innerText = 'Maksimal 5MB. Hanya format PDF.';
+    document.getElementById('modalPH').style.display = 'flex';
+}
+
+function editModal(id, jenis, nomor, tahun, judul, status) {
+    document.getElementById('modalTitle').innerText = 'Edit Produk Hukum';
+    document.getElementById('formPH').action = '/produk-hukum/edit';
+    document.getElementById('ph_id').value = id;
+    document.getElementById('ph_jenis').value = jenis;
+    document.getElementById('ph_nomor').value = nomor;
+    document.getElementById('ph_tahun').value = tahun;
+    document.getElementById('ph_judul').value = judul;
+    document.getElementById('ph_status').value = status;
+    document.getElementById('fileHelp').innerText = 'Biarkan kosong jika tidak ingin mengubah/menghapus file lama.';
+    document.getElementById('modalPH').style.display = 'flex';
+}
+
+function tutupModal() {
+    document.getElementById('modalPH').style.display = 'none';
+}
+</script>

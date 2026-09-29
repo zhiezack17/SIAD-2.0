@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 12mm 15mm 12mm 15mm;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 15px;
+            font-size: 10.5pt;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .header-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .kop-logo {
+            width: 75px;
+            height: auto;
+        }
+        .kop-title-kab {
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .kop-title-kec {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+        }
+        .kop-title-desa {
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+            text-decoration: underline;
+        }
+        .kop-alamat {
+            font-size: 9.5pt;
+            font-style: italic;
+            margin: 3px 0 0 0;
+        }
+        .double-line {
+            border: none;
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin: 6px 0 12px 0;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            text-decoration: underline;
+        }
+        .doc-subtitle {
+            text-align: center;
+            font-size: 10.5pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .meta-table {
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 10pt;
+        }
+        .meta-table td {
+            padding: 2px 0;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+            margin-bottom: 15px;
+        }
+        table.data-table th, table.data-table td {
+            border: 1px solid #000;
+            padding: 5px 6px;
+        }
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        
+        .signature-table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+        .signature-table td {
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+            padding: 0 15px;
+        }
+        .sig-space {
+            height: 65px;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOMBOL AKSI ATAS (HANYA MUNCUL DI LAYAR MONITOR) -->
+    <div class="no-print" style="background: #1e293b; color: white; padding: 10px 20px; margin: -15px -15px 15px -15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div>
+            <b>🖨️ Pratinjau Cetak: Buku Agenda <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %></b> &bull; Kepenghuluan <%= desa.nama %> (<%= periodeTeks %>)
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                🖨️ Cetak Dokumen (PDF)
+            </button>
+            <button onclick="window.close()" style="background: #64748b; color: white; border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                ✕ Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- KOP RESMI PEMERINTAHAN -->
+    <table class="header-table">
+        <tr>
+            <td style="width: 12%; text-align: left;">
+                <img src="/img/logo.png" alt="Logo Rohil" class="kop-logo" onerror="this.onerror=null; this.src='/images/logo_rohil.png';">
+            </td>
+            <td style="width: 76%;">
+                <div class="kop-title-kab">PEMERINTAH KABUPATEN ROKAN HILIR</div>
+                <div class="kop-title-kec">KECAMATAN <%= desa.kecamatan.toUpperCase() %></div>
+                <div class="kop-title-desa">KEPENGHULUAN <%= desa.nama.toUpperCase() %></div>
+                <div class="kop-alamat"><%= desa.alamat %></div>
+            </td>
+            <td style="width: 12%;"></td>
+        </tr>
+    </table>
+    <div class="double-line"></div>
+
+    <!-- JUDUL DOKUMEN -->
+    <div class="doc-title">BUKU AGENDA <%= tab === 'masuk' ? 'SURAT MASUK' : 'SURAT KELUAR' %></div>
+    <div class="doc-subtitle"><%= periodeTeks.toUpperCase() %></div>
+
+    <!-- TABEL DATA BUKU AGENDA -->
+    <% 
+        function formatTgl(tglStr) {
+            if (!tglStr) return '-';
+            const d = new Date(tglStr);
+            if (isNaN(d.getTime())) return tglStr;
+            const day = String(d.getDate()).padStart(2, '0');
+            const mon = String(d.getMonth() + 1).padStart(2, '0');
+            const yr = d.getFullYear();
+            return `${day}/${mon}/${yr}`;
+        }
+    %>
+
+    <% if (tab === 'masuk') { %>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 35px;">NO</th>
+                <th style="width: 75px;">TGL TERIMA</th>
+                <th style="width: 130px;">NOMOR SURAT</th>
+                <th style="width: 75px;">TGL SURAT</th>
+                <th style="width: 140px;">PENGIRIM / ASAL</th>
+                <th>PERIHAL / ISI RINGKAS</th>
+                <th style="width: 70px;">SIFAT</th>
+                <th style="width: 120px;">DITERUSKAN KEPADA</th>
+                <th style="width: 130px;">DISPOSISI / INSTRUKSI</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (data && data.length > 0) { %>
+                <% data.forEach((row, idx) => { %>
+                <tr>
+                    <td class="text-center font-bold"><%= idx + 1 %></td>
+                    <td class="text-center"><%= formatTgl(row.created_at || row.tanggal_surat) %></td>
+                    <td class="font-bold"><%= row.nomor_surat || '-' %></td>
+                    <td class="text-center"><%= formatTgl(row.tanggal_surat) %></td>
+                    <td><%= row.pengirim || '-' %></td>
+                    <td><%= row.perihal || '-' %></td>
+                    <td class="text-center"><%= row.disposisi_sifat || 'Biasa' %></td>
+                    <td><%= row.disposisi_ke_nama ? `${row.disposisi_ke_jabatan} (${row.disposisi_ke_nama})` : (row.disposisi_ke_jabatan || '-') %></td>
+                    <td><%= row.disposisi_instruksi || row.disposisi_catatan || '-' %></td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="9" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
+                        Belum ada catatan surat masuk pada periode ini.
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    <% } else { %>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;">NO</th>
+                <th style="width: 85px;">TGL KIRIM</th>
+                <th style="width: 160px;">NOMOR SURAT</th>
+                <th style="width: 85px;">TGL SURAT</th>
+                <th style="width: 180px;">TUJUAN / PENERIMA</th>
+                <th>PERIHAL / ISI RINGKAS</th>
+                <th style="width: 110px;">KETERANGAN</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (data && data.length > 0) { %>
+                <% data.forEach((row, idx) => { %>
+                <tr>
+                    <td class="text-center font-bold"><%= idx + 1 %></td>
+                    <td class="text-center"><%= formatTgl(row.created_at || row.tanggal_surat) %></td>
+                    <td class="font-bold"><%= row.nomor_surat || '-' %></td>
+                    <td class="text-center"><%= formatTgl(row.tanggal_surat) %></td>
+                    <td><%= row.tujuan || '-' %></td>
+                    <td><%= row.perihal || '-' %></td>
+                    <td class="text-center"><%= row.file_url ? 'Ada Arsip Digital' : '-' %></td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="7" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
+                        Belum ada catatan surat keluar pada periode ini.
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    <% } %>
+
+    <!-- RINGKASAN REKAP -->
+    <div style="font-size: 10pt; margin-top: 5px; margin-bottom: 20px;">
+        Jumlah Surat Tercatat: <b><%= data ? data.length : 0 %> Berkas</b>
+    </div>
+
+    <!-- TANDA TANGAN PENGESAHAN RESMI DESA -->
+    <table class="signature-table">
+        <tr>
+            <td>
+                Mengetahui,<br>
+                <b>Penghulu <%= desa.nama %></b>
+                <div class="sig-space"></div>
+                <div style="font-weight: bold; text-decoration: underline;"><%= desa.penghulu %></div>
+            </td>
+            <td>
+                <%= desa.nama %>, <%= tanggalCetak %><br>
+                Dibuat Oleh,<br>
+                <b>Sekretaris Kepenghuluan</b>
+                <div class="sig-space"></div>
+                <div style="font-weight: bold; text-decoration: underline;"><%= desa.sekretaris %></div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

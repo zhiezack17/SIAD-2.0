@@ -1,0 +1,158 @@
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="/img/logo.png" alt="Logo SIAD 2.0" style="height: 32px; margin-right: 8px; border-radius: 4px;"> SIAD 2.0
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/workspace" class="nav-item"><i class="fa-solid fa-folder-tree"></i> Workspace</a>
+            <div style="margin-bottom: 5px;">
+                <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); if(m.style.display==='none'){ m.style.display='flex'; document.getElementById('surat-icon').className='fa-solid fa-minus'; } else { m.style.display='none'; document.getElementById('surat-icon').className='fa-solid fa-plus'; }" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-envelope" style="width: 20px;"></i> Surat</span>
+                    <i id="surat-icon" class="fa-solid fa-minus" style="font-size: 14px;"></i>
+                </div>
+                <div id="surat-menu" style="display: flex; flex-direction: column; gap: 8px; padding-left: 35px; margin-top: 8px; margin-bottom: 8px;">
+                    <a href="/surat?tab=masuk" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Masuk</a>
+                    <a href="/surat?tab=keluar" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Keluar</a>
+                </div>
+            </div>
+            <a href="/spj" class="nav-item"><i class="fa-solid fa-briefcase"></i> Kegiatan (SPJ)</a>
+            <a href="/produk-hukum" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Produk Hukum</a>
+            <a href="/arsip" class="nav-item"><i class="fa-solid fa-box-archive"></i> Arsip Lainnya</a>
+            <a href="/aset" class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Aset</a>
+            <a href="/bumdes" class="nav-item"><i class="fa-solid fa-store"></i> BUMDes</a>
+            <a href="/master_data" class="nav-item"><i class="fa-solid fa-database"></i> Master Data</a>
+            <a href="/laporan" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+            <a href="/pengaturan" class="nav-item"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="search-bar">
+                <i class="fa-solid fa-search" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Cari Aset..." style="border: none; outline: none; margin-left: 10px; width: 300px;">
+            </div>
+            <div class="user-profile">
+                <span style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
+                    <strong><%= user ? user.nama : 'Guest' %></strong>
+                    <small style="font-size: 0.75rem; color: var(--text-muted);"><%= user ? user.peran : '' %></small>
+                </span>
+                <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; margin-left: 10px;">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <a href="/logout" style="margin-left: 15px; color: #dc2626; text-decoration: none;"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </header>
+        <div class="dashboard-content">
+            <h2 style="margin-bottom: 5px;">📦 Inventaris Aset Desa</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Kelola data inventaris barang dan aset milik desa.</p>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-title">Total Aset Terdaftar</div><div class="stat-value"><%= data ? data.length : 0 %></div></div>
+                <div class="stat-card"><div class="stat-title">Aset Bergerak</div><div class="stat-value" style="color: var(--primary);"><%= data ? data.filter(d => d.jenis && d.jenis.toLowerCase().includes('bergerak')).length : 0 %></div></div>
+                <div class="stat-card"><div class="stat-title">Aset Tetap</div><div class="stat-value" style="color: var(--accent);"><%= data ? data.filter(d => d.jenis && d.jenis.toLowerCase().includes('tetap')).length : 0 %></div></div>
+                <div class="stat-card"><div class="stat-title">Nilai Perkiraan</div><div class="stat-value" style="color: #f59e0b;">Rp <%= data ? data.reduce((s,d) => s + (Number(d.nilai) || 0), 0).toLocaleString('id-ID') : '0' %></div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px; align-items: start; margin-top: 25px;">
+                <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">➕ Tambah Aset Baru</h3>
+                    <form action="/aset" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Nama Aset</label>
+                            <input type="text" name="nama" required placeholder="Cth: Meja Kantor Kayu" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Jenis</label>
+                                <select name="jenis" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                    <option value="Aset Tetap">Aset Tetap</option>
+                                    <option value="Aset Bergerak">Aset Bergerak</option>
+                                    <option value="Aset Lainnya">Aset Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Kondisi</label>
+                                <select name="kondisi" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                    <option value="Baik">Baik</option>
+                                    <option value="Rusak Ringan">Rusak Ringan</option>
+                                    <option value="Rusak Berat">Rusak Berat</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Tanggal Perolehan</label>
+                                <input type="date" name="tanggal_perolehan" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Nilai (Rp)</label>
+                                <input type="number" name="nilai" placeholder="1500000" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Lokasi / Ruangan</label>
+                            <input type="text" name="lokasi" placeholder="Cth: Kantor Desa Lantai 1" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Keterangan</label>
+                            <textarea name="keterangan" rows="2" placeholder="Catatan tambahan (opsional)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+                        </div>
+                        <button type="submit" disabled style="background: #94a3b8; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: not-allowed; opacity: 0.7;">
+                            🔒 Simpan Aset (Fitur Penuh Segera Hadir)
+                        </button>
+                        <small style="color: #94a3b8; text-align: center; font-style: italic;">*Saat ini mode tampilan data. Form tambah aset akan aktif setelah patch kolom lengkap.</small>
+                    </form>
+                </div>
+                <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">📋 Daftar Inventaris Aset Desa</h3>
+                    <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; text-align: left;">
+                                <th style="padding: 12px 8px;">Nama Aset</th>
+                                <th style="padding: 12px 8px;">Jenis</th>
+                                <th style="padding: 12px 8px;">Kondisi</th>
+                                <th style="padding: 12px 8px;">Perolehan</th>
+                                <th style="padding: 12px 8px;">Nilai</th>
+                                <th style="padding: 12px 8px;">Lokasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (data && data.length > 0) { %>
+                                <% data.forEach(function(item) { %>
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 12px 8px; font-weight: bold; color: #0f172a;"><%= item.nama || '-' %></td>
+                                        <td style="padding: 12px 8px;">
+                                            <span style="background: <%= item.jenis && item.jenis.toLowerCase().includes('tetap') ? '#ede9fe' : item.jenis && item.jenis.toLowerCase().includes('bergerak') ? '#dbeafe' : '#fef3c7' %>; color: <%= item.jenis && item.jenis.toLowerCase().includes('tetap') ? '#7c3aed' : item.jenis && item.jenis.toLowerCase().includes('bergerak') ? '#1d4ed8' : '#92400e' %>; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                                                <%= item.jenis || 'Aset Lainnya' %>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px 8px;">
+                                            <span style="color: <%= item.kondisi === 'Baik' ? '#10b981' : item.kondisi === 'Rusak Ringan' ? '#f59e0b' : '#ef4444' %>; font-weight: bold; font-size: 13px;">
+                                                <%= item.kondisi || 'Baik' %>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px 8px; color: #64748b; font-size: 13px;"><%= item.tanggal_perolehan ? new Date(item.tanggal_perolehan).toLocaleDateString('id-ID') : '-' %></td>
+                                        <td style="padding: 12px 8px; font-weight: bold; color: #0f172a;">Rp <%= (Number(item.nilai) || 0).toLocaleString('id-ID') %></td>
+                                        <td style="padding: 12px 8px; color: #64748b; font-size: 13px;"><%= item.lokasi || '-' %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" style="padding: 40px; text-align: center; color: #94a3b8;">
+                                        <div style="font-size: 48px; margin-bottom: 15px;">📦</div>
+                                        Belum ada data aset yang terdaftar untuk desa ini.<br>
+                                        <small style="font-style: italic;">Data aset dapat diimpor via patch SQL atau ditambahkan setelah form aktif.</small>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script>
+(function(){ var p = location.pathname; document.querySelectorAll('.sidebar-nav .nav-item').forEach(a => { var h = a.getAttribute('href'); if (h && (h === p || (p.startsWith('/surat') && h.startsWith('/surat')) || (h !== '/dashboard' && p.startsWith(h)))) { a.classList.add('active'); } }); })();
+</script>

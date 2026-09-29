@@ -1,0 +1,124 @@
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header"><img src="/img/logo.png" style="height: 32px; margin-right: 8px; border-radius: 4px;"> SIAD 2.0</div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/workspace" class="nav-item"><i class="fa-solid fa-folder-tree"></i> Workspace</a>
+            <div style="margin-bottom: 5px;">
+                <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); if(m.style.display==='none'){ m.style.display='flex'; document.getElementById('surat-icon').className='fa-solid fa-minus'; } else { m.style.display='none'; document.getElementById('surat-icon').className='fa-solid fa-plus'; }" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-envelope" style="width: 20px;"></i> Surat</span>
+                    <i id="surat-icon" class="fa-solid fa-minus" style="font-size: 14px;"></i>
+                </div>
+                <div id="surat-menu" style="display: flex; flex-direction: column; gap: 8px; padding-left: 35px; margin-top: 8px; margin-bottom: 8px;">
+                    <a href="/surat?tab=masuk" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Masuk</a>
+                    <a href="/surat?tab=keluar" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Keluar</a>
+                </div>
+            </div>
+            <a href="/spj" class="nav-item"><i class="fa-solid fa-briefcase"></i> Kegiatan (SPJ)</a>
+            <a href="/produk-hukum" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Produk Hukum</a>
+            <a href="/arsip" class="nav-item"><i class="fa-solid fa-box-archive"></i> Arsip Lainnya</a>
+            <a href="/aset" class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Aset</a>
+            <a href="/bumdes" class="nav-item"><i class="fa-solid fa-store"></i> BUMDes</a>
+            <a href="/master_data" class="nav-item"><i class="fa-solid fa-database"></i> Master Data</a>
+            <a href="/laporan" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+            <a href="/pengaturan" class="nav-item"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+        </nav>
+    </aside>
+    <script>(function(){ var p = location.pathname; document.querySelectorAll('.sidebar-nav .nav-item').forEach(function(a){ var h = a.getAttribute && a.getAttribute('href'); if (h && (h === p || (p.startsWith('/surat') && h.startsWith('/surat')) || (h !== '/dashboard' && p.startsWith(h)))) { a.classList.add('active'); } }); })();</script>
+
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="search-bar">
+                <i class="fa-solid fa-search" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Cari Peraturan Desa, SK, dll..." style="border: none; outline: none; margin-left: 10px; width: 350px;">
+            </div>
+            <div class="user-profile">
+                <span style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
+                    <strong><%= user ? user.nama : 'Guest' %></strong>
+                    <small style="font-size: 0.75rem; color: var(--text-muted);"><%= user ? user.peran : '' %></small>
+                </span>
+                <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; margin-left: 10px;"><i class="fa-solid fa-user"></i></div>
+                <a href="/logout" style="margin-left: 15px; color: #dc2626; text-decoration: none;"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; border-radius: 12px; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 1.5rem; margin-bottom: 5px;">Produk Hukum (JDIH)</h2>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Pusat dokumentasi dan informasi hukum desa.</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah Dokumen</button>
+            </div>
+
+            <div class="card" style="padding: 1.5rem; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                            <th style="padding: 1rem 0.5rem; width: 5%;">No.</th>
+                            <% if (hukumList && hukumList.length > 0) { %>
+                                <% 
+                                    const sampleRow = hukumList[0];
+                                    const cols = Object.keys(sampleRow).filter(k => k !== 'id' && !k.includes('file')).slice(0, 5); 
+                                %>
+                                <% cols.forEach(col => { %>
+                                    <th style="padding: 1rem 0.5rem; text-transform: capitalize;"><%= col.replace(/_/g, ' ') %></th>
+                                <% }); %>
+                            <% } else { %>
+                                <th style="padding: 1rem 0.5rem;">Nomor/Kategori</th>
+                                <th style="padding: 1rem 0.5rem;">Tentang</th>
+                                <th style="padding: 1rem 0.5rem;">Tahun</th>
+                            <% } %>
+                            <th style="padding: 1rem 0.5rem; text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (hukumList && hukumList.length > 0) { %>
+                            <% 
+                                const sampleRow = hukumList[0];
+                                const cols = Object.keys(sampleRow).filter(k => k !== 'id' && !k.includes('file')).slice(0, 5); 
+                            %>
+                            <% hukumList.forEach((item, index) => { %>
+                            <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1rem 0.5rem;"><%= index + 1 %></td>
+                                <% cols.forEach(col => { %>
+                                    <td style="padding: 1rem 0.5rem;">
+                                        <% 
+                                            let val = item[col];
+                                            if (val instanceof Date) { val = val.toLocaleDateString('id-ID'); }
+                                            if (typeof val === 'string' && val.length > 50) { val = val.substring(0, 50) + '...'; }
+                                        %>
+                                        <% if (col.includes('nomor') || col.includes('kategori')) { %>
+                                            <span style="font-weight: 600; color: #1e40af; background: #eff6ff; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;"><%= val || '-' %></span>
+                                        <% } else if (col.includes('tentang') || col.includes('judul')) { %>
+                                            <span style="font-weight: 500; color: var(--text-dark);"><%= val || '-' %></span>
+                                        <% } else { %>
+                                            <%= val || '-' %>
+                                        <% } %>
+                                    </td>
+                                <% }); %>
+                                <td style="padding: 1rem 0.5rem; text-align: center;">
+                                    <button class="btn" style="padding: 6px 12px; font-size: 12px; background: #f0fdf4; color: #166534; border-radius: 4px; border: 1px solid #bbf7d0;"><i class="fa-solid fa-eye"></i> Detail</button>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" style="padding: 4rem 0; text-align: center; color: var(--text-muted);">
+                                    <i class="fa-solid fa-gavel" style="font-size: 2.5rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                                    Belum ada data produk hukum yang ditemukan di database.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>

@@ -1,0 +1,121 @@
+<div class="content-wrapper" style="padding: 20px; background-color: #f8fafc; min-height: 100vh;">
+    <div style="margin-bottom: 20px;">
+        <a href="/spj" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">⬅️ Kembali ke Induk SPJ</a>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid #3b82f6;">
+        <h2 style="margin: 0 0 10px 0; color: #0f172a;">💸 Pajak Kegiatan: <%= kegiatan.nama_kegiatan %></h2>
+        <p style="margin: 0; color: #64748b; font-weight: bold;">Tahun: <%= kegiatan.tahun %> &nbsp;|&nbsp; Pagu: <span style="color:#3b82f6;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></span></p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: start;">
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Setor Pajak Baru</h3>
+            <form action="/spj/pajak/tambah" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                <input type="hidden" name="redirect_to" value="detail">
+
+                <div>
+                    <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Jenis Pajak <span style="color:red;">*</span></label>
+                    <select name="jenis_pajak" required style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background:white; font-size: 13px;">
+                        <option value="PPN">PPN (Pajak Pertambahan Nilai)</option>
+                        <option value="PPh 21">PPh Pasal 21 (Upah/Honor)</option>
+                        <option value="PPh 22">PPh Pasal 22 (Barang/Material)</option>
+                        <option value="PPh 23">PPh Pasal 23 (Sewa/Jasa)</option>
+                        <option value="Pajak Daerah">Pajak Daerah / Restoran / Galian C</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Nominal Setor (Rp) <span style="color:red;">*</span></label>
+                    <input type="number" name="nominal" required placeholder="Cth: 150000" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">NTPN</label>
+                        <input type="text" name="ntpn" placeholder="16 Digit NTPN" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Kode Billing</label>
+                        <input type="text" name="kode_billing" placeholder="15 Digit Billing" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Tanggal Setor</label>
+                        <input type="date" name="tanggal_setor" value="<%= new Date().toISOString().split('T')[0] %>" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Rekanan / WP</label>
+                        <input type="text" name="nama_wp_rekanan" placeholder="Cth: UD. Usaha Jaya" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Uraian Belanja</label>
+                    <input type="text" name="uraian" placeholder="Cth: Belanja Semen Pembangunan Semenisasi" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;">Bukti Setor (BPN / NTPN)</label>
+                    <input type="file" name="file_bukti" style="width: 100%; padding: 8px 10px; border: 1px dashed #94a3b8; border-radius: 6px; background: #f8fafc; font-size: 13px;">
+                </div>
+                <button type="submit" style="background: #3b82f6; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Simpan Setoran Pajak</button>
+            </form>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Daftar Setoran Pajak Kegiatan</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color:#64748b;">
+                        <th style="padding: 10px;">Tgl</th>
+                        <th style="padding: 10px;">Jenis</th>
+                        <th style="padding: 10px;">Uraian / WP</th>
+                        <th style="padding: 10px;">NTPN / Billing</th>
+                        <th style="padding: 10px;">Nominal</th>
+                        <th style="padding: 10px;">Bukti</th>
+                        <th style="padding: 10px; width: 60px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(pajak && pajak.length > 0) { %>
+                        <% let totalPajak = 0; pajak.forEach(p => { 
+                            totalPajak += Number(p.nominal); 
+                            const tgl = p.tanggal_setor ? new Date(p.tanggal_setor).toLocaleDateString('id-ID') : '-';
+                        %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px; font-weight: 600; color: #475569;"><%= tgl %></td>
+                            <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;"><%= p.jenis_pajak %></span></td>
+                            <td style="padding: 10px;">
+                                <div><%= p.uraian || '-' %></div>
+                                <% if (p.nama_wp_rekanan) { %><small style="color:#64748b;">WP: <%= p.nama_wp_rekanan %></small><% } %>
+                            </td>
+                            <td style="padding: 10px; font-family: monospace; font-size: 11px;">
+                                <%= p.ntpn ? 'NTPN: ' + p.ntpn : (p.kode_billing ? 'Bill: ' + p.kode_billing : '-') %>
+                            </td>
+                            <td style="padding: 10px; font-weight: bold; color: #0f172a;">Rp <%= Number(p.nominal).toLocaleString('id-ID') %></td>
+                            <td style="padding: 10px;">
+                                <% if(p.file_url) { %>
+                                    <a href="<%= p.file_url %>" target="_blank" style="background:#eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; font-size:11px;">Drive</a>
+                                <% } else { %> - <% } %>
+                            </td>
+                            <td style="padding: 10px;">
+                                <form action="/spj/pajak/hapus" method="POST" onsubmit="return confirm('Hapus setoran pajak ini?');" style="margin: 0;">
+                                    <input type="hidden" name="id" value="<%= p.id %>">
+                                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                                    <input type="hidden" name="redirect_to" value="detail">
+                                    <button type="submit" style="background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight:bold; font-size: 11px;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                        <tr style="background: #f8fafc; font-weight: bold;">
+                            <td colspan="4" style="padding: 12px 10px; text-align: right; color:#0f172a;">TOTAL PAJAK DIBAYAR:</td>
+                            <td colspan="3" style="padding: 12px 10px; color: #15803d; font-size: 15px;">Rp <%= totalPajak.toLocaleString('id-ID') %></td>
+                        </tr>
+                    <% } else { %>
+                        <tr><td colspan="7" style="padding: 30px; text-align: center; color: #94a3b8;">Belum ada setoran pajak untuk kegiatan ini.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

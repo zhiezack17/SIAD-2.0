@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIAD 2.0 - Blueprint & Workflow Ekosistem Tata Kelola Desa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 297mm;
+            height: 210mm;
+            page-break-after: always;
+            position: relative;
+            padding: 16mm 20mm;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #0f172a;
+        }
+
+        /* PAGE 1: COVER */
+        .cover-page {
+            background: radial-gradient(circle at 80% 20%, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 1) 70%),
+                        radial-gradient(circle at 10% 80%, rgba(16, 185, 129, 0.25) 0%, rgba(15, 23, 42, 1) 60%),
+                        #0b0f19;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 25mm;
+        }
+
+        .cover-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30, 58, 138, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            padding: 6px 18px;
+            border-radius: 9999px;
+            font-size: 11pt;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #93c5fd;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+        }
+
+        .cover-title {
+            font-size: 42pt;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.15;
+            margin: 0 0 12px 0;
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 80%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cover-subtitle {
+            font-size: 18pt;
+            font-weight: 500;
+            color: #94a3b8;
+            max-width: 850px;
+            margin: 0 auto 35px auto;
+            line-height: 1.4;
+        }
+
+        .cover-pills {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .cover-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 11pt;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .cover-footer {
+            font-size: 11pt;
+            color: #64748b;
+            font-weight: 500;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* HEADER & FOOTER INSIDE SLIDES */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .slide-title-group h2 {
+            font-size: 18pt;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-title-group p {
+            font-size: 10pt;
+            color: #94a3b8;
+            margin: 3px 0 0 0;
+        }
+
+        .slide-tag {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #60a5fa;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            font-size: 9pt;
+            color: #64748b;
+        }
+
+        /* WORKFLOW DIAGRAM BLOCKS */
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 12px;
+            flex: 1;
+            margin-bottom: 12px;
+        }
+
+        .flow-step {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .flow-step.active-step {
+            background: rgba(30, 58, 138, 0.25);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 11pt;
+            margin-bottom: 10px;
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+        }
+
+        .step-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 4px 0;
+        }
+
+        .step-role {
+            font-size: 9.5pt;
+            color: #38bdf8;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .step-desc {
+            font-size: 9.5pt;
+            color: #94a3b8;
+            line-height: 1.45;
+            flex: 1;
+        }
+
+        .step-output {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-top: 10px;
+            border-left: 3px solid #10b981;
+            font-size: 8.5pt;
+            color: #a7f3d0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* GRID CARDS */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            flex: 1;
+            margin-bottom: 12px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-icon {
+            font-size: 24pt;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 9.5pt;
+            color: #94a3b8;
+            line-height: 1.45;
+        }
+
+        /* MATRIX TABLE */
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+            flex: 1;
+            margin-bottom: 12px;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .matrix-table th {
+            background: rgba(30, 58, 138, 0.3);
+            color: #93c5fd;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 8.5pt;
+            letter-spacing: 0.5px;
+        }
+
+        .matrix-table td {
+            color: #cbd5e1;
+        }
+
+        .badge-allow {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 8.5pt;
+        }
+
+        .badge-deny {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= PAGE 1: COVER ================= -->
+    <div class="page cover-page">
+        <div>
+            <div class="cover-badge">⚡ Executive Blueprint & Architecture</div>
+            <h1 class="cover-title">SIAD 2.0 ENTERPRISE</h1>
+            <div class="cover-subtitle">Sistem Informasi Arsip Digital & Tata Kelola Keuangan Desa Terpadu Berbasis Permendagri No. 20/2018 & Cloud Google Drive</div>
+            
+            <div class="cover-pills">
+                <div class="cover-pill">🏛️ Multi-Tenant 183 Kepenghuluan Rohil</div>
+                <div class="cover-pill">🔐 4-Tier SPJ & QR Code Validation</div>
+                <div class="cover-pill">🧾 Buku Pembantu Pajak & Excel Export</div>
+                <div class="cover-pill">📝 Disposisi Naskah Dinas Digital</div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <span>Pemerintah Kabupaten Rokan Hilir &bull; Dinas Pemberdayaan Masyarakat Desa (DPMD)</span>
+            <span>Versi Dokumen: 2.0 &bull; Tahun Anggaran 2026</span>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 2: ARSITEKTUR MULTI-TENANT & GOOGLE DRIVE ================= -->
+    <div class="page">
+        <div class="slide-header">
+            <div class="slide-title-group">
+                <h2>01. Arsitektur Multi-Tenant & Google Drive Vault</h2>
+                <p>Isolasi data 183 Kepenghuluan se-Kabupaten Rokan Hilir dengan enkripsi & penyimpanan awan permanen.</p>
+            </div>
+            <div class="slide-tag">Infrastruktur & Keamanan</div>
+        </div>
+
+        <div class="flow-container">
+            <div class="flow-step">
+                <div class="step-num">1</div>
+                <div class="step-title">Multi-Tenant Gateway</div>
+                <span class="step-role">Akses Terpadu & Scoped Filter</span>
+                <div class="step-desc">
+                    Mencakup 18 Kecamatan & 183 Kepenghuluan di Rohil. Setiap request pengguna dikunci secara otomatis berdasarkan <code>kepenghuluan_id</code> (Prinsip Least Privilege). Tidak ada kebocoran data antar-desa.
+                </div>
+                <div class="step-output">Tenant: Kepenghuluan Scoped</div>
+            </div>
+
+            <div class="flow-step active-step">
+                <div class="step-num">2</div>
+                <div class="step-title">Workspace Engine</div>
+                <span class="step-role">Folder Kerja Digital Berbasis Ruang</span>
+                <div class="step-desc">
+                    Ruang kerja fleksibel per bidang: Administrasi Umum, SPJ Fisik/Konstruksi, BUMDes, dan Aset. Dokumen dikelompokkan secara terstruktur dengan penomoran standar kearsipan kedinasan.
+                </div>
+                <div class="step-output">Output: Dynamic Workspaces</div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-num">3</div>
+                <div class="step-title">Google Drive Vault</div>
+                <span class="step-role">Cloud Integration (Google Service Account)</span>
+                <div class="step-desc">
+                    Setiap berkas (PDF SPJ, Bukti Pajak BPN, Scan Surat Masuk) otomatis diunggah ke Google Drive resmi desa. Kantor desa tidak terbebani storage server lokal, aman dari serangan ransomware atau harddisk rusak.
+                </div>
+                <div class="step-output">Storage: Google Drive Enterprise</div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-num">4</div>
+                <div class="step-title">Auditor Switcher</div>
+                <span class="step-role">Inspektorat Rohil & BPK Access</span>
+                <div class="step-desc">
+                    Akun Pengawas / Admin Kabupaten dilengkapi fitur <b>Desa Switcher</b> real-time. Auditor dapat menginspeksi berkas kepenghuluan manapun tanpa harus meminta softcopy manual berulang kali.
+                </div>
+                <div class="step-output">Feature: Real-time Audit Portal</div>
+            </div>
+        </div>
+
+        <div class="slide-footer">
+            <span>SIAD 2.0 &bull; Blueprint Arsitektur Sistem</span>
+            <span>Halaman 2 / 5</span>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 3: WORKFLOW 4-TIER VERIFIKASI SPJ ================= -->
+    <div class="page">
+        <div class="slide-header">
+            <div class="slide-title-group">
+                <h2>02. Workflow Verifikasi 4-Tier SPJ Dana Desa</h2>
+                <p>Standar Kepatuhan Permendagri No. 20/2018 dengan Validasi QR Code Anti-Pemalsuan.</p>
+            </div>
+            <div class="slide-tag">Kepatuhan Regulasi SPJ</div>
+        </div>
+
+        <div class="flow-container">
+            <div class="flow-step">
+                <div class="step-num" style="background:#f59e0b;">T1</div>
+                <div class="step-title">Pelaksana Kegiatan</div>
+                <span class="step-role">Kaur / Kasi Teknis (PPKD)</span>
+                <div class="step-desc">
+                    Menginput rincian kegiatan fisik/non-fisik, pagu APBDesa, lokasi, dan mengunggah dokumen fisik (Kuitansi, Nota, Bukti Belanja, Foto 0%-50%-100%).
+                </div>
+                <div class="step-output">Status: DRAFT (Kaur)</div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-num" style="background:#3b82f6;">T2</div>
+                <div class="step-title">Verifikasi Keuangan</div>
+                <span class="step-role">Kaur Keuangan / Bendahara</span>
+                <div class="step-desc">
+                    Memeriksa keabsahan bukti pengeluaran kas, kecukupan pagu anggaran, serta kepatuhan pemotongan dan penyetoran pajak (PPN/PPh/Daerah).
+                </div>
+                <div class="step-output">Paraf: Bendahara Desa</div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-num" style="background:#6366f1;">T3</div>
+                <div class="step-title">Verifikasi Administrasi</div>
+                <span class="step-role">Sekretaris Kepenghuluan (Sekdes)</span>
+                <div class="step-desc">
+                    Memverifikasi keselarasan administrasi naskah dinas, kelengkapan berita acara, dan kesesuaian Rencana Kerja Pemerintah Desa (RKPDes).
+                </div>
+                <div class="step-output">Paraf: Sekdes Rohil</div>
+            </div>
+
+            <div class="flow-step" style="background: rgba(16, 185, 129, 0.15); border-color: #10b981;">
+                <div class="step-num" style="background:#10b981;">T4</div>
+                <div class="step-title">Pengesahan Akhir</div>
+                <span class="step-role">Penghulu (Kepala Desa)</span>
+                <div class="step-desc">
+                    Penghulu menyetujui pengesahan SPJ. Sistem otomatis men-generate <b>QR Code Validasi Digital</b> yang mengunci status menjadi <b>SELESAI FINAL</b>.
+                </div>
+                <div class="step-output" style="border-color:#10b981; color:#34d399;">QR Code Sah (Scan HP)</div>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 16px; font-size: 9pt; display: flex; justify-content: space-between; align-items: center; border: 1px dashed rgba(255,255,255,0.15);">
+            <span>🛡️ <b>Mekanisme Revisi Aman:</b> Bila ditemukan kekurangan nota/pajak pada tahap T2, T3, atau T4, pemeriksa dapat menolak dengan menyertakan catatan revisi spesifik. SPJ otomatis kembali ke Pelaksana untuk dilengkapi.</span>
+            <span style="color:#38bdf8; font-weight:700;">Zero Red-Tape Guarantee</span>
+        </div>
+
+        <div class="slide-footer" style="margin-top: 10px;">
+            <span>SIAD 2.0 &bull; Alur Pengesahan SPJ 4-Tier</span>
+            <span>Halaman 3 / 5</span>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 4: DISPOSISI & BUKU PEMBANTU PAJAK ================= -->
+    <div class="page">
+        <div class="slide-header">
+            <div class="slide-title-group">
+                <h2>03. Modul Disposisi Naskah Dinas & Buku Pembantu Pajak</h2>
+                <p>Tertib Administrasi Surat Masuk Resmi & Penatausahaan Pajak Siap Audit KPP Pratama / Inspektorat.</p>
+            </div>
+            <div class="slide-tag">Operasional Harian</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; margin-bottom: 12px;">
+            <!-- DISPOSISI SURAT -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px; display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                    <span style="font-size: 20pt;">📬</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 13pt; color: #fff;">Disposisi Surat Masuk Digital</h3>
+                        <span style="font-size: 9pt; color: #94a3b8;">Tata Naskah Dinas Pemkab Rokan Hilir</span>
+                    </div>
+                </div>
+                <div style="font-size: 9.5pt; color: #cbd5e1; line-height: 1.5; flex: 1;">
+                    <p style="margin: 0 0 8px 0;">1. <b>Registrasi Masuk</b>: Staf mencatat Nomor Agenda, Nomor Surat, Pengirim (Dinas/Kecamatan), dan mengunggah scan PDF surat asli.</p>
+                    <p style="margin: 0 0 8px 0;">2. <b>Instruksi Penghulu</b>: Penghulu menentukan Sifat Surat (Sangat Segera/Segera/Biasa) dan mencentang arahan (Tindaklanjuti, Siapkan SPJ, Hadiri, Pelajari).</p>
+                    <p style="margin: 0;">3. <b>🖨️ Cetak Lembar Disposisi A4</b>: Format cetak resmi standar Kabupaten Rokan Hilir siap diparaf fisik atau diarsipkan langsung.</p>
+                </div>
+                <div class="step-output" style="border-left-color: #3b82f6; color: #93c5fd;">
+                    Status: Menunggu Disposisi ➔ Terdisposisi
+                </div>
+            </div>
+
+            <!-- BUKU PEMBANTU PAJAK -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px; display: flex; flex-direction: column;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                    <span style="font-size: 20pt;">🧾</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 13pt; color: #fff;">Buku Pembantu Pajak & Ekspor Excel</h3>
+                        <span style="font-size: 9pt; color: #94a3b8;">Kepatuhan Wajib Pungut/Setor Pajak APBDesa</span>
+                    </div>
+                </div>
+                <div style="font-size: 9.5pt; color: #cbd5e1; line-height: 1.5; flex: 1;">
+                    <p style="margin: 0 0 8px 0;">1. <b>Detail Penyetoran</b>: Input jenis pajak (PPN, PPh 21, 22, 23, Galian C), Nominal, <b>Kode Billing (15 digit)</b>, dan <b>NTPN Bank/Pos (16 digit)</b>.</p>
+                    <p style="margin: 0 0 8px 0;">2. <b>Auto-Aggregasi</b>: 4 Kartu KPI menghitung akumulasi penerimaan dan setoran pajak se-kepenghuluan secara real-time.</p>
+                    <p style="margin: 0;">3. <b>📥 Ekspor Excel & Cetak PDF</b>: Download spreadsheet (.xlsx) satu klik untuk laporan pajak tahunan dan cetak buku besar format Permendagri 20/2018.</p>
+                </div>
+                <div class="step-output" style="border-left-color: #10b981; color: #a7f3d0;">
+                    Output: XLSX Spreadsheet & A4 Landscape PDF
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-footer">
+            <span>SIAD 2.0 &bull; Modul Operasional Kantor Desa</span>
+            <span>Halaman 4 / 5</span>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 5: RBAC & NILAI INVESTASI ================= -->
+    <div class="page">
+        <div class="slide-header">
+            <div class="slide-title-group">
+                <h2>04. Matriks Wewenang Pengguna (RBAC) & Nilai Tambah</h2>
+                <p>Pembagian hak akses akuntabel demi keamanan berkas dan kelancaran tata kelola kepenghuluan.</p>
+            </div>
+            <div class="slide-tag">Governance & ROI</div>
+        </div>
+
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Role Pengguna</th>
+                    <th style="width: 18%;">Induk SPJ</th>
+                    <th style="width: 20%;">Pajak & NTPN</th>
+                    <th style="width: 20%;">Disposisi Surat</th>
+                    <th style="width: 20%;">Arsip & Laporan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b>👑 Admin Kabupaten / Auditor</b><br><small style="color:#64748b;">Inspektorat / DPMD Rohil</small></td>
+                    <td><span class="badge-allow">Supervisi 183 Desa</span></td>
+                    <td><span class="badge-allow">Audit Rekap Pajak</span></td>
+                    <td><span class="badge-allow">Pantau Surat Dinas</span></td>
+                    <td><span class="badge-allow">Akses Penuh Seluruh Desa</span></td>
+                </tr>
+                <tr>
+                    <td><b>🏛️ Penghulu (Kepala Desa)</b><br><small style="color:#64748b;">Pimpinan Kepenghuluan</small></td>
+                    <td><span class="badge-allow">Sahkan (QR Code)</span></td>
+                    <td><span class="badge-allow">Pantau Setor Pajak</span></td>
+                    <td><span class="badge-allow">Buat & Cetak Disposisi</span></td>
+                    <td><span class="badge-allow">Buku Pembantu & SPJ Sah</span></td>
+                </tr>
+                <tr>
+                    <td><b>📜 Sekretaris Kepenghuluan</b><br><small style="color:#64748b;">Koordinator PPKD</small></td>
+                    <td><span class="badge-allow">Verifikasi Tahap 3</span></td>
+                    <td><span class="badge-allow">Verifikasi Pajak</span></td>
+                    <td><span class="badge-allow">Teruskan / Cetak</span></td>
+                    <td><span class="badge-allow">Unduh Berkas & Dokumen</span></td>
+                </tr>
+                <tr>
+                    <td><b>💰 Kaur Keuangan / Bendahara</b><br><small style="color:#64748b;">Penataatausahaan Kas Desa</small></td>
+                    <td><span class="badge-allow">Verifikasi Tahap 2</span></td>
+                    <td><span class="badge-allow">Input NTPN & Ekspor XLSX</span></td>
+                    <td><span class="badge-allow">Terima Arahan</span></td>
+                    <td><span class="badge-allow">Cetak Buku Pajak</span></td>
+                </tr>
+                <tr>
+                    <td><b>👷 Kaur / Kasi (Pelaksana)</b><br><small style="color:#64748b;">Pelaksana Kegiatan Anggaran</small></td>
+                    <td><span class="badge-allow">Input & Upload Nota</span></td>
+                    <td><span class="badge-deny">Dibatasi</span></td>
+                    <td><span class="badge-deny">Dibatasi</span></td>
+                    <td><span class="badge-allow">Arsip Kegiatan Sendiri</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 6px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #38bdf8;">
+                <div style="font-weight: 700; font-size: 10pt; color: #fff;">🛡️ Zero Red-Flags Audit</div>
+                <div style="font-size: 8.5pt; color: #94a3b8;">Tidak ada lagi temuan SPJ fiktif atau pajak lupa disetor ke KPP Pratama.</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #10b981;">
+                <div style="font-weight: 700; font-size: 10pt; color: #fff;">⏱️ Efisiensi Kerja 80%</div>
+                <div style="font-size: 8.5pt; color: #94a3b8;">Pencetakan disposisi dan rekapitulasi Excel siap saji dalam 1 kali klik.</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                <div style="font-weight: 700; font-size: 10pt; color: #fff;">🔒 Aset Arsip Abadi</div>
+                <div style="font-size: 8.5pt; color: #94a3b8;">Ganti pejabat kepenghuluan, berkas tetap aman dan utuh di Cloud Google Drive.</div>
+            </div>
+        </div>
+
+        <div class="slide-footer" style="margin-top: 10px;">
+            <span>SIAD 2.0 &bull; Sistem Informasi Arsip Digital Rokan Hilir</span>
+            <span>Halaman 5 / 5</span>
+        </div>
+    </div>
+
+</body>
+</html>
+

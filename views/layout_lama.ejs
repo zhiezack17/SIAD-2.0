@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/img/logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --sidebar-bg: #0a1128 !important; --sidebar-bg2: #101c54 !important;
+  --sidebar-text: #94a3b8 !important; --sidebar-active: #ffffff !important;
+  --text-primary: #0f172a !important; --text-secondary: #64748b !important; 
+  --border: #e2e8f0 !important; --bg-page: #f1f5f9 !important; 
+  --card-bg: rgba(255, 255, 255, 0.95) !important;
+  --accent-red: #ef4444 !important; --accent-green: #10b981 !important;
+  --accent-yellow: #f59e0b !important; --accent-blue: #2e5bff !important; 
+  --accent-purple: #8b5cf6 !important; --accent-gold: #ffd98a !important;
+}
+html, body { height:100% !important; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  background: var(--bg-page) !important;
+  color: var(--text-primary) !important;
+  font-size:14px !important; line-height:1.6 !important;
+}
+h1, h2, h3, h4, h5, h6, .stat-value { font-family: 'Sora', sans-serif !important; }
+
+.dashboard-layout { display:flex !important; min-height:100vh !important; width:100% !important; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 270px !important; flex: 0 0 270px !important;
+  background: linear-gradient(170deg, var(--sidebar-bg) 0%, var(--sidebar-bg2) 100%) !important;
+  color: var(--sidebar-text) !important;
+  position: sticky !important; top: 0 !important; height: 100vh !important;
+  overflow-y: auto !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.06) !important;
+  border-right: 1px solid rgba(255,255,255,0.05) !important;
+}
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+.sidebar-header {
+  padding: 24px 20px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  display: flex !important; align-items: center !important; gap: 12px !important;
+  color: #fff !important; font-family: 'Sora', sans-serif !important; font-size: 18px !important; font-weight: 800 !important; letter-spacing: 0.5px !important;
+}
+.sidebar-nav { padding: 20px 14px 24px !important; display: flex !important; flex-direction: column !important; gap: 4px !important; }
+.sidebar-nav .nav-item {
+  display: flex !important; align-items: center !important; gap: 12px !important;
+  padding: 12px 16px !important;
+  border-radius: 12px !important;
+  color: var(--sidebar-text) !important;
+  font-size: 14.5px !important; font-weight: 600 !important;
+  text-decoration: none !important; transition: all 0.25s ease !important;
+}
+.sidebar-nav .nav-item i { width: 20px !important; text-align: center !important; font-size: 16px !important; transition: transform 0.2s; }
+.sidebar-nav .nav-item:hover {
+  background: rgba(255,255,255,0.05) !important; color: var(--sidebar-active) !important;
+}
+.sidebar-nav .nav-item:hover i { transform: scale(1.1); color: var(--accent-gold) !important; }
+.sidebar-nav .nav-item.active {
+  background: linear-gradient(90deg, rgba(46,91,255,0.2) 0%, rgba(46,91,255,0.05) 100%) !important;
+  color: var(--sidebar-active) !important;
+  box-shadow: inset 4px 0 0 var(--accent-blue) !important;
+}
+.sidebar-nav .nav-item.active i { color: var(--accent-blue) !important; }
+.sidebar-nav .submenu {
+  margin: 4px 0 8px 12px !important; padding-left: 20px !important;
+  border-left: 1px dashed rgba(255,255,255,0.15) !important;
+  display: flex !important; flex-direction: column !important; gap: 2px !important;
+}
+.sidebar-nav .submenu .nav-item { padding: 10px 12px !important; font-size: 13.5px !important; }
+.sidebar-nav .submenu.hidden { display: none !important; }
+
+/* SEARCH & TOPBAR */
+.sidebar-search { position: relative !important; margin: 0 14px 14px !important; }
+.sidebar-search input {
+  width: 100% !important; padding: 12px 12px 12px 40px !important;
+  border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.1) !important;
+  background: rgba(0,0,0,0.15) !important; color: #fff !important; font-size: 13px !important;
+  outline: none !important; transition: all 0.2s !important;
+}
+.sidebar-search input:focus { border-color: rgba(255,255,255,0.25) !important; background: rgba(0,0,0,0.25) !important; }
+.sidebar-search input::placeholder { color: rgba(255,255,255,0.4) !important; }
+.sidebar-search i { position: absolute !important; left: 14px !important; top: 50% !important; transform: translateY(-50%) !important; color: rgba(255,255,255,0.4) !important; }
+
+.main-wrapper { flex: 1 1 auto !important; display: flex !important; flex-direction: column !important; min-width: 0 !important; }
+.topbar {
+  background: var(--card-bg) !important; backdrop-filter: blur(12px) !important;
+  padding: 16px 32px !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  display: flex !important; align-items: center !important; justify-content: space-between !important;
+  position: sticky !important; top: 0 !important; z-index: 10 !important;
+}
+.breadcrumb { display: flex !important; align-items: center !important; gap: 10px !important; font-size: 13.5px !important; font-weight: 600 !important; color: var(--text-secondary) !important; }
+.breadcrumb span { color: var(--text-primary) !important; }
+.user-profile {
+  display: flex !important; align-items: center !important; gap: 14px !important;
+  padding: 6px 18px 6px 6px !important; background: #fff !important; border-radius: 999px !important;
+  border: 1px solid var(--border) !important; cursor: pointer !important; transition: all 0.2s !important;
+}
+.user-profile:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; border-color: #cbd5e1 !important; }
+.avatar { width: 38px !important; height: 38px !important; border-radius: 50% !important; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)) !important; color: #fff !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 700 !important; font-size: 15px !important; font-family: 'Sora', sans-serif !important; }
+.user-info { text-align: right !important; line-height: 1.3 !important; }
+.user-info .user-name { font-size: 13.5px !important; font-weight: 700 !important; color: var(--text-primary) !important; }
+.user-info .user-role { font-size: 11.5px !important; font-weight: 600 !important; color: var(--accent-blue) !important; }
+
+/* CONTENT & CARDS */
+.dashboard-content { padding: 32px 36px 48px !important; flex: 1 1 auto !important; }
+.page-header { margin-bottom: 30px !important; display: flex !important; align-items: flex-end !important; justify-content: space-between !important; gap: 16px !important; flex-wrap: wrap !important; }
+.page-header h1 { font-size: 26px !important; font-weight: 800 !important; color: var(--text-primary) !important; letter-spacing: -0.5px !important; }
+.page-header p { color: var(--text-secondary) !important; font-size: 14px !important; margin-top: 6px !important; }
+
+.btn { display: inline-flex !important; align-items: center !important; gap: 8px !important; padding: 10px 20px !important; border-radius: 10px !important; border: none !important; font-size: 14px !important; font-weight: 700 !important; cursor: pointer !important; text-decoration: none !important; transition: all 0.2s !important; }
+.btn:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important; }
+.btn-primary { background: var(--accent-blue) !important; color: #fff !important; }
+.btn-primary:hover { background: #1d4ed8 !important; }
+
+/* STATS GRID */
+.stats-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; gap: 20px !important; margin-bottom: 30px !important; }
+.stat-card {
+  background: var(--card-bg) !important; backdrop-filter: blur(10px) !important;
+  padding: 24px !important; border-radius: 20px !important;
+  border: 1px solid rgba(255,255,255,0.8) !important;
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025) !important;
+  position: relative !important; overflow: hidden !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+.stat-card:hover { transform: translateY(-4px) !important; box-shadow: 0 20px 40px -5px rgba(0,0,0,0.08) !important; }
+.stat-card .stat-label { font-size: 13px !important; color: var(--text-secondary) !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; margin-bottom: 8px !important; }
+.stat-card .stat-value { font-size: 34px !important; font-weight: 800 !important; color: var(--text-primary) !important; letter-spacing: -1px !important; }
+.stat-card .stat-icon {
+  position: absolute !important; top: 24px !important; right: 24px !important;
+  width: 52px !important; height: 52px !important; border-radius: 16px !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  font-size: 24px !important;
+}
+.stat-card.blue .stat-icon { background: rgba(46,91,255,0.1) !important; color: var(--accent-blue) !important; }
+.stat-card.red .stat-icon { background: rgba(239,68,68,0.1) !important; color: var(--accent-red) !important; }
+.stat-card.green .stat-icon { background: rgba(16,185,129,0.1) !important; color: var(--accent-green) !important; }
+.stat-card.yellow .stat-icon { background: rgba(245,158,11,0.1) !important; color: var(--accent-yellow) !important; }
+
+/* CHARTS ROW & PANELS */
+.charts-row { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)) !important; gap: 24px !important; margin-bottom: 30px !important; }
+.card, .panel {
+  background: var(--card-bg) !important; backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important; border: 1px solid rgba(255,255,255,0.8) !important;
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05) !important;
+  padding: 24px !important; margin-bottom: 24px !important;
+}
+.card-title, .panel-header h2 { font-size: 16px !important; font-weight: 800 !important; color: var(--text-primary) !important; margin-bottom: 20px !important; display: flex !important; align-items: center !important; gap: 8px !important; }
+
+.table-wrap { overflow-x: auto !important; }
+table.data-table { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; font-size: 14px !important; }
+table.data-table thead th { padding: 14px 16px !important; text-align: left !important; font-weight: 700 !important; color: var(--text-secondary) !important; font-size: 12px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; border-bottom: 2px solid var(--border) !important; }
+table.data-table tbody td { padding: 16px !important; border-bottom: 1px solid var(--border) !important; vertical-align: middle !important; color: var(--text-primary) !important; font-weight: 500 !important; }
+table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important; }
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .sidebar { width: 240px !important; flex: 0 0 240px !important; }
+  .dashboard-content { padding: 24px !important; }
+}
+@media (max-width: 768px) {
+  .dashboard-layout { flex-direction: column !important; }
+  .sidebar { width: 100% !important; flex: 0 0 auto !important; height: auto !important; position: static !important; }
+  .charts-row { grid-template-columns: 1fr !important; }
+  .topbar { padding: 16px 20px !important; }
+}
+</style>
+</style>
+
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="/img/logo.png" style="height:32px; margin-right:12px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);"> SIAD 2.0
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/workspace" class="nav-item"><i class="fa-solid fa-folder-tree"></i> Workspace</a>
+            <div>
+                <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); const ic=document.getElementById('surat-icon'); const isNowHidden=m.classList.toggle('hidden'); if(isNowHidden){ ic.className='fa-solid fa-plus'; } else { ic.className='fa-solid fa-minus'; }" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+                    <span><i class="fa-solid fa-envelope"></i> Surat</span>
+                    <i id="surat-icon" class="fa-solid fa-minus" style="font-size:13px;"></i>
+                </div>
+                <div id="surat-menu" class="submenu">
+                    <a href="/surat?tab=masuk" class="nav-item"><i class="fa-solid fa-inbox"></i> Surat Masuk</a>
+                    <a href="/surat?tab=keluar" class="nav-item"><i class="fa-solid fa-paper-plane"></i> Surat Keluar</a>
+                </div>
+            </div>
+            <a href="/spj" class="nav-item"><i class="fa-solid fa-briefcase"></i> Kegiatan (SPJ)</a>
+            <a href="/produk-hukum" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Produk Hukum</a>
+            <a href="/arsip" class="nav-item"><i class="fa-solid fa-box-archive"></i> Arsip Lainnya</a>
+            <a href="/aset" class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Aset</a>
+            <a href="/bumdes" class="nav-item"><i class="fa-solid fa-store"></i> BUMDes</a>
+            <a href="/master_data" class="nav-item"><i class="fa-solid fa-database"></i> Master Data</a>
+            <a href="/laporan" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+            <a href="/pengaturan" class="nav-item"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+        </nav>
+        <div class="sidebar-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Cari Arsip...">
+        </div>
+    </aside>
+    <main class="main-wrapper">
+        <header class="topbar">
+            <div class="breadcrumb" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);">
+                <i class="fa-solid fa-house-chimney" style="color:var(--accent-blue);"></i>
+                <span>SIAD 2.0</span>
+                <i class="fa-solid fa-chevron-right" style="font-size:10px;opacity:0.6;"></i>
+                <span style="color:var(--text-primary);font-weight:500;"><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : 'Dashboard' %></span>
+            </div>
+            <div class="user-profile">
+                <%
+                  var namaLengkap = user && (user.nama_lengkap || user.nama) ? (user.nama_lengkap || user.nama) : 'Administrator SIAD Kab. Rokan Hilir';
+                  var peranUser = user && user.peran ? user.peran : 'ADMIN';
+                  var initialName = namaLengkap.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+                %>
+                <div class="avatar"><%= initialName %></div>
+                <div class="user-info">
+                    <div class="user-name"><%= namaLengkap %></div>
+                    <div class="user-role"><%= peranUser %></div>
+                    <a href="/logout" class="logout-link"><i class="fa-solid fa-right-from-bracket" style="margin-right:3px;"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+        <div class="dashboard-content">
+            <%- body %>
+        </div>
+    </main>
+</div>
+<script>(function(){ var p = location.pathname; document.querySelectorAll('.sidebar-nav .nav-item').forEach(function(a){ var h = a.getAttribute && a.getAttribute('href'); if (h && (h === p || (p.startsWith('/surat') && h.startsWith('/surat')) || (h !== '/dashboard' && p.startsWith(h)))) { a.classList.add('active'); } }); })();</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 11pt;
+            line-height: 1.35;
+            color: #000;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 20mm;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+        .kop {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .kop h4 { margin: 0; font-size: 13pt; font-weight: normal; text-transform: uppercase; }
+        .kop h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
+        .kop h2 { margin: 0; font-size: 15pt; font-weight: bold; text-transform: uppercase; }
+        .kop p { margin: 3px 0 0 0; font-size: 9pt; font-style: italic; }
+
+        .judul {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .judul h3 {
+            margin: 0;
+            font-size: 13pt;
+            text-decoration: underline;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .judul p { margin: 2px 0 0 0; font-size: 10pt; }
+
+        table.tbl-bordered {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            font-size: 10.5pt;
+        }
+        table.tbl-bordered th, table.tbl-bordered td {
+            border: 1px solid #000;
+            padding: 6px 10px;
+            vertical-align: top;
+        }
+
+        .check-box {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 1px solid #000;
+            margin-right: 6px;
+            text-align: center;
+            line-height: 14px;
+            font-size: 10px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        .ttd-box {
+            float: right;
+            width: 250px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11pt;
+            page-break-inside: avoid;
+        }
+        .ttd-space {
+            height: 65px;
+        }
+
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .page { box-shadow: none; margin: 0; width: 100%; min-height: auto; padding: 10mm 15mm; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <button onclick="window.print()" class="no-print">🖨️ Cetak Lembar Disposisi (A4/PDF)</button>
+
+    <div class="page">
+        <!-- KOP SURAT -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 85px; text-align: center; vertical-align: middle;">
+                    <img src="/img/logo-rohil.png" onerror="this.src='/images/logo_rohil.png'; this.onerror=null;" alt="Logo Pemkab Rohil" style="width: 75px; height: auto; max-height: 90px; object-fit: contain;">
+                </td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <% const kepClean = (surat.kepenghuluan_nama || '').replace(/^kepenghuluan\s+/i, '').trim(); %>
+                    <h4 style="margin:0; font-size:13pt; text-transform:uppercase; letter-spacing:0.5px;">PEMERINTAH KABUPATEN ROKAN HILIR</h4>
+                    <h3 style="margin:2px 0; font-size:12pt; text-transform:uppercase;">KECAMATAN <%= (surat.kecamatan_nama || '.........................').toUpperCase() %></h3>
+                    <h2 style="margin:2px 0; font-size:15pt; text-transform:uppercase; text-decoration:underline;">KEPENGHULUAN <%= (kepClean || '.........................').toUpperCase() %></h2>
+                    <p style="margin:3px 0 0 0; font-size:9.5pt; font-style:italic;"><%= surat.alamat_desa || 'Sistem Informasi Arsip & Dokumen Desa (SIAD 2.0) • Standar Tata Naskah Dinas' %></p>
+                </td>
+                <td style="width: 85px;"></td>
+            </tr>
+        </table>
+        <div style="border-top: 3px solid #000; border-bottom: 1px solid #000; height: 3px; margin: 6px 0 15px 0;"></div>
+
+        <!-- JUDUL -->
+        <div class="judul">
+            <h3>Lembar Disposisi</h3>
+            <p>Nomor Registrasi Sistem: REG/SM/<%= new Date(surat.tanggal_surat || new Date()).getFullYear() %>/<%= String(surat.id).padStart(4, '0') %></p>
+        </div>
+
+        <%
+            const sifat = (surat.disposisi_sifat || 'Biasa').toLowerCase();
+            const instTeks = (surat.disposisi_instruksi || '').toLowerCase();
+            const keJab = (surat.disposisi_ke_jabatan || '').toLowerCase();
+        %>
+
+        <!-- TABEL DATA SURAT -->
+        <table class="tbl-bordered">
+            <tr>
+                <td style="width: 20%; font-weight: bold; background: #fafafa;">Surat Dari</td>
+                <td style="width: 45%; font-weight: bold;"><%= surat.pengirim %></td>
+                <td style="width: 15%; font-weight: bold; background: #fafafa;">No. Agenda</td>
+                <td style="width: 20%;"><%= surat.nomor_agenda || '-' %></td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background: #fafafa;">Nomor Surat</td>
+                <td><%= surat.nomor_surat %></td>
+                <td style="font-weight: bold; background: #fafafa;">Tgl. Terima</td>
+                <td><%= surat.tanggal_terima ? new Date(surat.tanggal_terima).toLocaleDateString('id-ID') : new Date(surat.dibuat_pada || new Date()).toLocaleDateString('id-ID') %></td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background: #fafafa;">Tanggal Surat</td>
+                <td><%= new Date(surat.tanggal_surat).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %></td>
+                <td style="font-weight: bold; background: #fafafa;">Sifat</td>
+                <td>
+                    <span style="font-weight: bold; text-transform: uppercase;"><%= surat.disposisi_sifat || 'Biasa' %></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background: #fafafa;">Perihal</td>
+                <td colspan="3" style="font-weight: bold; color: #0f172a;"><%= surat.perihal %></td>
+            </tr>
+        </table>
+
+        <!-- TABEL 2 KOLOM: DITERUSKAN KEPADA & INSTRUKSI -->
+        <table class="tbl-bordered" style="margin-top: 15px;">
+            <tr style="background: #f2f2f2; text-align: center; font-weight: bold;">
+                <td style="width: 50%;">DITERUSKAN KEPADA :</td>
+                <td style="width: 50%;">PETUNJUK / INSTRUKSI :</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 14px;">
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('sekretaris') ? '✓' : '' %></span> Sekretaris Kepenghuluan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('keuangan') || keJab.includes('bendahara') ? '✓' : '' %></span> Kaur Keuangan (Bendahara)
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('tata usaha') || keJab.includes('umum') ? '✓' : '' %></span> Kaur Tata Usaha & Umum
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('perencanaan') ? '✓' : '' %></span> Kaur Perencanaan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('pemerintahan') ? '✓' : '' %></span> Kasi Pemerintahan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('kesejahteraan') ? '✓' : '' %></span> Kasi Kesejahteraan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('pelayanan') ? '✓' : '' %></span> Kasi Pelayanan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= keJab.includes('kadus') || keJab.includes('dusun') ? '✓' : '' %></span> Kepala Dusun (Kadus)
+                    </div>
+                    <div style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 6px; font-style: italic; font-size: 9.5pt;">
+                        Penerima Tertulis: <strong><%= surat.disposisi_ke_jabatan || '-' %></strong>
+                    </div>
+                </td>
+                <td style="padding: 12px 14px;">
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= instTeks.includes('tindak lanjuti') ? '✓' : '' %></span> Tindak lanjuti segera
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= instTeks.includes('pelajari') ? '✓' : '' %></span> Pelajari dan beri saran/masukan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= instTeks.includes('hadiri') ? '✓' : '' %></span> Hadiri rapat mewakili
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= instTeks.includes('koordinasikan') ? '✓' : '' %></span> Koordinasikan dengan pihak terkait
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= instTeks.includes('siapkan bahan') ? '✓' : '' %></span> Siapkan bahan / laporan
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="check-box"><%= instTeks.includes('arsipkan') ? '✓' : '' %></span> Arsipkan / untuk diketahui
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- CATATAN KHUSUS PIMPINAN -->
+        <table class="tbl-bordered" style="margin-top: 10px;">
+            <tr style="background: #f2f2f2; font-weight: bold;">
+                <td>CATATAN / ARAHAN TAMBAHAN PIMPINAN :</td>
+            </tr>
+            <tr>
+                <td style="height: 90px; vertical-align: top; padding: 12px; font-size: 11pt; color: #0f172a;">
+                    <%= surat.disposisi_catatan || 'Segera laksanakan sesuai dengan ketentuan peraturan yang berlaku dan laporkan hasilnya.' %>
+                </td>
+            </tr>
+        </table>
+
+        <!-- TANDA TANGAN PEJABAT -->
+        <div class="ttd-box">
+            <p style="margin: 0;">
+                <%= kepClean || surat.kepenghuluan_nama || 'Kepenghuluan' %>, <%= surat.disposisi_tanggal ? new Date(surat.disposisi_tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %><br>
+                <strong><%= surat.disposisi_dari_jabatan || ('Penghulu ' + (kepClean || surat.kepenghuluan_nama || '')) %></strong>
+            </p>
+            <div class="ttd-space" style="display: flex; align-items: center; justify-content: center;">
+                <div style="border: 2px dashed #1d4ed8; color: #1d4ed8; padding: 4px 10px; border-radius: 4px; font-size: 9pt; font-weight: bold;">
+                    DISPOSISI ELEKTRONIK TERVERIFIKASI
+                </div>
+            </div>
+            <p style="margin: 0; font-weight: bold; text-decoration: underline;">
+                <%= surat.disposisi_dari_nama || '( .................................................. )' %>
+            </p>
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <!-- FOOTER -->
+        <div style="margin-top: 35px; border-top: 1px solid #ccc; padding-top: 5px; font-size: 8.5pt; color: #64748b; display: flex; justify-content: space-between;">
+            <span>Sistem Informasi Arsip & Dokumen Desa (SIAD 2.0) - Kab. Rokan Hilir</span>
+            <span>Dicetak pada: <%= new Date().toLocaleString('id-ID') %></span>
+        </div>
+    </div>
+
+</body>
+</html>

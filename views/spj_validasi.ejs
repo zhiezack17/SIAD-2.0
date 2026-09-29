@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/img/logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0b1329 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #0f172a;
+            padding: 24px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            padding: 28px 24px;
+            text-align: center;
+            color: #ffffff;
+            border-bottom: 4px solid #f59e0b;
+        }
+        .logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            margin-bottom: 12px;
+        }
+        .logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .header h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .header p {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .body-content {
+            padding: 24px;
+        }
+        .badge-status {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+        .badge-status.verified {
+            background: #ecfdf5;
+            border: 1.5px solid #a7f3d0;
+        }
+        .badge-status.pending {
+            background: #fffbeb;
+            border: 1.5px solid #fde68a;
+        }
+        .badge-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .verified .badge-icon {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .pending .badge-icon {
+            background: #f59e0b;
+            color: #ffffff;
+        }
+        .badge-title {
+            font-weight: 800;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        .verified .badge-title { color: #065f46; }
+        .pending .badge-title { color: #92400e; }
+        .badge-desc {
+            font-size: 12.5px;
+            line-height: 1.4;
+        }
+        .verified .badge-desc { color: #047857; }
+        .pending .badge-desc { color: #b45309; }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #64748b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13.5px;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .info-label {
+            color: #64748b;
+            font-weight: 600;
+        }
+        .info-value {
+            color: #0f172a;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .sign-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .sign-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            transition: transform 0.2s;
+        }
+        .sign-step.completed {
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+        }
+        .sign-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .sign-step.completed .sign-icon {
+            background: #10b981;
+            color: white;
+        }
+        .sign-step:not(.completed) .sign-icon {
+            background: #e2e8f0;
+            color: #94a3b8;
+        }
+        .sign-role {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+        }
+        .sign-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 2px 0;
+        }
+        .sign-time {
+            font-size: 11.5px;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 18px 24px;
+            text-align: center;
+            font-size: 11.5px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        .footer strong {
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER KOP RESMI -->
+        <div class="header">
+            <div class="logo-wrap">
+                <img src="/img/logo.png" alt="Logo Rohil">
+            </div>
+            <h1>Pemerintah Kabupaten Rokan Hilir</h1>
+            <p>Sistem Informasi Arsip & Dokumen Desa (SIAD 2.0) &bull; Portal Validasi Publik</p>
+        </div>
+
+        <div class="body-content">
+            <% if (typeof found !== 'undefined' && !found) { %>
+                <!-- DOKUMEN TIDAK DITEMUKAN -->
+                <div class="badge-status pending" style="background:#fef2f2; border-color:#fecaca;">
+                    <div class="badge-icon" style="background:#ef4444; color:white;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <div class="badge-title" style="color:#991b1b;">Dokumen Tidak Terdaftar</div>
+                        <div class="badge-desc" style="color:#b91c1c;">
+                            Nomor registrasi dokumen SPJ tidak ditemukan pada pangkalan data SIAD 2.0 Kabupaten Rokan Hilir. Harap verifikasi ulang berkas fisik Anda.
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <!-- STATUS KEABSAHAN DOKUMEN -->
+                <% if (isSah) { %>
+                <div class="badge-status verified">
+                    <div class="badge-icon">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <div>
+                        <div class="badge-title">DOKUMEN RESMI & TERVERIFIKASI DIGITAL</div>
+                        <div class="badge-desc">
+                            Dokumen SPJ ini sah, terdaftar resmi di database Kabupaten Rokan Hilir, dan telah melewati seluruh tahapan verifikasi bendahara, sekdes, serta pengesahan akhir oleh Penghulu.
+                        </div>
+                    </div>
+                </div>
+                <% } else { %>
+                <div class="badge-status pending">
+                    <div class="badge-icon">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <div class="badge-title">DALAM PROSES VERIFIKASI BERJENJANG</div>
+                        <div class="badge-desc">
+                            Dokumen terdaftar namun statusnya saat ini masih berada pada tahap: <strong><%= kegiatan.tahap_verifikasi %></strong>.
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- INFORMASI KEGIATAN SPJ -->
+                <div class="section-title">
+                    <i class="fa-solid fa-file-invoice"></i> Rincian Identitas Kegiatan
+                </div>
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">No. Registrasi SPJ</span>
+                        <span class="info-value">SPJ/<%= kegiatan.tahun || '2026' %>/<%= String(kegiatan.id).padStart(4, '0') %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kepenghuluan / Desa</span>
+                        <span class="info-value"><%= kegiatan.kepenghuluan_nama || '-' %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kecamatan</span>
+                        <span class="info-value"><%= kegiatan.kecamatan_nama || 'Kab. Rokan Hilir' %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nama Kegiatan</span>
+                        <span class="info-value"><%= kegiatan.nama_kegiatan %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tahun Anggaran</span>
+                        <span class="info-value"><%= kegiatan.tahun %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Pagu Anggaran</span>
+                        <span class="info-value" style="color: #059669;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Pajak Disetor</span>
+                        <span class="info-value" style="color: #2563eb;">Rp <%= Number(totalPajak).toLocaleString('id-ID') %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Bukti Fisik Terlampir</span>
+                        <span class="info-value"><%= dokumen.length %> Dokumen Arsip Digital</span>
+                    </div>
+                </div>
+
+                <!-- JEJAK AUDIT PENGESAHAN DIGITAL -->
+                <div class="section-title">
+                    <i class="fa-solid fa-signature"></i> Jejak Digital Pengesahan Berjenjang
+                </div>
+                <div class="sign-timeline">
+                    <!-- BENDAHARA -->
+                    <div class="sign-step <%= kegiatan.verifikasi_bendahara_oleh ? 'completed' : '' %>">
+                        <div class="sign-icon">
+                            <i class="fa-solid <%= kegiatan.verifikasi_bendahara_oleh ? 'fa-check' : 'fa-hourglass' %>"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="sign-role">Verifikasi Keuangan & Pajak (Bendahara)</div>
+                            <div class="sign-name"><%= kegiatan.verifikasi_bendahara_oleh || 'Menunggu Verifikasi' %></div>
+                            <% if (kegiatan.verifikasi_bendahara_at) { %>
+                            <div class="sign-time">
+                                <i class="fa-solid fa-circle-check"></i> Diverifikasi pada <%= new Date(kegiatan.verifikasi_bendahara_at).toLocaleString('id-ID') %>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- SEKDES -->
+                    <div class="sign-step <%= kegiatan.verifikasi_sekdes_oleh ? 'completed' : '' %>">
+                        <div class="sign-icon">
+                            <i class="fa-solid <%= kegiatan.verifikasi_sekdes_oleh ? 'fa-check' : 'fa-hourglass' %>"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="sign-role">Verifikasi Kelengkapan Administrasi (Sekdes)</div>
+                            <div class="sign-name"><%= kegiatan.verifikasi_sekdes_oleh || 'Menunggu Verifikasi' %></div>
+                            <% if (kegiatan.verifikasi_sekdes_at) { %>
+                            <div class="sign-time">
+                                <i class="fa-solid fa-circle-check"></i> Diverifikasi pada <%= new Date(kegiatan.verifikasi_sekdes_at).toLocaleString('id-ID') %>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- PENGHULU -->
+                    <div class="sign-step <%= kegiatan.persetujuan_penghulu_oleh ? 'completed' : '' %>">
+                        <div class="sign-icon">
+                            <i class="fa-solid <%= kegiatan.persetujuan_penghulu_oleh ? 'fa-award' : 'fa-hourglass' %>"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="sign-role">Persetujuan & Pengesahan Akhir (Penghulu / Kepala Desa)</div>
+                            <div class="sign-name"><%= kegiatan.persetujuan_penghulu_oleh || 'Menunggu Pengesahan' %></div>
+                            <% if (kegiatan.persetujuan_penghulu_at) { %>
+                            <div class="sign-time" style="color: #1d4ed8;">
+                                <i class="fa-solid fa-stamp"></i> Disahkan secara sah pada <%= new Date(kegiatan.persetujuan_penghulu_at).toLocaleString('id-ID') %>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+            <% } %>
+        </div>
+
+        <!-- FOOTER KEAMANAN SISTEM -->
+        <div class="footer">
+            <strong>Sistem Informasi Arsip & Dokumen Desa (SIAD 2.0)</strong><br>
+            Dikelola secara resmi oleh Pemerintah Kabupaten Rokan Hilir &bull; Provinsi Riau<br>
+            <span style="font-size: 10px; color: #94a3b8;">
+                Integritas data dijamin melalui enkripsi pangkalan data terpusat. Kode ID: SIAD-ROHIL-V2-<%= (typeof kegiatan !== 'undefined' && kegiatan.id) ? kegiatan.id : '0' %>
+            </span>
+        </div>
+    </div>
+
+</body>
+</html>

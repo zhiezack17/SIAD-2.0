@@ -1,0 +1,28 @@
+
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 30px;">
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px;">
+            <div>
+                <h2 style="margin:0; color: #1e293b; font-size: 24px;">🏢 Modul Workspace</h2>
+                <p style="margin:5px 0 0 0; color: #64748b;">Kelola Proyek & Ruang Kerja Utama Desa</p>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            <% if (typeof workspaces !== 'undefined' && workspaces && workspaces.length > 0) { %>
+                <% workspaces.forEach(ws => { %>
+                    <div style="width: 300px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; background: #fff;">
+                        <h3 style="margin:0 0 10px 0;"><%= ws.nama %></h3>
+                        <p style="color: #64748b; font-size: 14px; margin: 0 0 15px 0;"><%= ws.deskripsi %></p>
+                        <a href="/workspace/<%= ws.id %>" style="display: inline-block; background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; width: 100%; text-align: center; box-sizing: border-box;">Buka Workspace</a>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div style="width: 100%; text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-folder-open" style="font-size: 64px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                    <h3 style="color: #475569; margin: 0 0 10px 0;">Belum Ada Workspace Aktif</h3>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

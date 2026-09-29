@@ -1,0 +1,64 @@
+<div class="content-wrapper" style="padding: 20px; background-color: #f8fafc; min-height: 100vh;">
+    <div style="margin-bottom: 20px;">
+        <a href="/spj" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">⬅️ Kembali ke Induk SPJ</a>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid #10b981;">
+        <h2 style="margin: 0 0 10px 0; color: #0f172a;">📂 Dokumen Kegiatan: <%= kegiatan.nama_kegiatan %></h2>
+        <p style="margin: 0; color: #64748b; font-weight: bold;">Tahun: <%= kegiatan.tahun %> &nbsp;|&nbsp; Pagu: <span style="color:#10b981;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></span></p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: start;">
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Upload Dokumen Baru</h3>
+            <form action="/spj/dokumen/upload" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                <div>
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Nama Dokumen</label>
+                    <input type="text" name="nama_dokumen" required placeholder="Cth: Kwitansi Pembelian ATK / Nota..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">File (Scan/PDF)</label>
+                    <input type="file" name="file_dokumen" required style="width: 100%; padding: 10px; border: 1px dashed #94a3b8; border-radius: 6px; background: #f8fafc;">
+                </div>
+                <button type="submit" style="background: #10b981; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Upload ke Drive</button>
+            </form>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Daftar Dokumen</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color:#64748b;">
+                        <th style="padding: 10px;">Nama Dokumen</th>
+                        <th style="padding: 10px;">File Drive</th>
+                        <th style="padding: 10px; width: 80px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(dokumen && dokumen.length > 0) { %>
+                        <% dokumen.forEach(doc => { %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px; font-weight:bold;"><%= doc.nama_dokumen %></td>
+                            <td style="padding: 10px;">
+                                <% if(doc.file_url) { %>
+                                    <a href="<%= doc.file_url %>" target="_blank" style="background:#eef2ff; color: #4f46e5; padding: 6px 10px; border-radius: 4px; font-weight: bold; text-decoration: none; font-size:12px;">Lihat Drive</a>
+                                <% } else { %> - <% } %>
+                            </td>
+                            <td style="padding: 10px;">
+                                <form action="/spj/dokumen/hapus" method="POST" onsubmit="return confirm('Hapus dokumen ini permanen?');" style="margin: 0;">
+                                    <input type="hidden" name="id" value="<%= doc.id %>">
+                                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                                    <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight:bold;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="3" style="padding: 30px; text-align: center; color: #94a3b8;">Belum ada dokumen yang diupload.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

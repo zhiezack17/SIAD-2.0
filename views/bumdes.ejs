@@ -1,0 +1,461 @@
+<div class="content-wrapper" style="padding: 24px; min-height: 100vh; background: #f8fafc;">
+    <!-- Top Bar Navigation -->
+    <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h2 style="margin: 0 0 4px 0; color: #0f172a; font-size: 24px; display: flex; align-items: center; gap: 10px;">
+                <span>🏪</span> BUMDes &mdash; Badan Usaha Milik Desa
+            </h2>
+            <p style="margin: 0; color: #64748b; font-size: 13.5px;">
+                Tata kelola Badan Hukum, Struktur Organisasi Pengurus (PP 11/2021), Unit Usaha, dan Kontribusi PADes.
+            </p>
+        </div>
+        <a href="/dashboard" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: white; color: #0f172a; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            <span>⬅️</span> Kembali ke Dashboard
+        </a>
+    </div>
+
+    <!-- Alert / Notifikasi -->
+    <% if (query && query.status) { %>
+        <% if (query.status === 'profil_success') { %>
+            <div style="background: #dcfce7; color: #166534; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; border-left: 5px solid #22c55e; display: flex; align-items: center; justify-content: space-between;">
+                <span>✅ Data Profil & Legalitas BUMDes berhasil disimpan!</span>
+                <span style="cursor:pointer;" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } else if (query.status === 'pengurus_success') { %>
+            <div style="background: #dcfce7; color: #166534; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; border-left: 5px solid #22c55e; display: flex; align-items: center; justify-content: space-between;">
+                <span>✅ Data Pengurus BUMDes berhasil ditambahkan!</span>
+                <span style="cursor:pointer;" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } else if (query.status === 'pengurus_deleted') { %>
+            <div style="background: #fef2f2; color: #991b1b; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; border-left: 5px solid #ef4444; display: flex; align-items: center; justify-content: space-between;">
+                <span>🗑️ Data Pengurus BUMDes berhasil dihapus.</span>
+                <span style="cursor:pointer;" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } else if (query.status === 'unit_success') { %>
+            <div style="background: #dcfce7; color: #166534; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; border-left: 5px solid #22c55e; display: flex; align-items: center; justify-content: space-between;">
+                <span>✅ Unit Usaha BUMDes berhasil ditambahkan!</span>
+                <span style="cursor:pointer;" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } else if (query.status === 'unit_deleted') { %>
+            <div style="background: #fef2f2; color: #991b1b; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; border-left: 5px solid #ef4444; display: flex; align-items: center; justify-content: space-between;">
+                <span>🗑️ Unit Usaha BUMDes berhasil dihapus.</span>
+                <span style="cursor:pointer;" onclick="this.parentElement.style.display='none'">&times;</span>
+            </div>
+        <% } %>
+    <% } %>
+
+    <!-- 4 Kartu Statistik Ringkasan -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 25px;">
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Total Pengurus</div>
+            <div style="font-size: 26px; font-weight: 800; color: #0f172a; margin-top: 4px;"><%= stats.totalPengurus %> Orang</div>
+            <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Penasihat, Direksi & Pengawas</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #10b981;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Unit Usaha Aktif</div>
+            <div style="font-size: 26px; font-weight: 800; color: #10b981; margin-top: 4px;"><%= stats.unitAktif %> Unit</div>
+            <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Dari total <%= unitUsahaList.length %> unit usaha</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Total Modal Desa</div>
+            <div style="font-size: 22px; font-weight: 800; color: #d97706; margin-top: 4px;">Rp <%= Number(stats.totalModal).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Penyertaan Modal APBDes</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #8b5cf6;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Kontribusi PADes</div>
+            <div style="font-size: 22px; font-weight: 800; color: #7c3aed; margin-top: 4px;">Rp <%= Number(stats.totalPADes).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Bagi hasil masuk ke kas desa</div>
+        </div>
+    </div>
+
+    <!-- Navigasi 3 Tab BUMDes -->
+    <div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 25px; overflow-x: auto;">
+        <a href="/bumdes?tab=profil" style="padding: 12px 20px; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 8px 8px 0 0; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; <%= tab === 'profil' ? 'background: #ffffff; color: #2563eb; border: 2px solid #e2e8f0; border-bottom: 2px solid #ffffff; margin-bottom: -2px;' : 'color: #64748b; background: transparent;' %>">
+            <span>🏛️</span> 1. Profil & Legalitas Kemenkumham
+        </a>
+        <a href="/bumdes?tab=pengurus" style="padding: 12px 20px; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 8px 8px 0 0; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; <%= tab === 'pengurus' ? 'background: #ffffff; color: #2563eb; border: 2px solid #e2e8f0; border-bottom: 2px solid #ffffff; margin-bottom: -2px;' : 'color: #64748b; background: transparent;' %>">
+            <span>👥</span> 2. Struktur Pengurus (PP 11/2021)
+            <span style="background: #e2e8f0; color: #334155; font-size: 11px; padding: 2px 7px; border-radius: 10px;"><%= pengurusList.length %></span>
+        </a>
+        <a href="/bumdes?tab=unit" style="padding: 12px 20px; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 8px 8px 0 0; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; <%= tab === 'unit' ? 'background: #ffffff; color: #2563eb; border: 2px solid #e2e8f0; border-bottom: 2px solid #ffffff; margin-bottom: -2px;' : 'color: #64748b; background: transparent;' %>">
+            <span>💼</span> 3. Unit Usaha & Kontribusi PADes
+            <span style="background: #e2e8f0; color: #334155; font-size: 11px; padding: 2px 7px; border-radius: 10px;"><%= unitUsahaList.length %></span>
+        </a>
+    </div>
+
+    <!-- KONTEN TAB 1: PROFIL & LEGALITAS BUMDES -->
+    <% if (tab === 'profil') { %>
+    <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; max-width: 950px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+            <div>
+                <h3 style="margin: 0 0 4px 0; color: #0f172a; font-size: 18px;">Identitas & Legalitas Badan Hukum BUMDes</h3>
+                <p style="margin: 0; color: #64748b; font-size: 13px;">Data legalitas resmi BUMDes terdaftar di Kemenkumham dan Kemendesa PDTT.</p>
+            </div>
+            <span style="background: #eff6ff; color: #1d4ed8; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;">PP No. 11/2021</span>
+        </div>
+
+        <form action="/bumdes/profil" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="grid-column: span 2;">
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Nama Resmi BUMDes *</label>
+                <input type="text" name="nama_bumdes" required value="<%= profil ? profil.nama_bumdes : '' %>" placeholder="Cth: BUMDes Karya Mandiri Bersama" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">No. Sertifikat Badan Hukum Kemenkumham</label>
+                <input type="text" name="no_badan_hukum" value="<%= profil ? (profil.no_badan_hukum || '') : '' %>" placeholder="Cth: AHU-01234.AH.01.33.Tahun 2023" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+                <small style="color: #64748b; font-size: 11.5px;">Nomor SK terdaftar resmi di Ditjen AHU Kemenkumham</small>
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Nomor Induk Berusaha (NIB - OSS)</label>
+                <input type="text" name="nib" value="<%= profil ? (profil.nib || '') : '' %>" placeholder="Cth: 1234567890123" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+                <small style="color: #64748b; font-size: 11.5px;">Nomor legalitas berusaha dari Kementerian Investasi/BKPM</small>
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Nomor Pokok Wajib Pajak (NPWP BUMDes)</label>
+                <input type="text" name="npwp" value="<%= profil ? (profil.npwp || '') : '' %>" placeholder="Cth: 00.000.000.0-000.000" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Nomor Peraturan Desa (Perdes) Pendirian</label>
+                <input type="text" name="no_perdes_pendirian" value="<%= profil ? (profil.no_perdes_pendirian || '') : '' %>" placeholder="Cth: Perdes No. 04 Tahun 2021" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Tanggal Penetapan Perdes Pendirian</label>
+                <input type="date" name="tgl_perdes_pendirian" value="<%= profil && profil.tgl_perdes_pendirian ? new Date(profil.tgl_perdes_pendirian).toISOString().split('T')[0] : '' %>" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Nama Bank BUMDes</label>
+                <input type="text" name="nama_bank" value="<%= profil ? (profil.nama_bank || '') : '' %>" placeholder="Cth: Bank Riau Kepri Syariah / BRI" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Nomor Rekening Bank (Wajib Atas Nama BUMDes)</label>
+                <input type="text" name="no_rekening" value="<%= profil ? (profil.no_rekening || '') : '' %>" placeholder="Cth: 123-456-7890" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Penyertaan Modal Awal Desa (Rp)</label>
+                <input type="number" step="any" name="modal_awal" value="<%= profil ? (profil.modal_awal || 0) : 0 %>" placeholder="0" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Penyertaan Modal Tambahan Desa (Rp)</label>
+                <input type="number" step="any" name="modal_tambahan" value="<%= profil ? (profil.modal_tambahan || 0) : 0 %>" placeholder="0" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+
+            <div style="grid-column: span 2;">
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Upload Dokumen AD/ART & Berita Acara Musdes (PDF)</label>
+                <input type="file" name="file_ad_art" accept="application/pdf,image/*" style="width: 100%; padding: 9px; border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                <% if (profil && profil.file_ad_art_url) { %>
+                    <div style="margin-top: 8px; font-size: 13px;">
+                        <a href="<%= profil.file_ad_art_url %>" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: underline;">
+                            📄 Lihat Dokumen AD/ART yang Telah Diunggah
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+
+            <div style="grid-column: span 2; margin-top: 10px;">
+                <button type="submit" style="background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 700; font-size: 14.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                    <span>💾</span> Simpan Profil & Legalitas BUMDes
+                </button>
+            </div>
+        </form>
+    </div>
+    <% } %>
+
+    <!-- KONTEN TAB 2: STRUKTUR PENGURUS BUMDES -->
+    <% if (tab === 'pengurus') { %>
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: start;">
+        <!-- Form Tambah Pengurus -->
+        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+            <h3 style="margin: 0 0 16px 0; color: #0f172a; font-size: 17px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <span>➕</span> Tambah Pengurus BUMDes
+            </h3>
+            
+            <form action="/bumdes/pengurus" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Nama Lengkap *</label>
+                    <input type="text" name="nama" required placeholder="Nama lengkap pengurus" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Jabatan Organisasi (PP 11/2021) *</label>
+                    <select name="jabatan" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px; background: white;">
+                        <option value="Penasihat (Ex-officio Penghulu)">Penasihat (Ex-officio Penghulu)</option>
+                        <option value="Direktur / Ketua BUMDes" selected>Direktur / Ketua BUMDes</option>
+                        <option value="Sekretaris BUMDes">Sekretaris BUMDes</option>
+                        <option value="Bendahara BUMDes">Bendahara BUMDes</option>
+                        <option value="Kepala Unit Usaha">Kepala Unit Usaha</option>
+                        <option value="Anggota Pengawas (Tokoh Musdes)">Anggota Pengawas (Tokoh Musdes)</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">NIK KTP</label>
+                        <input type="text" name="nik" placeholder="16 Digit NIK" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">No. WhatsApp</label>
+                        <input type="text" name="no_hp" placeholder="08xxxxxxxxxx" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Nomor SK Penghulu</label>
+                        <input type="text" name="no_sk" placeholder="Cth: SK/05/2024" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Periode Bakti</label>
+                        <input type="text" name="periode" placeholder="Cth: 2024 - 2029" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Status Pengurus</label>
+                    <select name="status" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px; background: white;">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Demisioner">Demisioner</option>
+                        <option value="Berhenti / Mengundurkan Diri">Berhenti / Mengundurkan Diri</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Scan Berkas SK (PDF/Gambar)</label>
+                    <input type="file" name="file_sk" accept="application/pdf,image/*" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 6px; font-size: 12px; background: #f8fafc;">
+                </div>
+
+                <div style="margin-top: 6px;">
+                    <button type="submit" style="width: 100%; background: #2563eb; color: white; padding: 11px 16px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                        <span>💾</span> Simpan Pengurus BUMDes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Daftar Pengurus -->
+        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+                    <span>📋</span> Struktur Organisasi Pengurus BUMDes
+                </h3>
+                <span style="font-size: 13px; color: #64748b;"><%= pengurusList.length %> Pengurus Terdaftar</span>
+            </div>
+
+            <% if (pengurusList.length === 0) { %>
+                <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                    <div style="font-size: 40px; margin-bottom: 8px;">👥</div>
+                    <div style="font-weight: 600; color: #475569;">Belum ada pengurus BUMDes yang didaftarkan.</div>
+                    <div style="font-size: 12.5px; margin-top: 4px;">Gunakan formulir di sebelah kiri untuk menambah Direktur, Sekretaris, Bendahara, atau Pengawas.</div>
+                </div>
+            <% } else { %>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; color: #475569;">
+                                <th style="padding: 10px 12px;">Jabatan</th>
+                                <th style="padding: 10px 12px;">Nama & NIK</th>
+                                <th style="padding: 10px 12px;">No. SK / Periode</th>
+                                <th style="padding: 10px 12px;">Berkas SK</th>
+                                <th style="padding: 10px 12px;">Status</th>
+                                <th style="padding: 10px 12px; text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% pengurusList.forEach(function(p) { %>
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px 12px; font-weight: 700;">
+                                        <% if (p.jabatan.includes('Penasihat')) { %>
+                                            <span style="background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;">Penasihat</span>
+                                        <% } else if (p.jabatan.includes('Direktur') || p.jabatan.includes('Ketua')) { %>
+                                            <span style="background: #dbeafe; color: #1e40af; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;">Direktur</span>
+                                        <% } else if (p.jabatan.includes('Sekretaris')) { %>
+                                            <span style="background: #f3e8ff; color: #6b21a8; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;">Sekretaris</span>
+                                        <% } else if (p.jabatan.includes('Bendahara')) { %>
+                                            <span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;">Bendahara</span>
+                                        <% } else if (p.jabatan.includes('Pengawas')) { %>
+                                            <span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;">Pengawas</span>
+                                        <% } else { %>
+                                            <span style="background: #f1f5f9; color: #334155; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;"><%= p.jabatan %></span>
+                                        <% } %>
+                                    </td>
+                                    <td style="padding: 10px 12px;">
+                                        <div style="font-weight: 700; color: #0f172a;"><%= p.nama %></div>
+                                        <div style="color: #64748b; font-size: 11.5px;">NIK: <%= p.nik || '-' %> <%= p.no_hp ? ' &bull; WA: ' + p.no_hp : '' %></div>
+                                    </td>
+                                    <td style="padding: 10px 12px; color: #334155;">
+                                        <div><%= p.no_sk || '-' %></div>
+                                        <div style="color: #94a3b8; font-size: 11px;"><%= p.periode || '-' %></div>
+                                    </td>
+                                    <td style="padding: 10px 12px;">
+                                        <% if (p.file_sk_url) { %>
+                                            <a href="<%= p.file_sk_url %>" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: underline; font-size: 12px;">
+                                                📄 File SK
+                                            </a>
+                                        <% } else { %>
+                                            <span style="color: #94a3b8; font-size: 12px;">-</span>
+                                        <% } %>
+                                    </td>
+                                    <td style="padding: 10px 12px;">
+                                        <span style="background: <%= p.status === 'Aktif' ? '#dcfce7' : '#fee2e2' %>; color: <%= p.status === 'Aktif' ? '#15803d' : '#991b1b' %>; padding: 2px 8px; border-radius: 9999px; font-weight: 700; font-size: 11px;">
+                                            <%= p.status %>
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px 12px; text-align: center;">
+                                        <form action="/bumdes/pengurus/delete" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengurus ini?');" style="display: inline;">
+                                            <input type="hidden" name="id" value="<%= p.id %>">
+                                            <button type="submit" style="background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer; padding: 4px;" title="Hapus Pengurus">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- KONTEN TAB 3: UNIT USAHA & KONTRIBUSI PADES -->
+    <% if (tab === 'unit') { %>
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: start;">
+        <!-- Form Tambah Unit Usaha -->
+        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+            <h3 style="margin: 0 0 16px 0; color: #0f172a; font-size: 17px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                <span>➕</span> Tambah Unit Usaha BUMDes
+            </h3>
+            
+            <form action="/bumdes/unit-usaha" method="POST" style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Nama Unit Usaha *</label>
+                    <input type="text" name="nama_unit" required placeholder="Cth: Pengelolaan Air Bersih PAMSIMAS" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Kategori Sektor Usaha</label>
+                    <select name="kategori" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px; background: white;">
+                        <option value="Jasa Pelayanan & Air Bersih">Jasa Pelayanan & Air Bersih</option>
+                        <option value="Perdagangan & Toko Sarana Produksi">Perdagangan & Toko Sarana Produksi</option>
+                        <option value="Jasa Keuangan Mikro & Agen Bank">Jasa Keuangan Mikro & Agen Bank</option>
+                        <option value="Pertanian / Perkebunan Sawit">Pertanian / Perkebunan Sawit</option>
+                        <option value="Pariwisata Desa">Pariwisata Desa</option>
+                        <option value="Pengelolaan Pasar / Kios Desa">Pengelolaan Pasar / Kios Desa</option>
+                        <option value="Pengolahan / Manufaktur Lokal">Pengolahan / Manufaktur Lokal</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Omzet Tahunan (Rp)</label>
+                        <input type="number" step="any" name="omzet_tahunan" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Setoran PADes (Rp)</label>
+                        <input type="number" step="any" name="kontribusi_pades" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Tenaga Kerja Warga</label>
+                        <input type="number" name="jumlah_pekerja" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Status Operasional</label>
+                        <select name="status" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px; background: white;">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Rintisan">Rintisan</option>
+                            <option value="Tidak Aktif">Tidak Aktif</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Keterangan / Alamat Unit Usaha</label>
+                    <textarea name="keterangan" rows="2" placeholder="Catatan lokasi atau deskripsi kegiatan unit usaha..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;"></textarea>
+                </div>
+
+                <div style="margin-top: 6px;">
+                    <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 11px 16px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                        <span>💾</span> Simpan Unit Usaha BUMDes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Daftar Unit Usaha -->
+        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+                    <span>💼</span> Daftar Unit Usaha & Kontribusi PADes
+                </h3>
+                <span style="font-size: 13px; color: #64748b;"><%= unitUsahaList.length %> Unit Usaha</span>
+            </div>
+
+            <% if (unitUsahaList.length === 0) { %>
+                <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                    <div style="font-size: 40px; margin-bottom: 8px;">🏪</div>
+                    <div style="font-weight: 600; color: #475569;">Belum ada unit usaha yang didaftarkan.</div>
+                    <div style="font-size: 12.5px; margin-top: 4px;">Tambahkan unit usaha (Air Bersih, Sawit Kas Desa, Agen Bank, Pasar) di formulir sebelah kiri.</div>
+                </div>
+            <% } else { %>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; color: #475569;">
+                                <th style="padding: 10px 12px;">Nama Unit & Sektor</th>
+                                <th style="padding: 10px 12px;">Status</th>
+                                <th style="padding: 10px 12px; text-align: right;">Omzet Tahunan</th>
+                                <th style="padding: 10px 12px; text-align: right;">Setoran PADes</th>
+                                <th style="padding: 10px 12px; text-align: center;">Tenaga Kerja</th>
+                                <th style="padding: 10px 12px; text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% unitUsahaList.forEach(function(u) { %>
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px 12px;">
+                                        <div style="font-weight: 700; color: #0f172a;"><%= u.nama_unit %></div>
+                                        <div style="color: #64748b; font-size: 11.5px;"><%= u.kategori %></div>
+                                    </td>
+                                    <td style="padding: 10px 12px;">
+                                        <span style="background: <%= u.status === 'Aktif' ? '#dcfce7' : (u.status === 'Rintisan' ? '#fef3c7' : '#fee2e2') %>; color: <%= u.status === 'Aktif' ? '#15803d' : (u.status === 'Rintisan' ? '#92400e' : '#991b1b') %>; padding: 2px 8px; border-radius: 9999px; font-weight: 700; font-size: 11px;">
+                                            <%= u.status %>
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #0f172a;">
+                                        Rp <%= Number(u.omzet_tahunan || 0).toLocaleString('id-ID') %>
+                                    </td>
+                                    <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #166534;">
+                                        Rp <%= Number(u.kontribusi_pades || 0).toLocaleString('id-ID') %>
+                                    </td>
+                                    <td style="padding: 10px 12px; text-align: center; color: #334155;">
+                                        <%= u.jumlah_pekerja || 0 %> Orang
+                                    </td>
+                                    <td style="padding: 10px 12px; text-align: center;">
+                                        <form action="/bumdes/unit-usaha/delete" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus unit usaha ini?');" style="display: inline;">
+                                            <input type="hidden" name="id" value="<%= u.id %>">
+                                            <button type="submit" style="background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer; padding: 4px;" title="Hapus Unit">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+</div>

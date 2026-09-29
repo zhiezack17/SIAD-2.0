@@ -1,0 +1,610 @@
+<div class="content-wrapper" style="padding: 20px; background-color: #f8fafc; min-height: 100vh;">
+    <!-- Top Navigation Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <a href="/spj" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">⬅️ Kembali ke Induk SPJ</a>
+        
+        <a href="/spj/cetak/<%= kegiatan.id %>" target="_blank" style="text-decoration: none; background: #0f172a; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px;">
+            🖨️ Cetak Lembar Pengesahan SPJ
+        </a>
+    </div>
+
+    <!-- Header Informasi Kegiatan -->
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 6px solid #2563eb;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 8px;">
+                    <%= kegiatan.kepenghuluan_nama || 'Kepenghuluan' %> &bull; Tahun Anggaran <%= kegiatan.tahun %>
+                </span>
+                <h2 style="margin: 0 0 8px 0; color: #0f172a; font-size: 22px;"><%= kegiatan.nama_kegiatan %></h2>
+                <p style="margin: 0; color: #64748b; font-size: 14px;">
+                    Lokasi: <strong><%= kegiatan.lokasi || '-' %></strong> &nbsp;|&nbsp; 
+                    Pagu Anggaran: <strong style="color:#059669;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></strong>
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 13px; color: #64748b; display: block; margin-bottom: 4px;">Status Saat Ini:</span>
+                <% 
+                    const tahap = kegiatan.tahap_verifikasi || 'DRAFT'; 
+                    let badgeBg = '#f1f5f9'; let badgeColor = '#475569'; let badgeText = 'Draft / Pengajuan';
+                    if (tahap === 'VERIFIKASI_BENDAHARA') { badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = 'Verifikasi Bendahara'; }
+                    else if (tahap === 'VERIFIKASI_SEKDES') { badgeBg = '#e0e7ff'; badgeColor = '#3730a3'; badgeText = 'Verifikasi Sekdes'; }
+                    else if (tahap === 'VERIFIKASI_PENGHULU') { badgeBg = '#dbeafe'; badgeColor = '#1d4ed8'; badgeText = 'Persetujuan Penghulu'; }
+                    else if (tahap === 'SELESAI_FINAL') { badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = 'Selesai & Disahkan'; }
+                    else if (tahap === 'PERLU_REVISI') { badgeBg = '#fee2e2'; badgeColor = '#b91c1c'; badgeText = 'Perlu Revisi'; }
+                %>
+                <span style="background: <%= badgeBg %>; color: <%= badgeColor %>; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                    <%= badgeText %>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peringatan Catatan Revisi Jika Ada -->
+    <% if (kegiatan.catatan_revisi) { %>
+    <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 5px solid #ef4444; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+        <h4 style="margin: 0 0 5px 0; color: #991b1b; display: flex; align-items: center; gap: 8px;">
+            ⚠️ Catatan Revisi dari Verifikator:
+        </h4>
+        <p style="margin: 0; color: #b91c1c; font-size: 14px;"><%= kegiatan.catatan_revisi %></p>
+    </div>
+    <% } %>
+
+    <!-- STEPPER ALUR VERIFIKASI 4 TAHAP -->
+    <div style="background: white; border-radius: 12px; padding: 20px 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 25px;">
+        <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Alur Verifikasi Bertingkat (SOP Administrasi Desa)</h4>
+        
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; position: relative;">
+            <% 
+                const step1Active = true;
+                const step2Active = ['VERIFIKASI_BENDAHARA', 'VERIFIKASI_SEKDES', 'VERIFIKASI_PENGHULU', 'SELESAI_FINAL'].includes(tahap);
+                const step3Active = ['VERIFIKASI_SEKDES', 'VERIFIKASI_PENGHULU', 'SELESAI_FINAL'].includes(tahap);
+                const step4Active = ['SELESAI_FINAL'].includes(tahap);
+            %>
+            <!-- Step 1: Kaur -->
+            <div style="border: 2px solid <%= step1Active ? '#10b981' : '#e2e8f0' %>; background: <%= step1Active ? '#f0fdf4' : '#f8fafc' %>; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 12px; font-weight: bold; color: <%= step1Active ? '#059669' : '#94a3b8' %>;">TAHAP 1</div>
+                <div style="font-weight: bold; color: #0f172a; margin: 4px 0;">Kaur / Pelaksana</div>
+                <div style="font-size: 12px; color: #64748b;">Upload Berkas & Pajak</div>
+            </div>
+
+            <!-- Step 2: Bendahara -->
+            <div style="border: 2px solid <%= step2Active ? '#10b981' : (tahap === 'VERIFIKASI_BENDAHARA' ? '#f59e0b' : '#e2e8f0') %>; background: <%= step2Active ? '#f0fdf4' : (tahap === 'VERIFIKASI_BENDAHARA' ? '#fffbeb' : '#f8fafc') %>; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 12px; font-weight: bold; color: <%= step2Active ? '#059669' : (tahap === 'VERIFIKASI_BENDAHARA' ? '#d97706' : '#94a3b8') %>;">TAHAP 2</div>
+                <div style="font-weight: bold; color: #0f172a; margin: 4px 0;">Bendahara Desa</div>
+                <div style="font-size: 12px; color: #64748b;">Verifikasi Kuitansi & Pajak</div>
+            </div>
+
+            <!-- Step 3: Sekdes -->
+            <div style="border: 2px solid <%= step3Active ? '#10b981' : (tahap === 'VERIFIKASI_SEKDES' ? '#f59e0b' : '#e2e8f0') %>; background: <%= step3Active ? '#f0fdf4' : (tahap === 'VERIFIKASI_SEKDES' ? '#fffbeb' : '#f8fafc') %>; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 12px; font-weight: bold; color: <%= step3Active ? '#059669' : (tahap === 'VERIFIKASI_SEKDES' ? '#d97706' : '#94a3b8') %>;">TAHAP 3</div>
+                <div style="font-weight: bold; color: #0f172a; margin: 4px 0;">Sekretaris Desa</div>
+                <div style="font-size: 12px; color: #64748b;">Kesesuaian Administrasi</div>
+            </div>
+
+            <!-- Step 4: Penghulu -->
+            <div style="border: 2px solid <%= step4Active ? '#10b981' : (tahap === 'VERIFIKASI_PENGHULU' ? '#f59e0b' : '#e2e8f0') %>; background: <%= step4Active ? '#f0fdf4' : (tahap === 'VERIFIKASI_PENGHULU' ? '#fffbeb' : '#f8fafc') %>; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 12px; font-weight: bold; color: <%= step4Active ? '#059669' : (tahap === 'VERIFIKASI_PENGHULU' ? '#d97706' : '#94a3b8') %>;">TAHAP 4</div>
+                <div style="font-weight: bold; color: #0f172a; margin: 4px 0;">Penghulu (Kades)</div>
+                <div style="font-size: 12px; color: #64748b;">Pengesahan Akhir (Sah)</div>
+            </div>
+        </div>
+
+        <!-- PANEL AKSI SESUAI PERAN PENGGUNA -->
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 13px; color: #64748b;">
+                Peran Anda: <strong style="color: #0f172a; text-transform: uppercase;"><%= userRole %></strong>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <!-- Aksi untuk Kaur / Operator / Admin -->
+                <% if ((userRole.includes('kaur') || userRole.includes('operator') || isAdmin) && (tahap === 'DRAFT' || tahap === 'PERLU_REVISI')) { %>
+                <form action="/spj/verifikasi" method="POST" style="margin:0;">
+                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                    <input type="hidden" name="aksi" value="ajukan">
+                    <button type="submit" style="background: #2563eb; color: white; padding: 10px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                        📤 Ajukan ke Bendahara
+                    </button>
+                </form>
+                <% } %>
+
+                <!-- Aksi untuk Bendahara / Admin -->
+                <% if ((userRole.includes('bendahara') || isAdmin) && tahap === 'VERIFIKASI_BENDAHARA') { %>
+                <button onclick="bukaModalRevisi('bendahara')" style="background: #f1f5f9; color: #b91c1c; border: 1px solid #fecaca; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    ↩️ Minta Revisi
+                </button>
+                <form action="/spj/verifikasi" method="POST" style="margin:0;">
+                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                    <input type="hidden" name="aksi" value="setujui_bendahara">
+                    <button type="submit" style="background: #10b981; color: white; padding: 10px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                        ✅ Setujui Verifikasi Keuangan & Teruskan ke Sekdes
+                    </button>
+                </form>
+                <% } %>
+
+                <!-- Aksi untuk Sekdes / Admin -->
+                <% if ((userRole.includes('sekdes') || userRole.includes('sekretaris') || isAdmin) && tahap === 'VERIFIKASI_SEKDES') { %>
+                <button onclick="bukaModalRevisi('sekdes')" style="background: #f1f5f9; color: #b91c1c; border: 1px solid #fecaca; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    ↩️ Minta Revisi
+                </button>
+                <form action="/spj/verifikasi" method="POST" style="margin:0;">
+                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                    <input type="hidden" name="aksi" value="setujui_sekdes">
+                    <button type="submit" style="background: #10b981; color: white; padding: 10px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                        ✅ Setujui Verifikasi Administrasi & Teruskan ke Penghulu
+                    </button>
+                </form>
+                <% } %>
+
+                <!-- Aksi untuk Penghulu / Pimpinan / Admin -->
+                <% if ((userRole.includes('penghulu') || userRole.includes('pimpinan') || isAdmin) && tahap === 'VERIFIKASI_PENGHULU') { %>
+                <button onclick="bukaModalRevisi('penghulu')" style="background: #f1f5f9; color: #b91c1c; border: 1px solid #fecaca; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    ↩️ Minta Revisi
+                </button>
+                <form action="/spj/verifikasi" method="POST" style="margin:0;">
+                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                    <input type="hidden" name="aksi" value="setujui_penghulu">
+                    <button type="submit" style="background: #059669; color: white; padding: 10px 22px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                        🏆 Sahkan & Setujui SPJ Final
+                    </button>
+                </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <% 
+        const rRole = String(typeof userRole !== 'undefined' ? userRole : '').toLowerCase();
+        const isPimpinanOrSekdes = rRole.includes('penghulu') || rRole.includes('pimpinan') || rRole.includes('kades') || rRole.includes('sekdes') || rRole.includes('sekretaris');
+        const isReadOnly = !isAdmin && (isPimpinanOrSekdes || tahap === 'SELESAI_FINAL');
+    %>
+
+    <% if (tahap === 'SELESAI_FINAL') { %>
+    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 16px 22px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: #10b981; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">✓</div>
+            <div>
+                <strong style="color: #065f46; font-size: 15px; display: block;">SPJ Kegiatan Telah Sah & Selesai Diverifikasi</strong>
+                <span style="color: #047857; font-size: 13px;">Seluruh tahapan verifikasi administrasi dan pengesahan Penghulu telah lengkap dan tersimpan secara permanen.</span>
+            </div>
+        </div>
+        <a href="/spj/cetak/<%= kegiatan.id %>" target="_blank" style="background: #059669; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);">
+            🖨️ Cetak Lembar Pengesahan (A4)
+        </a>
+    </div>
+    <% } %>
+
+    <!-- KONTEN: DOKUMEN BUKTI FISIK & PAJAK -->
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: start; margin-bottom: 25px;">
+        
+        <!-- BAGIAN 1: BUKTI FISIK SPJ -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 16px;">📁 Dokumen Bukti Fisik (<%= dokumen ? dokumen.length : 0 %>)</h3>
+            </div>
+
+            <% if (!isReadOnly) { %>
+            <!-- Form Upload -->
+            <form action="/spj/dokumen/upload" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; margin-bottom: 4px; display: block;">Nama Dokumen</label>
+                    <input type="text" name="nama_dokumen" required placeholder="Cth: Kwitansi Pembelian ATK / Nota..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; margin-bottom: 4px; display: block;">File (PDF / Scan Bukti)</label>
+                    <input type="file" name="file_dokumen" required style="width: 100%; padding: 8px; border: 1px dashed #94a3b8; border-radius: 6px; background: white; box-sizing: border-box;">
+                </div>
+                <button type="submit" style="background: #10b981; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    📤 Upload ke Google Drive
+                </button>
+            </form>
+            <% } else { %>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 8px;">
+                <span>🔒</span> Mode Peninjauan: Berkas kuitansi diunggah oleh Pelaksana Kegiatan (PKA / Kaur).
+            </div>
+            <% } %>
+
+            <!-- Tabel Dokumen -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color:#64748b;">
+                        <th style="padding: 10px 6px;">Nama Dokumen</th>
+                        <th style="padding: 10px 6px; width: 110px;">File Drive</th>
+                        <% if (!isReadOnly) { %>
+                        <th style="padding: 10px 6px; width: 60px; text-align: center;">Aksi</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(dokumen && dokumen.length > 0) { %>
+                        <% dokumen.forEach(doc => { %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px 6px; font-weight: 500;"><%= doc.nama_dokumen %></td>
+                            <td style="padding: 10px 6px;">
+                                <% if(doc.file_url) { %>
+                                    <a href="<%= doc.file_url %>" target="_blank" style="background:#eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 4px; font-weight: bold; text-decoration: none; font-size: 12px;">Lihat Drive</a>
+                                <% } else { %> - <% } %>
+                            </td>
+                            <% if (!isReadOnly) { %>
+                            <td style="padding: 10px 6px; text-align: center;">
+                                <form action="/spj/dokumen/hapus" method="POST" onsubmit="return confirm('Hapus dokumen ini?');" style="margin: 0;">
+                                    <input type="hidden" name="id" value="<%= doc.id %>">
+                                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                                    <button type="submit" style="background: #fee2e2; color: #ef4444; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-weight: bold;">🗑️</button>
+                                </form>
+                            </td>
+                            <% } %>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="<%= !isReadOnly ? 3 : 2 %>" style="padding: 25px; text-align: center; color: #94a3b8;">Belum ada dokumen yang diunggah.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BAGIAN 2: RINCIAN PAJAK SPJ -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 16px;">💸 Potongan Pajak (<%= pajak ? pajak.length : 0 %>)</h3>
+            </div>
+
+            <% if (!isReadOnly) { %>
+            <!-- Form Tambah Pajak -->
+            <form action="/spj/pajak/tambah" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-weight: bold; font-size: 13px; margin-bottom: 4px; display: block;">Jenis Pajak</label>
+                        <select name="jenis_pajak" required style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                            <option value="PPN">PPN</option>
+                            <option value="PPh 21">PPh Pasal 21</option>
+                            <option value="PPh 22">PPh Pasal 22</option>
+                            <option value="PPh 23">PPh Pasal 23</option>
+                            <option value="Pajak Daerah">Pajak Daerah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; font-size: 13px; margin-bottom: 4px; display: block;">Nominal (Rp)</label>
+                        <input type="number" name="nominal" required placeholder="0" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; margin-bottom: 4px; display: block;">Bukti Bayar / NTPN (Opsional)</label>
+                    <input type="file" name="file_bukti" style="width: 100%; padding: 8px; border: 1px dashed #94a3b8; border-radius: 6px; background: white; box-sizing: border-box;">
+                </div>
+                <button type="submit" style="background: #3b82f6; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    + Simpan Pajak
+                </button>
+            </form>
+            <% } else { %>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 8px;">
+                <span>🔒</span> Mode Peninjauan: Rincian potongan pajak diperiksa dan dikelola oleh Bendahara Desa.
+            </div>
+            <% } %>
+
+            <!-- Tabel Pajak -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color:#64748b;">
+                        <th style="padding: 10px 6px;">Jenis</th>
+                        <th style="padding: 10px 6px;">Nominal</th>
+                        <% if (!isReadOnly) { %>
+                        <th style="padding: 10px 6px; width: 60px; text-align: center;">Aksi</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(pajak && pajak.length > 0) { %>
+                        <% pajak.forEach(p => { %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px 6px; font-weight: 500;">
+                                <%= p.jenis_pajak %>
+                                <% if (p.file_url || p.file_bukti) { %>
+                                    <br><a href="<%= p.file_url || p.file_bukti %>" target="_blank" style="font-size: 11px; color: #2563eb; text-decoration: none;">Lihat Bukti</a>
+                                <% } %>
+                            </td>
+                            <td style="padding: 10px 6px; font-weight: bold; color: #059669;">Rp <%= Number(p.nominal).toLocaleString('id-ID') %></td>
+                            <% if (!isReadOnly) { %>
+                            <td style="padding: 10px 6px; text-align: center;">
+                                <form action="/spj/pajak/hapus" method="POST" onsubmit="return confirm('Hapus pajak ini?');" style="margin: 0;">
+                                    <input type="hidden" name="id" value="<%= p.id %>">
+                                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                                    <button type="submit" style="background: #fee2e2; color: #ef4444; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-weight: bold;">🗑️</button>
+                                </form>
+                            </td>
+                            <% } %>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="<%= !isReadOnly ? 3 : 2 %>" style="padding: 25px; text-align: center; color: #94a3b8;">Belum ada data pajak.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- BAGIAN 3: GALERI & DOKUMENTASI FOTO KEGIATAN (MULTI-UPLOAD) -->
+    <!-- ======================================================== -->
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="margin: 0; color: #0f172a; font-size: 16.5px; display: flex; align-items: center; gap: 8px;">
+                    📸 Dokumentasi & Foto Kegiatan Lapangan
+                    <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                        <%= typeof foto !== 'undefined' && foto ? foto.length : 0 %> Foto
+                    </span>
+                </h3>
+                <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12.5px;">
+                    Bukti fisik visual pelaksanaan kegiatan (Progres 0%, 50%, 100%, serah terima barang, penyaluran, pelatihan, dsb) untuk arsip digital dan audit Inspektorat/BPK.
+                </p>
+            </div>
+            <% if (!isReadOnly) { %>
+            <button type="button" onclick="toggleFormFoto()" id="btnToggleFoto" style="background: #2563eb; color: white; padding: 8px 14px; border: none; border-radius: 6px; font-weight: bold; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(37,99,235,0.2);">
+                <span>➕</span> Upload Foto Kegiatan
+            </button>
+            <% } %>
+        </div>
+
+        <% if (!isReadOnly) { %>
+        <!-- FORM MULTI-UPLOAD FOTO KEGIATAN -->
+        <div id="formUploadFotoContainer" style="display: none; background: #f8fafc; border: 1.5px dashed #3b82f6; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+            <form action="/spj/foto/upload" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
+                <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label style="font-weight: bold; font-size: 13px; margin-bottom: 5px; display: block; color: #334155;">
+                            Pilih File Foto (Bisa Banyak / Multi-Upload) <span style="color: red;">*</span>
+                        </label>
+                        <input type="file" name="foto_kegiatan" multiple accept="image/*" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; box-sizing: border-box; font-size: 12.5px;">
+                        <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">
+                            💡 Anda dapat memilih 1 hingga 10 foto sekaligus dari galeri HP atau komputer (format .JPG, .PNG, .JPEG).
+                        </small>
+                    </div>
+
+                    <div>
+                        <label style="font-weight: bold; font-size: 13px; margin-bottom: 5px; display: block; color: #334155;">
+                            Kategori / Tahapan Kegiatan <span style="color: red;">*</span>
+                        </label>
+                        <select name="kategori" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-size: 13px; font-weight: 600; color: #1e293b;">
+                            <option value="Dokumentasi Fisik 0%">Dokumentasi Fisik 0% (Titik Awal Sebelum Pengerjaan)</option>
+                            <option value="Dokumentasi Fisik 50%">Dokumentasi Fisik 50% (Sedang Dalam Pengerjaan)</option>
+                            <option value="Dokumentasi Fisik 100%">Dokumentasi Fisik 100% (Pekerjaan Selesai / Fisik Tuntas)</option>
+                            <option value="Dokumentasi Penyaluran / Bantuan">Dokumentasi Penyaluran Bantuan / Serah Terima</option>
+                            <option value="Dokumentasi Pelatihan / Bimtek">Dokumentasi Pelatihan / Bimtek / Sosialisasi</option>
+                            <option value="Dokumentasi Musyawarah / Rapat">Dokumentasi Musyawarah / Rapat Kegiatan</option>
+                            <option value="Dokumentasi Lapangan Umum">Dokumentasi Lapangan Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; margin-bottom: 5px; display: block; color: #334155;">
+                        Keterangan / Lokasi Foto (Opsional)
+                    </label>
+                    <input type="text" name="judul_foto" placeholder="Cth: Titik Sta 0+050 Pembangunan Parit Dusun Suka Maju" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; box-sizing: border-box; font-size: 13px;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px;">
+                    <button type="button" onclick="toggleFormFoto()" style="background: #e2e8f0; color: #475569; padding: 9px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;">
+                        Batal
+                    </button>
+                    <button type="submit" style="background: #10b981; color: white; padding: 9px 20px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">
+                        📤 Simpan & Upload ke Google Drive
+                    </button>
+                </div>
+            </form>
+        </div>
+        <% } %>
+
+        <%
+            function getDriveThumb(url) {
+                if (!url) return '';
+                const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                if (m && m[1]) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800';
+                return url;
+            }
+        %>
+
+        <!-- GRID GALERI FOTO -->
+        <% if (typeof foto !== 'undefined' && foto && foto.length > 0) { %>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px;">
+                <% foto.forEach((f, idx) => { 
+                    const thumbUrl = getDriveThumb(f.file_url);
+                    const kat = f.kategori || 'Dokumentasi';
+                    let badgeBg = '#f1f5f9'; let badgeColor = '#475569';
+                    if (kat.includes('0%')) { badgeBg = '#fef3c7'; badgeColor = '#b45309'; }
+                    else if (kat.includes('50%')) { badgeBg = '#e0f2fe'; badgeColor = '#0369a1'; }
+                    else if (kat.includes('100%')) { badgeBg = '#dcfce7'; badgeColor = '#15803d'; }
+                    else if (kat.includes('Penyaluran') || kat.includes('Bantuan')) { badgeBg = '#fae8ff'; badgeColor = '#86198f'; }
+                    else if (kat.includes('Pelatihan') || kat.includes('Bimtek')) { badgeBg = '#ede9fe'; badgeColor = '#6d28d9'; }
+                %>
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;">
+                    <!-- Foto Preview -->
+                    <div style="position: relative; width: 100%; height: 160px; background: #0f172a; overflow: hidden; cursor: pointer;" onclick="bukaLightbox('<%= thumbUrl %>', '<%= (f.judul_foto || 'Dokumentasi Kegiatan').replace(/'/g, "\\'") %>', '<%= kat %>', '<%= f.file_url %>')">
+                        <img src="<%= thumbUrl %>" alt="<%= f.judul_foto || 'Foto' %>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.onerror=null; this.src='/images/logo_rohil.png'; this.style.objectFit='contain'; this.style.padding='20px';">
+                        <span style="position: absolute; top: 8px; left: 8px; background: <%= badgeBg %>; color: <%= badgeColor %>; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                            <%= kat %>
+                        </span>
+                        <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+                            🔍 Klik Perbesar
+                        </div>
+                    </div>
+
+                    <!-- Keterangan & Aksi -->
+                    <div style="padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.35; margin-bottom: 4px;">
+                                <%= f.judul_foto || 'Dokumentasi #' + (idx + 1) %>
+                            </div>
+                            <div style="font-size: 11.5px; color: #64748b;">
+                                📅 <%= f.created_at ? new Date(f.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-' %>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9;">
+                            <a href="<%= f.file_url %>" target="_blank" style="background: #eff6ff; color: #2563eb; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: bold;">
+                                🌐 Drive
+                            </a>
+                            <% if (!isReadOnly) { %>
+                            <form action="/spj/foto/hapus" method="POST" onsubmit="return confirm('Hapus foto dokumentasi ini?')" style="margin: 0;">
+                                <input type="hidden" name="id" value="<%= f.id %>">
+                                <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                                <button type="submit" style="background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: bold; cursor: pointer;">
+                                    🗑️ Hapus
+                                </button>
+                            </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div style="padding: 35px 20px; text-align: center; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; color: #94a3b8;">
+                <div style="font-size: 38px; margin-bottom: 8px;">📷</div>
+                <div style="font-weight: bold; font-size: 14px; color: #475569; margin-bottom: 4px;">Belum Ada Foto Dokumentasi Kegiatan</div>
+                <p style="margin: 0; font-size: 12.5px; color: #64748b;">
+                    Klik tombol <strong>"➕ Upload Foto Kegiatan"</strong> di atas untuk mengunggah foto progres fisik (0%, 50%, 100%) atau bukti dokumentasi kegiatan lainnya.
+                </p>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- MODAL LIGHTBOX PREVIEW FOTO -->
+    <div id="modalLightbox" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.88); align-items: center; justify-content: center; z-index: 1000; padding: 20px;" onclick="tutupLightbox(event)">
+        <div style="position: relative; max-width: 900px; width: 100%; max-height: 90vh; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+                <div>
+                    <span id="lbKategori" style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 6px;"></span>
+                    <strong id="lbJudul" style="font-size: 14px; color: #0f172a;"></strong>
+                </div>
+                <button type="button" onclick="document.getElementById('modalLightbox').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
+            </div>
+            <div style="background: #0b1120; display: flex; align-items: center; justify-content: center; max-height: 70vh; overflow: hidden;">
+                <img id="lbImg" src="" alt="Preview" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+            </div>
+            <div style="padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; font-size: 12px;">
+                <span style="color: #64748b;">Dokumentasi Resmi Kegiatan SPJ &bull; SIAD 2.0</span>
+                <a id="lbDriveLink" href="#" target="_blank" style="background: #2563eb; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold;">Buka Asli di Google Drive ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIT TRAIL LOG RESMI -->
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="margin: 0 0 15px 0; color: #0f172a; font-size: 16px;">📜 Rekam Jejak Persetujuan (Audit Trail)</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; color: #64748b;">
+                    <th style="padding: 8px;">Tahap</th>
+                    <th style="padding: 8px;">Pejabat Pemeriksa</th>
+                    <th style="padding: 8px;">Waktu Verifikasi</th>
+                    <th style="padding: 8px;">Status Pengesahan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px 8px; font-weight: bold;">1. Verifikasi Keuangan (Bendahara)</td>
+                    <td style="padding: 10px 8px;"><%= kegiatan.verifikasi_bendahara_oleh || '-' %></td>
+                    <td style="padding: 10px 8px;"><%= kegiatan.verifikasi_bendahara_at ? new Date(kegiatan.verifikasi_bendahara_at).toLocaleString('id-ID') : '-' %></td>
+                    <td style="padding: 10px 8px;">
+                        <% if (kegiatan.verifikasi_bendahara_oleh) { %>
+                            <span style="color: #15803d; font-weight: bold;">✅ Selesai Diverifikasi</span>
+                        <% } else { %>
+                            <span style="color: #94a3b8;">⏳ Menunggu</span>
+                        <% } %>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px 8px; font-weight: bold;">2. Verifikasi Administratif (Sekdes)</td>
+                    <td style="padding: 10px 8px;"><%= kegiatan.verifikasi_sekdes_oleh || '-' %></td>
+                    <td style="padding: 10px 8px;"><%= kegiatan.verifikasi_sekdes_at ? new Date(kegiatan.verifikasi_sekdes_at).toLocaleString('id-ID') : '-' %></td>
+                    <td style="padding: 10px 8px;">
+                        <% if (kegiatan.verifikasi_sekdes_oleh) { %>
+                            <span style="color: #15803d; font-weight: bold;">✅ Selesai Diverifikasi</span>
+                        <% } else { %>
+                            <span style="color: #94a3b8;">⏳ Menunggu</span>
+                        <% } %>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px 8px; font-weight: bold;">3. Persetujuan Akhir (Penghulu)</td>
+                    <td style="padding: 10px 8px;"><%= kegiatan.persetujuan_penghulu_oleh || '-' %></td>
+                    <td style="padding: 10px 8px;"><%= kegiatan.persetujuan_penghulu_at ? new Date(kegiatan.persetujuan_penghulu_at).toLocaleString('id-ID') : '-' %></td>
+                    <td style="padding: 10px 8px;">
+                        <% if (kegiatan.persetujuan_penghulu_oleh) { %>
+                            <span style="color: #15803d; font-weight: bold;">🏆 Disahkan (Final)</span>
+                        <% } else { %>
+                            <span style="color: #94a3b8;">⏳ Menunggu</span>
+                        <% } %>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL INPUT CATATAN REVISI -->
+<div id="modalRevisi" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100;">
+    <div style="background: white; padding: 25px; border-radius: 10px; width: 100%; max-width: 480px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; color: #b91c1c;">Catatan Permintaan Revisi</h3>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 15px;">Tuliskan dengan jelas bagian dokumen atau kuitansi yang perlu dilengkapi oleh pelaksana kegiatan.</p>
+        
+        <form action="/spj/verifikasi" method="POST">
+            <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+            <input type="hidden" name="aksi" value="revisi">
+            <textarea name="catatan" required rows="4" placeholder="Cth: Kuitansi nota toko material belum ditandatangani rekanan..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; font-size: 14px;"></textarea>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="document.getElementById('modalRevisi').style.display='none'" style="padding: 9px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-weight: bold;">Batal</button>
+                <button type="submit" style="padding: 9px 18px; border: none; background: #dc2626; color: white; border-radius: 6px; cursor: pointer; font-weight: bold;">Kirim Revisi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function bukaModalRevisi(role) {
+    document.getElementById('modalRevisi').style.display = 'flex';
+}
+
+function toggleFormFoto() {
+    const el = document.getElementById('formUploadFotoContainer');
+    const btn = document.getElementById('btnToggleFoto');
+    if (!el) return;
+    if (el.style.display === 'none' || !el.style.display) {
+        el.style.display = 'block';
+        if (btn) btn.innerHTML = '<span>✖</span> Tutup Form Upload';
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        el.style.display = 'none';
+        if (btn) btn.innerHTML = '<span>➕</span> Upload Foto Kegiatan';
+    }
+}
+
+function bukaLightbox(thumbUrl, judul, kategori, driveUrl) {
+    const modal = document.getElementById('modalLightbox');
+    if (!modal) return;
+    document.getElementById('lbImg').src = thumbUrl;
+    document.getElementById('lbJudul').innerText = judul;
+    document.getElementById('lbKategori').innerText = kategori;
+    document.getElementById('lbDriveLink').href = driveUrl;
+    modal.style.display = 'flex';
+}
+
+function tutupLightbox(e) {
+    const modal = document.getElementById('modalLightbox');
+    if (modal) modal.style.display = 'none';
+}
+
+// Otomatis tutup lightbox dengan tombol ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('modalLightbox');
+        if (modal) modal.style.display = 'none';
+    }
+});
+</script>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Buku Panduan Penggunaan SIAD 2.0</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 18mm 16mm 18mm 16mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: #1e293b;
+    line-height: 1.6;
+    font-size: 11pt;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  /* Cover Page */
+  .cover {
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 94vh;
+    text-align: center;
+    padding: 40px 20px;
+    border: 8px double #1e3a8a;
+    box-sizing: border-box;
+  }
+
+  .cover-header {
+    margin-top: 40px;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: #1e3a8a;
+    color: white;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 11pt;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .cover-title {
+    font-size: 26pt;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 25px 0 10px 0;
+    line-height: 1.25;
+  }
+
+  .cover-subtitle {
+    font-size: 15pt;
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 20px;
+  }
+
+  .cover-desc {
+    font-size: 11pt;
+    color: #475569;
+    max-width: 580px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .cover-divider {
+    width: 120px;
+    height: 4px;
+    background: #2563eb;
+    margin: 25px auto;
+    border-radius: 2px;
+  }
+
+  .cover-footer {
+    margin-bottom: 30px;
+    font-size: 10pt;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 20px;
+  }
+
+  /* Section Styling */
+  .page-break {
+    page-break-before: always;
+  }
+
+  h1 {
+    font-size: 18pt;
+    color: #1e3a8a;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 6px;
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 14pt;
+    color: #0f172a;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h3 {
+    font-size: 12pt;
+    color: #334155;
+    margin-top: 14px;
+    margin-bottom: 8px;
+  }
+
+  p, li {
+    font-size: 10.5pt;
+    color: #334155;
+    text-align: justify;
+  }
+
+  ul, ol {
+    margin-top: 6px;
+    margin-bottom: 14px;
+    padding-left: 24px;
+  }
+
+  li {
+    margin-bottom: 6px;
+  }
+
+  /* Boxes & Callouts */
+  .callout-info {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 10pt;
+    color: #1e3a8a;
+  }
+
+  .callout-warning {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 10pt;
+    color: #92400e;
+  }
+
+  .callout-success {
+    background: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 10pt;
+    color: #166534;
+  }
+
+  /* Steps Component */
+  .step-box {
+    display: flex;
+    gap: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+  }
+
+  .step-number {
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    font-size: 12pt;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-weight: bold;
+    color: #0f172a;
+    font-size: 11pt;
+    margin-bottom: 4px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+
+  th {
+    background: #1e3a8a;
+    color: white;
+    text-align: left;
+    padding: 9px 12px;
+    font-weight: 600;
+    border: 1px solid #1e3a8a;
+  }
+
+  td {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+  }
+
+  tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  /* Role Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9pt;
+    font-weight: bold;
+  }
+  .badge-admin { background: #dbeafe; color: #1e40af; }
+  .badge-penghulu { background: #fef3c7; color: #92400e; }
+  .badge-sekdes { background: #e0e7ff; color: #4338ca; }
+  .badge-bendahara { background: #dcfce7; color: #15803d; }
+  .badge-kaur { background: #f3e8ff; color: #6b21a8; }
+
+  .header-nav {
+    font-size: 9pt;
+    color: #94a3b8;
+    text-align: right;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER PAGE ================= -->
+<div class="cover">
+  <div class="cover-header">
+    <span class="cover-badge">BUKU PANDUAN PENGGUNA (USER MANUAL)</span>
+    <h1 class="cover-title">SIAD 2.0</h1>
+    <div class="cover-subtitle">SISTEM INFORMASI ARSIP & ADMINISTRASI DESA</div>
+    <div class="cover-divider"></div>
+    <p class="cover-desc">
+      Panduan Lengkap Operasional Digitalisasi Tata Kelola Arsip, Administrasi Persuratan, Inventarisasi Aset, dan Verifikasi Berjenjang SPJ Keuangan Kepenghuluan se-Kabupaten Rokan Hilir.
+    </p>
+  </div>
+
+  <div style="margin: 20px 0;">
+    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; display: inline-block; text-align: left; max-width: 480px;">
+      <div style="font-size: 10pt; color: #64748b; margin-bottom: 4px;">Pemeriksaan & Pengesahan Digital:</div>
+      <div style="font-size: 11pt; font-weight: bold; color: #0f172a;">✅ Multi-Level Approval SPJ (Kaur &bull; Sekdes &bull; Penghulu)</div>
+      <div style="font-size: 10pt; color: #334155; margin-top: 4px;">Mendukung Kesiapan Audit Berkala Inspektorat & BPK RI</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <strong>KABUPATEN ROKAN HILIR &bull; PROVINSI RIAU</strong><br>
+    Versi Aplikasi: 2.0.0 (Production Release) &bull; Tahun Anggaran 2026
+  </div>
+</div>
+
+<!-- ================= BAB 1: PENGENALAN & STRUKTUR PERAN ================= -->
+<div class="page-break">
+  <div class="header-nav">Buku Panduan SIAD 2.0 &bull; Bab I: Pendahuluan & Peran Pengguna</div>
+  
+  <h1>BAB I: PENDAHULUAN & PEMBAGIAN HAK AKSES</h1>
+
+  <h2>1.1 Apa itu SIAD 2.0?</h2>
+  <p>
+    <strong>Sistem Informasi Arsip & Administrasi Desa (SIAD 2.0)</strong> adalah platform tata kelola pemerintahan desa berbasis web yang dirancang khusus untuk mempermudah aparatur kepenghuluan di Kabupaten Rokan Hilir dalam mengelola administrasi perkantoran secara tertib, transparan, dan akuntabel.
+  </p>
+  <p>
+    Sistem ini menyelesaikan kendala klasik di kantor desa seperti berkas kuitansi SPJ yang terselip, hilangnya arsip saat pergantian pejabat desa, tidak terdatanya aset desa, hingga keterlambatan penyusunan laporan keuangan APBDes.
+  </p>
+
+  <div class="callout-info">
+    <strong>💡 Manfaat Utama untuk Kepenghuluan:</strong>
+    <ul>
+      <li><strong>Aman dari Kehilangan Fisik:</strong> Dokumen SPJ, surat, dan SK dipindai (scan) dan tersimpan permanen di cloud server berkeamanan tinggi.</li>
+      <li><strong>Siap Audit Inspektorat Kapan Saja:</strong> Dokumen keuangan dapat diakses dalam hitungan detik saat ada pemeriksaan berkala.</li>
+      <li><strong>Lembar Pengesahan Resmi Otomatis:</strong> Dilengkapi verifikasi berjenjang dan QR Code validasi keabsahan dokumen.</li>
+    </ul>
+  </div>
+
+  <h2>1.2 Pembagian Peran & Hak Akses (Role Aparatur)</h2>
+  <p>
+    Setiap kepenghuluan yang aktif diberikan <strong>5 akun terpisah</strong> sesuai tupoksi jabatan aparatur desa:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 22%;">Peran / Jabatan</th>
+        <th style="width: 28%;">Format Username</th>
+        <th>Tupoksi & Hak Akses di SIAD 2.0</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-admin">Admin Kepenghuluan</span></td>
+        <td><code>admin_[namadesa]</code><br><small>cth: <code>admin_sungaisialang</code></small></td>
+        <td>Mengelola identitas kepenghuluan, nama penghulu, alamat kantor, serta pengaturan profil desa.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-penghulu">Penghulu (Kades)</span></td>
+        <td><code>penghulu_[namadesa]</code><br><small>cth: <code>penghulu_sungaisialang</code></small></td>
+        <td><strong>Pimpinan Tertinggi / Final Approval:</strong> Memeriksa dan memberikan pengesahan akhir berkas SPJ serta memantau seluruh kinerja desa.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-sekdes">Sekretaris Desa</span></td>
+        <td><code>sekdes_[namadesa]</code><br><small>cth: <code>sekdes_sungaisialang</code></small></td>
+        <td><strong>Verifikator Berjenjang:</strong> Meneliti kebenaran berkas SPJ yang diinput bendahara/kaur sebelum diteruskan ke Penghulu.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-bendahara">Bendahara Desa</span></td>
+        <td><code>bendahara_[namadesa]</code><br><small>cth: <code>bendahara_sungaisialang</code></small></td>
+        <td>Menginput realisasi anggaran APBDes, mengunggah scan kuitansi/bukti transaksi fisik, dan mencetak Lembar Pengesahan SPJ.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-kaur">Kaur Keuangan / Umum</span></td>
+        <td><code>kaur_[namadesa]</code><br><small>cth: <code>kaur_sungaisialang</code></small></td>
+        <td>Menginput draf data kegiatan keuangan SPJ dan mengelola administrasi persuratan harian desa.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================= BAB 2 & 3: LOGIN & DASHBOARD ================= -->
+<div class="page-break">
+  <div class="header-nav">Buku Panduan SIAD 2.0 &bull; Bab II & III: Akses Masuk & Dashboard</div>
+
+  <h1>BAB II: CARA MASUK KE SISTEM (LOGIN)</h1>
+  
+  <p>Untuk mengakses aplikasi SIAD 2.0, ikuti langkah-langkah mudah berikut:</p>
+
+  <div class="step-box">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <div class="step-title">Buka Peramban Web (Browser)</div>
+      Buka Google Chrome, Mozilla Firefox, atau Microsoft Edge pada laptop, komputer kantor, maupun ponsel pintar Anda.
+    </div>
+  </div>
+
+  <div class="step-box">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <div class="step-title">Kunjungi Alamat Resmi SIAD 2.0</div>
+      Ketik alamat URL pada address bar: <strong style="color: #2563eb;">https://siad-v2.com</strong> lalu tekan Enter.
+    </div>
+  </div>
+
+  <div class="step-box">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <div class="step-title">Masukkan Username & Password Akun Anda</div>
+      Masukkan username sesuai jabatan desa (misal: <code>bendahara_sungaisialang</code>).<br>
+      Masukkan password default: <code style="font-weight:bold; color:#047857;">Admin_SIAD_Rohil2026!</code> lalu klik tombol <strong>"Masuk ke Sistem"</strong>.
+    </div>
+  </div>
+
+  <div class="callout-warning">
+    <strong>⚠️ Keamanan Akun:</strong>
+    Setiap akun desa terisolasi secara aman. Aparatur Kepenghuluan A tidak akan pernah bisa melihat atau mengubah data Kepenghuluan B. Jaga kerahasiaan password Anda.
+  </div>
+
+  <h1 style="margin-top: 30px;">BAB III: MEMAHAMI TAMPILAN DASHBOARD</h1>
+  <p>
+    Setelah berhasil login, Anda akan langsung diarahkan ke halaman <strong>Dashboard Utama</strong> yang menyajikan ringkasan statistik terkini desa Anda secara riil:
+  </p>
+
+  <ul>
+    <li><strong>Total Dokumen Arsip:</strong> Menghitung seluruh berkas digital (SPJ, Surat, SK, Aset) yang telah diunggah oleh desa Anda.</li>
+    <li><strong>SPJ Belum Lengkap:</strong> Menampilkan jumlah kegiatan yang berkas buktinya masih dalam proses review atau perlu perbaikan catatan.</li>
+    <li><strong>SPJ Sudah Terverifikasi:</strong> Jumlah kegiatan yang telah sah disetujui berjenjang oleh Sekdes dan Penghulu.</li>
+    <li><strong>Grafik Dokumen per Tahun:</strong> Diagram batang interaktif yang membandingkan volume arsip desa dari tahun 2023 hingga tahun berjalan (2026).</li>
+  </ul>
+</div>
+
+<!-- ================= BAB 4: MODUL SPJ (INTI SISTEM) ================= -->
+<div class="page-break">
+  <div class="header-nav">Buku Panduan SIAD 2.0 &bull; Bab IV: Modul SPJ Keuangan & Verifikasi</div>
+
+  <h1>BAB IV: MODUL SPJ & VERIFIKASI BERJENJANG</h1>
+  <p>
+    Modul SPJ merupakan jantung utama SIAD 2.0 untuk menjamin seluruh belanja APBDes memiliki bukti fisik yang sah dan disetujui secara berjenjang.
+  </p>
+
+  <h2>4.1 Alur Verifikasi 3 Tahap (Standard Operating Procedure)</h2>
+  
+  <div class="step-box">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <div class="step-title">Tahap 1: Input Kegiatan & Bukti Fisik (Oleh Kaur / Bendahara)</div>
+      Bendahara menginput nama kegiatan, tahun anggaran, <strong>Tahap (Tahap 1 / Tahap 2)</strong>, nominal anggaran, serta mengunggah scan kuitansi/nota belanja. Status awal: <em>"Menunggu Review Sekdes"</em>.
+    </div>
+  </div>
+
+  <div class="step-box">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <div class="step-title">Tahap 2: Verifikasi & Telaah Berkas (Oleh Sekretaris Desa)</div>
+      Sekretaris Desa login, memeriksa kelengkapan faktur/kuitansi. Jika sesuai, Sekdes mengklik <strong>"Setujui Verifikasi"</strong>. Status berubah menjadi: <em>"Disetujui Sekdes"</em>.
+    </div>
+  </div>
+
+  <div class="step-box">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <div class="step-title">Tahap 3: Pengesahan Akhir Pimpinan (Oleh Penghulu)</div>
+      Penghulu login, meninjau persetujuan Sekdes, lalu mengklik <strong>"Sahkan Dokumen"</strong>. Status berubah menjadi <em>"Terverifikasi Penuh"</em>.
+    </div>
+  </div>
+
+  <h2>4.2 Cara Menambah Data SPJ Baru</h2>
+  <ol>
+    <li>Klik menu <strong>"Laporan SPJ"</strong> pada bilah menu navigasi sebelah kiri.</li>
+    <li>Klik tombol hijau <strong>"+ Tambah SPJ Kegiatan"</strong>.</li>
+    <li>Isi formulir yang tersedia:
+      <ul>
+        <li><strong>Tahun Anggaran:</strong> Pilih tahun (cth: 2026).</li>
+        <li><strong>Tahap / Semester:</strong> Pilih <em>Tahap 1</em>, <em>Tahap 2</em>, atau <em>Semester</em>.</li>
+        <li><strong>Bidang / Sub-Bidang APBDes:</strong> Pilih bidang kegiatan (Penyelenggaraan Pemerintahan, Pembangunan, dsb).</li>
+        <li><strong>Nama Kegiatan:</strong> Masukkan uraian kegiatan (cth: <em>Pembangunan Semenisasi Jalan Dusun I</em>).</li>
+        <li><strong>Nominal Realisasi:</strong> Masukkan angka anggaran dalam rupiah.</li>
+        <li><strong>Upload File Berkas:</strong> Pilih file scan SPJ (Format PDF, JPG, atau PNG).</li>
+      </ul>
+    </li>
+    <li>Klik tombol <strong>"Simpan SPJ"</strong>.</li>
+  </ol>
+
+  <h2>4.3 Mencetak Lembar Pengesahan SPJ Resmi</h2>
+  <p>
+    Setelah berkas berstatus disetujui, klik ikon <strong>"Cetak Lembar Pengesahan"</strong>. Sistem akan otomatis membuat dokumen cetak format standar pemerintah yang memuat:
+  </p>
+  <ul>
+    <li>Kop resmi Kepenghuluan dan Kabupaten Rokan Hilir.</li>
+    <li>Rincian realisasi kegiatan dan tahun anggaran.</li>
+    <li>Kolom tanda tangan resmi lengkap dengan nama Penghulu, Sekretaris Desa, dan Bendahara (otomatis tersinkron dari modul pengaturan).</li>
+    <li><strong>Kode Barcode / QR Code Validasi Digital</strong> untuk pembuktian keaslian berkas.</li>
+  </ul>
+</div>
+
+<!-- ================= BAB 5, 6, 7: PERSURATAN, ASET, ARSIP ================= -->
+<div class="page-break">
+  <div class="header-nav">Buku Panduan SIAD 2.0 &bull; Bab V, VI & VII: Surat, Aset & Produk Hukum</div>
+
+  <h1>BAB V: MODUL ADMINISTRASI PERSURATAN</h1>
+  <p>Membantu sekretariat desa mendata arus surat menyurat agar nomor agenda tidak ganda:</p>
+  <ul>
+    <li><strong>Surat Masuk:</strong> Catat asal instansi pengirim, tanggal terima, perihal surat, nomor surat, dan upload scan surat asli. Penghulu dapat mengisi kolom arahan disposisi secara digital.</li>
+    <li><strong>Surat Keluar:</strong> Catat nomor register surat keluar, tujuan surat, dan tanggal pengiriman, serta arsip salinan surat yang telah ditandatangani dan distempel.</li>
+  </ul>
+
+  <h1>BAB VI: MODUL INVENTARISASI & ASET DESA</h1>
+  <p>
+    Mencatat seluruh aset dan kekayaan milik desa sesuai standar Permendagri No. 1 Tahun 2016 tentang Pengelolaan Aset Desa:
+  </p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Kategori Aset</th>
+        <th>Contoh Barang Milik Desa</th>
+        <th style="width: 25%;">Status Kondisi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tanah & Bangunan</strong></td>
+        <td>Tanah kantor desa, balai pertemuan, polindes, gedung PAUD desa.</td>
+        <td>Baik / Terawat</td>
+      </tr>
+      <tr>
+        <td><strong>Peralatan & Mesin</strong></td>
+        <td>Sepeda motor dinas, laptop kantor desa, printer, genset desa.</td>
+        <td>Baik / Rusak Ringan / Rusak Berat</td>
+      </tr>
+      <tr>
+        <td><strong>Jalan, Irigasi & Jaringan</strong></td>
+        <td>Jalan semenisasi desa, jembatan kayu/beton, sumur bor desa.</td>
+        <td>Berfungsi / Butuh Rehab</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <p>
+    <strong>Cara Input Aset:</strong> Masuk ke menu <strong>"Aset Desa"</strong> &rarr; Klik tombol <strong>"+ Tambah Aset"</strong> &rarr; Lengkapi nama barang, kode barang, tahun perolehan, sumber dana (Dana Desa/ADD/BHP), dan nilai harga perolehan &rarr; Simpan.
+  </p>
+
+  <h1>BAB VII: ARSIP PRODUK HUKUM & BUMDES</h1>
+  <ul>
+    <li><strong>Produk Hukum Desa:</strong> Wadah digital penyimpanan Peraturan Desa (Perdes), Peraturan Kepala Desa (Perkades), dan Keputusan Penghulu (SK). Memudahkan desa saat membutuhkan rujukan aturan lama.</li>
+    <li><strong>BUMDes:</strong> Tempat penyimpanan akta pendirian, sertifikat badan hukum Kemenkumham, struktur kepengurusan, dan arsip laporan laba rugi tahunan BUMDes.</li>
+  </ul>
+</div>
+
+<!-- ================= BAB 8 & 9: PENGATURAN & FAQ ================= -->
+<div class="page-break">
+  <div class="header-nav">Buku Panduan SIAD 2.0 &bull; Bab VIII & IX: Pengaturan & Tanya Jawab</div>
+
+  <h1>BAB VIII: MODUL PENGATURAN DESA</h1>
+  <p>
+    Menu ini khusus diakses oleh akun <strong>Admin Desa</strong> atau <strong>Bendahara</strong> untuk mengatur identitas resmi kepenghuluan:
+  </p>
+
+  <div class="step-box">
+    <div class="step-number">⚙️</div>
+    <div class="step-content">
+      <div class="step-title">Cara Mengisi / Memperbarui Identitas Desa:</div>
+      <ol style="margin: 4px 0 0 0; padding-left: 20px;">
+        <li>Klik menu <strong>"Pengaturan"</strong> di bagian bawah menu navigasi.</li>
+        <li>Isi <strong>Nama Desa / Kepenghuluan</strong> lengkap (cth: <em>Kepenghuluan Sungai Sialang</em>).</li>
+        <li>Isi <strong>Nama Kepala Desa / Penghulu</strong> yang saat ini menjabat (lengkap dengan gelar).</li>
+        <li>Isi <strong>Alamat Kantor</strong> kepenghuluan.</li>
+        <li>Klik tombol <strong>"💾 Simpan Identitas Desa"</strong>.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="callout-success">
+    <strong>✅ Sinkronisasi Otomatis:</strong>
+    Nama Penghulu yang Anda simpan di menu ini akan langsung otomatis tercetak di seluruh <strong>Lembar Pengesahan SPJ</strong>, surat menyurat, dan laporan resmi lainnya tanpa perlu Anda ketik ulang satu per satu.
+  </div>
+
+  <h1 style="margin-top: 30px;">BAB IX: TANYA JAWAB (FAQ) & BANTUAN TEKNIS</h1>
+
+  <h3>1. Bagaimana jika terjadi pergantian Penghulu atau Bendahara di desa kami?</h3>
+  <p>
+    Sangat mudah. Anda tidak perlu membuat akun baru. Cukup masuk ke menu <strong>Pengaturan</strong>, ubah nama pejabat baru pada kolom yang tersedia, lalu klik Simpan. Seluruh cetakan berkas selanjutnya akan otomatis mencantumkan nama pejabat baru.
+  </p>
+
+  <h3>2. Apakah aplikasi ini bisa dibuka lewat HP Android atau iPhone?</h3>
+  <p>
+    Bisa. SIAD 2.0 sudah <em>Mobile-Responsive</em>, artinya tampilan aplikasi akan menyesuaikan layar smartphone dengan rapi sehingga Penghulu dapat menyetujui (approval) SPJ di mana saja meskipun sedang berada di luar kantor.
+  </p>
+
+  <h3>3. Bagaimana jika jaringan internet di desa sedang lambat?</h3>
+  <p>
+    SIAD 2.0 dirancang sangat ringan (lightweight) dan hemat kuota data. Saat mengunggah scan berkas kuitansi, disarankan ukuran file foto tidak melebihi 2 MegaByte (MB) agar proses upload berjalan cepat.
+  </p>
+
+  <div style="margin-top: 30px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px; text-align: center;">
+    <strong style="color: #0f172a; font-size: 11pt;">LAYANAN BANTUAN TEKNIS & PENDAMPINGAN SIAD 2.0</strong><br>
+    <span style="color: #475569; font-size: 10pt;">Jika aparatur kepenghuluan mengalami kendala teknis dalam pengoperasian aplikasi, silakan menghubungi Tim Bantuan Teknis Kabupaten Rokan Hilir.</span>
+  </div>
+</div>
+
+</body>
+</html>

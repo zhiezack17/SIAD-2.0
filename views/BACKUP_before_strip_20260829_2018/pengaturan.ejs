@@ -1,0 +1,41 @@
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 20px;">
+    <div style="margin-bottom: 20px;">
+        <a href="/dashboard" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            ⬅️ Kembali ke Dashboard
+        </a>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 800px;">
+        <h2 style="margin:0 0 25px 0; color: #1e293b; font-size: 24px;">⚙️ Pengaturan Identitas Desa</h2>
+        
+        <div id="notifikasiSukses" style="display: none; background: #dcfce7; color: #166534; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; border-left: 5px solid #22c55e;">
+            ✅ Data Identitas Desa berhasil disimpan secara permanen!
+        </div>
+
+        <form action="/pengaturan/update" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #334155;">Nama Desa / Kepenghuluan</label>
+                <input type="text" name="nama_desa" value="<%= data.nama_desa %>" required placeholder="Cth: Sungai Alang" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #334155;">Nama Kepala Desa / Penghulu</label>
+                <input type="text" name="nama_kepala_desa" value="<%= data.nama_kepala_desa %>" placeholder="Masukkan nama kades" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+            </div>
+            <div style="grid-column: span 2;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #334155;">Alamat Lengkap Kantor</label>
+                <textarea name="alamat" rows="3" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"><%= data.alamat %></textarea>
+            </div>
+            <div>
+                <button type="submit" style="background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:15px; transition: 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">💾 Simpan Pengaturan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    if (window.location.search.includes('status=success')) {
+        document.getElementById('notifikasiSukses').style.display = 'block';
+        // Hilangkan tulisan '?status=success' dari URL agar lebih rapi
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+</script>

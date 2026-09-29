@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="/img/logo.png" alt="Logo SIAD 2.0" style="height: 32px; margin-right: 8px; border-radius: 4px;"> SIAD 2.0
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/workspace" class="nav-item"><i class="fa-solid fa-folder-tree"></i> Workspace</a>
+            <div style="margin-bottom: 5px;">
+                <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); if(m.style.display==='none'){ m.style.display='flex'; document.getElementById('surat-icon').className='fa-solid fa-minus'; } else { m.style.display='none'; document.getElementById('surat-icon').className='fa-solid fa-plus'; }" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-envelope" style="width: 20px;"></i> Surat</span>
+                    <i id="surat-icon" class="fa-solid fa-minus" style="font-size: 14px;"></i>
+                </div>
+                <div id="surat-menu" style="display: flex; flex-direction: column; gap: 8px; padding-left: 35px; margin-top: 8px; margin-bottom: 8px;">
+                    <a href="/surat?tab=masuk" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Masuk</a>
+                    <a href="/surat?tab=keluar" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Keluar</a>
+                </div>
+            </div>
+            <a href="/spj" class="nav-item"><i class="fa-solid fa-briefcase"></i> Kegiatan (SPJ)</a>
+            <a href="/produk-hukum" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Produk Hukum</a>
+            <a href="/arsip" class="nav-item"><i class="fa-solid fa-box-archive"></i> Arsip Lainnya</a>
+            <a href="/aset" class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Aset</a>
+            <a href="/bumdes" class="nav-item"><i class="fa-solid fa-store"></i> BUMDes</a>
+            <a href="/master_data" class="nav-item"><i class="fa-solid fa-database"></i> Master Data</a>
+            <a href="/laporan" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+            <a href="/pengaturan" class="nav-item"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <header class="topbar">
+            <div class="search-bar">
+                <i class="fa-solid fa-search" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Cari Arsip..." style="border: none; outline: none; margin-left: 10px; width: 300px;">
+            </div>
+            <div class="user-profile">
+                <span style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
+                    <strong><%= user ? user.nama : 'Guest' %></strong>
+                    <small style="font-size: 0.75rem; color: var(--text-muted);"><%= user ? user.peran : '' %></small>
+                </span>
+                <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; margin-left: 10px;">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <a href="/logout" style="margin-left: 15px; color: #dc2626; text-decoration: none;"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </header>
+        <div class="dashboard-content">
+            <%- body %>
+        </div>
+    </main>
+</div>
+<script>(function(){ var p = location.pathname; document.querySelectorAll('.sidebar-nav .nav-item').forEach(function(a){ var h = a.getAttribute && a.getAttribute('href'); if (h && (h === p || (p.startsWith('/surat') && h.startsWith('/surat')) || (h !== '/dashboard' && p.startsWith(h)))) { a.classList.add('active'); } }); })();</script>
+</body>
+</html>

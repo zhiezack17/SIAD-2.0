@@ -1,0 +1,178 @@
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 20px;">
+    <div style="margin-bottom: 20px;">
+        <a href="/dashboard" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            ⬅️ Kembali ke Dashboard
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 25px;">
+    <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="/dashboard" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: white; color: #0f172a; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            <span>⬅️</span> Kembali ke Dashboard
+        </a>
+        <div style="font-size: 13px; color: #64748b; font-weight: 500;">
+            SIAD 2.0 &bull; Modul Pengaturan & Manajemen Desa
+        </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 800px;">
+        <h2 style="margin:0 0 25px 0; color: #1e293b; font-size: 24px;">⚙️ Pengaturan Identitas Desa</h2>
+    <% if (query && query.status === 'init_success' && generatedUsers && generatedUsers.length > 0) { %>
+    <!-- Card Notifikasi Sukses Inisialisasi Akun Desa -->
+    <div style="background: #ffffff; border: 2px solid #22c55e; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15); max-width: 900px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 15px;">
+            <div>
+                <h3 style="margin: 0 0 6px 0; color: #166534; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+                    <span>🎉</span> Akun Kepenghuluan <%= generatedDesa %> Berhasil Diaktifkan!
+                </h3>
+                <p style="margin: 0; color: #374151; font-size: 14px;">
+                    6 Akun aparatur desa telah dibuat dan langsung dapat digunakan untuk login ke SIAD 2.0.
+                </p>
+            </div>
+            <button onclick="copyCredentials()" style="background: #166534; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                📋 Salin Semua Akun
+            </button>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px dashed #86efac; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #166534;">
+            <strong>🔑 Password Default Seluruh Akun:</strong> <code style="background: #ffffff; padding: 3px 8px; border-radius: 4px; border: 1px solid #bbf7d0; font-weight: bold; color: #047857; font-size: 14px;">Admin_SIAD_Rohil2026!</code>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; color: #475569;">
+                        <th style="padding: 10px;">Role / Jabatan</th>
+                        <th style="padding: 10px;">Nama Lengkap</th>
+                        <th style="padding: 10px;">Username</th>
+                        <th style="padding: 10px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <% generatedUsers.forEach(function(u) { %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px; font-weight: 600; color: #1e293b;">
+                                <span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; font-size: 12px;">
+                                    <%= u.role.toUpperCase() %>
+                                </span>
+                            </td>
+                            <td style="padding: 10px; color: #334155;"><%= u.nama_lengkap %></td>
+                            <td style="padding: 10px; font-family: monospace; font-weight: 700; color: #0f172a;"><%= u.username %></td>
+                            <td style="padding: 10px;">
+                                <span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 9999px; font-weight: 600; font-size: 11px;">
+                                    Aktif
+                                </span>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <% } %>
+
+    <% if (user && user.is_super_admin) { %>
+    <!-- Card Khusus Super Admin: 1-Klik Onboarding Desa -->
+    <div style="background: white; border-radius: 12px; padding: 25px 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); max-width: 900px; margin-bottom: 25px; border-top: 4px solid #3b82f6;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div>
+                <h3 style="margin: 0 0 5px 0; color: #1e293b; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+                    <span>⚡</span> 1-Klik Inisialisasi & Buka Akses Desa Baru
+                </h3>
+                <p style="margin: 0; color: #64748b; font-size: 13.5px;">
+                    Pilih nama desa dari total 184 desa se-Rokan Hilir. Sistem akan otomatis men-generate 6 akun aparatur (Admin, Penghulu, Sekdes, Bendahara, Kaur Keuangan, Kaur Umum) dan membuka aksesnya.
+                </p>
+            </div>
+            <span style="background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #bfdbfe;">
+                Super Admin Rohil
+            </span>
+        </div>
+
+        <form action="/pengaturan/inisialisasi-desa" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mengaktifkan akun untuk kepenghuluan ini? 6 Akun aparatur akan langsung dibuat dan aktif.');" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="flex: 1; min-width: 280px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 13px;">
+                    Pilih Kepenghuluan / Kelurahan:
+                </label>
+                <select name="kepenghuluan_id" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; background: white;">
+                    <option value="">-- Cari atau Pilih Desa/Kepenghuluan (184 Desa) --</option>
+                    <% kepenghuluanList.forEach(function(k) { %>
+                        <option value="<%= k.id %>">
+                            <%= k.nama %> (<%= k.kecamatan_nama || 'Rohil' %>) <%= k.user_count > 0 ? '— [Sudah Aktif (' + k.user_count + ' Akun)]' : '— [Belum Dibuka / Terkunci]' %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            <div>
+                <button type="submit" style="background: #2563eb; color: white; padding: 11px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; transition: 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                    <span>🚀</span> Buka Akses & Buat 5 Akun Default
+                </button>
+            </div>
+        </form>
+    </div>
+    <% } %>
+
+    <!-- Card Pengaturan Identitas Desa -->
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); max-width: 900px;">
+        <h3 style="margin: 0 0 20px 0; color: #1e293b; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+            <span>🏛️</span> Identitas & Profil Kepenghuluan
+        </h3>
+        
+        <div id="notifikasiSukses" style="display: none; background: #dcfce7; color: #166534; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; border-left: 5px solid #22c55e;">
+        <div id="notifikasiSukses" style="display: none; background: #dcfce7; color: #166534; padding: 14px; border-radius: 6px; margin-bottom: 20px; font-weight: 600; border-left: 4px solid #22c55e;">
+            ✅ Data Identitas Desa berhasil disimpan secara permanen!
+        </div>
+
+        <form action="/pengaturan/update" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #334155;">Nama Desa / Kepenghuluan</label>
+                <input type="text" name="nama_desa" value="<%= data.nama_desa %>" required placeholder="Cth: Sungai Alang" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #334155; font-size: 13.5px;">Nama Desa / Kepenghuluan</label>
+                <input type="text" name="nama_desa" value="<%= data.nama_desa %>" required placeholder="Cth: Kepenghuluan Sungai Sialang" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #334155;">Nama Kepala Desa / Penghulu</label>
+                <input type="text" name="nama_kepala_desa" value="<%= data.nama_kepala_desa %>" placeholder="Masukkan nama kades" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #334155; font-size: 13.5px;">Nama Kepala Desa / Penghulu</label>
+                <input type="text" name="nama_kepala_desa" value="<%= data.nama_kepala_desa %>" placeholder="Masukkan nama penghulu" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+            </div>
+            <div style="grid-column: span 2;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #334155;">Alamat Lengkap Kantor</label>
+                <textarea name="alamat" rows="3" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;"><%= data.alamat %></textarea>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #334155; font-size: 13.5px;">Alamat Lengkap Kantor</label>
+                <textarea name="alamat" rows="3" placeholder="Masukkan alamat lengkap kantor kepenghuluan..." style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;"><%= data.alamat %></textarea>
+            </div>
+            <div>
+                <button type="submit" style="background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:15px; transition: 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">💾 Simpan Pengaturan</button>
+                <button type="submit" style="background: #0f172a; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s;" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0f172a'">
+                    💾 Simpan Identitas Desa
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    if (window.location.search.includes('status=success')) {
+        document.getElementById('notifikasiSukses').style.display = 'block';
+        // Hilangkan tulisan '?status=success' dari URL agar lebih rapi
+        const notif = document.getElementById('notifikasiSukses');
+        if (notif) notif.style.display = 'block';
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function copyCredentials() {
+        let text = "=== INFORMASI AKUN SIAD 2.0 KEPENGHULAN <%= generatedDesa || '' %> ===\n";
+        text += "URL Login : https://siad-v2.com/login\n";
+        text += "Password Default: Admin_SIAD_Rohil2026!\n\n";
+        text += "Daftar Akun:\n";
+        <% if (generatedUsers && generatedUsers.length > 0) { %>
+            <% generatedUsers.forEach(function(u) { %>
+                text += "- [<%= u.role.toUpperCase() %>] Username: <%= u.username %> (<%= u.nama_lengkap %>)\n";
+            <% }); %>
+        <% } %>
+        text += "\nCatatan: Harap segera login dan simpan data desa.";
+        
+        navigator.clipboard.writeText(text).then(function() {
+            alert("✅ Data akun kepenghuluan berhasil disalin ke clipboard!");
+        }).catch(function(err) {
+            alert("Gagal menyalin otomatis. Silakan blok tabel secara manual.");
+        });
+    }
+</script>

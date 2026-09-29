@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 12mm 15mm 12mm 15mm;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 15px;
+            font-size: 11pt;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .header-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .kop-logo {
+            width: 75px;
+            height: auto;
+        }
+        .kop-title-kab {
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .kop-title-kec {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+        }
+        .kop-title-desa {
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+            text-decoration: underline;
+        }
+        .kop-alamat {
+            font-size: 9.5pt;
+            font-style: italic;
+            margin: 3px 0 0 0;
+        }
+        .double-line {
+            border: none;
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin: 6px 0 12px 0;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            text-decoration: underline;
+        }
+        .doc-subtitle {
+            text-align: center;
+            font-size: 10.5pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .meta-table {
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 10pt;
+        }
+        .meta-table td {
+            padding: 2px 0;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+            margin-bottom: 15px;
+        }
+        table.data-table th, table.data-table td {
+            border: 1px solid #000;
+            padding: 5px 6px;
+        }
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+        }
+        .bidang-header {
+            background-color: #e2e8f0 !important;
+            font-weight: bold;
+            font-size: 10pt;
+            text-align: left;
+            padding-left: 8px !important;
+        }
+        .bidang-subtotal {
+            background-color: #f8fafc !important;
+            font-weight: bold;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        
+        .signature-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+        .signature-table td {
+            width: 33.33%;
+            text-align: center;
+            vertical-align: top;
+            padding: 0 10px;
+        }
+        .sig-space {
+            height: 60px;
+        }
+        .status-badge {
+            font-size: 8.5pt;
+            padding: 2px 5px;
+            border: 1px solid #64748b;
+            border-radius: 3px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOMBOL AKSI ATAS (HANYA MUNCUL DI LAYAR MONITOR) -->
+    <div class="no-print" style="background: #1e293b; color: white; padding: 10px 20px; margin: -15px -15px 15px -15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div>
+            <b>🖨️ Pratinjau Rekapitulasi Realisasi SPJ (Siskeudes Compliant)</b> &bull; Kepenghuluan <%= desa.nama %> (TA <%= tahun %>)
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                Cetak Dokumen Sekarang (PDF)
+            </button>
+            <button onclick="window.close()" style="background: #64748b; color: white; border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- KOP RESMI PEMERINTAHAN DESA KABUPATEN ROKAN HILIR -->
+    <table class="header-table">
+        <tr>
+            <td style="width: 15%;">
+                <img src="/assets/img/logo-rohil.png" onerror="this.src='/images/logo.png'; this.onerror=null;" alt="Logo Rohil" class="kop-logo">
+            </td>
+            <td style="width: 85%;">
+                <div class="kop-title-kab">PEMERINTAH KABUPATEN ROKAN HILIR</div>
+                <div class="kop-title-kec">KECAMATAN <%= (desa.kecamatan_nama || 'BAGAN SINEMBAH').toUpperCase() %></div>
+                <div class="kop-title-desa">KEPENGHULUAN <%= (desa.nama || 'BAGAN BATU BARAT').toUpperCase() %></div>
+                <div class="kop-alamat"><%= desa.alamat || 'Jl. Jenderal Sudirman No. 01, Kodepos 28992' %></div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="double-line"></div>
+
+    <!-- JUDUL DOKUMEN -->
+    <div class="doc-title">REKAPITULASI REALISASI SURAT PERTANGGUNGJAWABAN (SPJ)</div>
+    <div class="doc-subtitle">
+        TAHUN ANGGARAN <%= tahun %> 
+        <% if (tahap && tahap !== 'Semua') { %>
+            &mdash; <%= tahap.toUpperCase() %>
+        <% } %>
+    </div>
+
+    <!-- META DATA INFORMASI -->
+    <table class="meta-table">
+        <tr>
+            <td style="width: 15%;"><b>Kepenghuluan</b></td>
+            <td style="width: 35%;">: <%= desa.nama || 'Bagan Batu Barat' %></td>
+            <td style="width: 18%;"><b>Tahun Anggaran</b></td>
+            <td style="width: 32%;">: <%= tahun %></td>
+        </tr>
+        <tr>
+            <td><b>Kecamatan</b></td>
+            <td>: <%= desa.kecamatan_nama || 'Bagan Sinembah' %></td>
+            <td><b>Tahap / Periode</b></td>
+            <td>: <%= tahap && tahap !== 'Semua' ? tahap : 'Semua Tahap (Tahunan)' %></td>
+        </tr>
+        <tr>
+            <td><b>Kabupaten</b></td>
+            <td>: Rokan Hilir</td>
+            <td><b>Klasifikasi Standar</b></td>
+            <td>: Permendagri No. 20/2018 (Siskeudes)</td>
+        </tr>
+    </table>
+
+    <!-- TABEL REKAPITULASI REALISASI SPJ SESUAI 5 BIDANG SISKEUDES -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 30px;">NO</th>
+                <th style="width: 90px;">KODE REK</th>
+                <th>BIDANG / URAIAN KEGIATAN</th>
+                <th style="width: 110px;">LOKASI</th>
+                <th style="width: 70px;">TAHAP</th>
+                <th style="width: 115px;">PAGU ANGGARAN (Rp)</th>
+                <th style="width: 115px;">REALISASI SPJ (Rp)</th>
+                <th style="width: 110px;">SISA / SELISIH (Rp)</th>
+                <th style="width: 50px;">%</th>
+                <th style="width: 110px;">STATUS VERIFIKASI</th>
+            </tr>
+            <tr style="font-size: 8pt; background: #fafafa;">
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6</th>
+                <th>7</th>
+                <th>8 = 6 - 7</th>
+                <th>9 = 7/6</th>
+                <th>10</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% 
+                let grandTotalPagu = 0;
+                let grandTotalRealisasi = 0;
+                let nomorGlobal = 1;
+
+                if (typeof bidangGroups !== 'undefined' && bidangGroups.length > 0) {
+                    bidangGroups.forEach((bg) => {
+                        grandTotalPagu += bg.subtotalPagu;
+                        grandTotalRealisasi += bg.subtotalRealisasi;
+            %>
+                <!-- BARIS HEADER BIDANG -->
+                <tr class="bidang-header">
+                    <td class="text-center font-bold">&bull;</td>
+                    <td class="font-bold"><%= bg.kodeBidang %></td>
+                    <td colspan="8" class="font-bold"><%= bg.namaBidang.toUpperCase() %></td>
+                </tr>
+
+                <% if (bg.kegiatan && bg.kegiatan.length > 0) { %>
+                    <% bg.kegiatan.forEach((k) => { 
+                        const pagu = Number(k.pagu_anggaran) || 0;
+                        const isFinal = k.tahap_verifikasi === 'SELESAI_FINAL' || (k.status && k.status.toUpperCase() === 'SELESAI');
+                        // Realisasi SPJ sah dihitung jika sudah diverifikasi/selesai atau pagu diajukan
+                        const realisasi = isFinal ? pagu : (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU' || k.tahap_verifikasi === 'VERIFIKASI_SEKDES' ? pagu : 0);
+                        const sisa = pagu - realisasi;
+                        const persen = pagu > 0 ? ((realisasi / pagu) * 100).toFixed(1) : '0';
+
+                        let statusLabel = 'Draft (Kaur)';
+                        if (k.tahap_verifikasi === 'VERIFIKASI_BENDAHARA') statusLabel = 'Menunggu Bendahara';
+                        else if (k.tahap_verifikasi === 'VERIFIKASI_SEKDES') statusLabel = 'Paraf Sekdes';
+                        else if (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU') statusLabel = 'Menunggu Penghulu';
+                        else if (k.tahap_verifikasi === 'SELESAI_FINAL') statusLabel = 'SAH (Final)';
+                        else if (k.tahap_verifikasi === 'PERLU_REVISI') statusLabel = 'Perlu Revisi';
+                    %>
+                    <tr>
+                        <td class="text-center"><%= nomorGlobal++ %></td>
+                        <td class="text-center" style="font-family: monospace;"><%= k.kode_rekening || bg.kodeBidang + '.' + String(nomorGlobal - 1).padStart(2, '0') %></td>
+                        <td>
+                            <b><%= k.nama_kegiatan %></b>
+                            <% if (k.keterangan) { %>
+                                <br><span style="font-size: 8.5pt; color: #475569;"><%= k.keterangan %></span>
+                            <% } %>
+                        </td>
+                        <td><%= k.lokasi || '-' %></td>
+                        <td class="text-center"><%= k.tahap || 'Tahap 1' %></td>
+                        <td class="text-right font-bold"><%= pagu.toLocaleString('id-ID') %></td>
+                        <td class="text-right font-bold"><%= realisasi.toLocaleString('id-ID') %></td>
+                        <td class="text-right"><%= sisa.toLocaleString('id-ID') %></td>
+                        <td class="text-center"><%= persen %>%</td>
+                        <td class="text-center">
+                            <span class="status-badge"><%= statusLabel %></span>
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td></td>
+                        <td class="text-center">-</td>
+                        <td colspan="8" style="font-style: italic; color: #64748b;">(Tidak ada kegiatan untuk bidang ini pada periode yang dipilih)</td>
+                    </tr>
+                <% } %>
+
+                <!-- BARIS SUBTOTAL BIDANG -->
+                <% 
+                    const subSisa = bg.subtotalPagu - bg.subtotalRealisasi;
+                    const subPersen = bg.subtotalPagu > 0 ? ((bg.subtotalRealisasi / bg.subtotalPagu) * 100).toFixed(1) : '0';
+                %>
+                <tr class="bidang-subtotal">
+                    <td colspan="5" class="text-right">SUBTOTAL <%= bg.namaBidang.toUpperCase() %>:</td>
+                    <td class="text-right font-bold"><%= bg.subtotalPagu.toLocaleString('id-ID') %></td>
+                    <td class="text-right font-bold"><%= bg.subtotalRealisasi.toLocaleString('id-ID') %></td>
+                    <td class="text-right font-bold"><%= subSisa.toLocaleString('id-ID') %></td>
+                    <td class="text-center font-bold"><%= subPersen %>%</td>
+                    <td></td>
+                </tr>
+
+            <% 
+                    });
+                } 
+                const grandSisa = grandTotalPagu - grandTotalRealisasi;
+                const grandPersen = grandTotalPagu > 0 ? ((grandTotalRealisasi / grandTotalPagu) * 100).toFixed(1) : '0';
+            %>
+
+            <!-- BARIS GRAND TOTAL KESELURUHAN -->
+            <tr style="background-color: #cbd5e1; font-weight: bold; font-size: 10.5pt; border-top: 2px solid #000;">
+                <td colspan="5" class="text-right">TOTAL REALISASI SELURUH BIDANG:</td>
+                <td class="text-right"><%= grandTotalPagu.toLocaleString('id-ID') %></td>
+                <td class="text-right"><%= grandTotalRealisasi.toLocaleString('id-ID') %></td>
+                <td class="text-right"><%= grandSisa.toLocaleString('id-ID') %></td>
+                <td class="text-center"><%= grandPersen %>%</td>
+                <td class="text-center">SIAD-SISKEUDES</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- LEMBAR PENGESAHAN TANDA TANGAN RESMI 3 PIHAK -->
+    <table class="signature-table">
+        <tr>
+            <td>
+                Menyetujui,<br>
+                <b>PENGHULU <%= (desa.nama || 'BAGAN BATU BARAT').toUpperCase() %></b>
+                <div class="sig-space"></div>
+                <b><u><%= namaPenghulu %></u></b><br>
+                <span>NIPD. <%= nipPenghulu || '-' %></span>
+            </td>
+            <td>
+                Telah Diverifikasi Oleh,<br>
+                <b>SEKRETARIS DESA</b>
+                <div class="sig-space"></div>
+                <b><u><%= namaSekdes %></u></b><br>
+                <span>NIPD. <%= nipSekdes || '-' %></span>
+            </td>
+            <td>
+                <%= (desa.nama || 'Bagan Batu Barat') %>, <%= tanggalCetak %><br>
+                <b>BENDAHARA / KAUR KEUANGAN</b>
+                <div class="sig-space"></div>
+                <b><u><%= namaBendahara %></u></b><br>
+                <span>NIPD. <%= nipBendahara || '-' %></span>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+

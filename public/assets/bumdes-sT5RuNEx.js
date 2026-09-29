@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-DGeXAQPT.js";import{t}from"./module-stub-B8V6hHuC.js";var n=e(),r=()=>(0,n.jsx)(t,{title:`BUMDes`,description:`Dokumen usaha dan laporan keuangan Badan Usaha Milik Desa.`,features:[`Profil unit usaha`,`Laporan keuangan bulanan/tahunan`,`Dokumen legal (AD/ART, SK Pengurus)`]});export{r as component};

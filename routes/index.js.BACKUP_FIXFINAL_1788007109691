@@ -1,0 +1,161 @@
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/authController');
+const suratController = require('../controllers/suratController');
+const db = require('../config/db');
+const spjController = require('../controllers/spjController');
+const produkHukumController = require('../controllers/produkHukumController');
+const workspaceController = require('../controllers/workspaceController');
+const arsipController = require('../controllers/arsipController');
+const laporanController = require('../controllers/laporanController');
+const masterController = require('../controllers/masterController');
+const pengaturanController = require('../controllers/pengaturanController');
+const ac = require('../middleware/access');
+
+const requireAuth = authController.requireAuth;
+
+
+// Helper count filter per table + desa
+const countFiltered = async (tbl, req) => {
+    const admin = ac.isAdmin(req); const did = ac.getDesaId(req);
+    let sql = `SELECT COUNT(*) FROM ${tbl} WHERE 1=1`; let p = [];
+    if (!admin && did) {
+        try {
+            const testCol = await db.query(
+                `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 AND column_name='kepenghuluan_id' LIMIT 1`,
+                [tbl]
+            );
+            if (testCol.rows.length > 0) { sql += ` AND (kepenghuluan_id = $1 OR kepenghuluan_id IS NULL)`; p.push(did); }
+        } catch (e) { /* noop */ }
+    }
+    try { return (await db.query(sql, p)).rows[0].count; } catch (e) { return 0; }
+};
+
+// --- Rute Autentikasi ---
+router.get('/login', authController.getLogin);
+router.post('/login', authController.postLogin);
+router.get('/logout', authController.logout);
+
+// --- Rute Utama ---
+router.get('/', requireAuth, (req, res) => { res.redirect('/dashboard'); });
+
+// --- Rute Dashboard ---
+router.get('/dashboard', requireAuth, async (req, res) => {
+    try {
+        const admin = ac.isAdmin(req); const did = ac.getDesaId(req);
+        let stats = { total_workspace: 0, dokumen_terarsip: 0, total_surat_masuk: 0, total_surat_keluar: 0 };
+        try { stats.total_surat_masuk = await countFiltered('surat_masuk', req); } catch(e){}
+        try { stats.total_surat_keluar = await countFiltered('surat_keluar', req); } catch(e){}
+        try {
+            // workspace dokumen count
+            const docCount = await countFiltered('workspace_document', req);
+            const arsipCount = await countFiltered('arsip_desa', req);
+            const spjDocCount = await countFiltered('spj_dokumen', req);
+            const produkCount = await countFiltered('produk_hukum', req);
+            stats.dokumen_terarsip = (Number(docCount)||0) + (Number(arsipCount)||0) + (Number(spjDocCount)||0) + (Number(produkCount)||0);
+        } catch(e){}
+        let workspaces = [];
+        try {
+            let baseWs = `
+                SELECT w.*, wt.nama as type_nama, wt.warna as type_warna, wt.icon as type_icon, mk.nama as kepenghuluan_nama
+                FROM workspace w
+                LEFT JOIN workspace_type wt ON w.workspace_type_id = wt.id
+                LEFT JOIN kepenghuluan mk ON w.kepenghuluan_id = mk.id
+                WHERE 1=1`;
+            let p = []; let i = 1;
+            if (!admin && did) {
+                // Check if workspace table has column first
+                try {
+                    const colCheck = await db.query(
+                        `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='workspace' AND column_name='kepenghuluan_id' LIMIT 1`
+                    );
+                    if (colCheck.rows.length > 0) {
+                        baseWs += ` AND (w.kepenghuluan_id = $${i} OR w.kepenghuluan_id IS NULL)`;
+                        p.push(did);
+                        i++;
+                    }
+                } catch (e) { /* noop */ }
+            }
+            baseWs += ` ORDER BY w.created_at DESC LIMIT 5`;
+            const ws = await db.query(baseWs, p);
+            workspaces = ws.rows;
+            // total workspace count (separate)
+            stats.total_workspace = await countFiltered('workspace', req);
+        } catch(e){
+            try { const wsFallback = await db.query(`SELECT * FROM workspace ORDER BY created_at DESC LIMIT 5`); workspaces = wsFallback.rows; stats.total_workspace = workspaces.length; } catch(err){}
+        }
+        res.render('dashboard', { title: 'Dashboard - SIAD 2.0', stats: stats, workspaces: workspaces, recentActivities: [], kegiatan: [], dokumen: [], arsip: [] });
+    } catch(e) {
+        console.error('Dashboard error:', e);
+        res.render('dashboard', { title: 'Dashboard - SIAD 2.0', stats: null, workspaces: [], recentActivities: [], kegiatan: [], dokumen: [], arsip: [] });
+    }
+});
+
+// === ALAT BANTU UPLOAD & FILE SYSTEM ===
+const multer = require('multer');
+const path = require('path');
+const fs_module = require('fs');
+
+if (!fs_module.existsSync('./public/uploads/spj')) fs_module.mkdirSync('./public/uploads/spj', { recursive: true });
+const spjStorage = multer.memoryStorage();
+const upload = multer({ storage: spjStorage });
+
+
+// --- Rute Modul Surat ---
+router.get('/surat', requireAuth, suratController.getIndex);
+router.post('/surat/masuk', requireAuth, upload.single('file_surat'), suratController.postSuratMasuk);
+router.post('/surat/keluar', requireAuth, upload.single('file_surat'), suratController.postSuratKeluar);
+router.post('/surat/delete', requireAuth, suratController.deleteSurat);
+router.post('/surat/edit', requireAuth, suratController.editSurat);
+
+// --- Rute SPJ (GET) ---
+router.get('/spj', requireAuth, spjController.getIndex);
+router.post('/spj/tambah', requireAuth, spjController.postTambah);
+router.post('/spj/edit', requireAuth, spjController.postEdit);
+router.post('/spj/delete', requireAuth, spjController.postDelete);
+
+// --- Rute Arsip (GET) ---
+router.get('/arsip', requireAuth, arsipController.getIndex);
+
+router.get('/spj/dokumen/:id', requireAuth, spjController.getDokumen);
+router.post('/spj/dokumen/upload', requireAuth, upload.single('file_dokumen'), spjController.postUploadDokumen);
+router.post('/spj/dokumen/hapus', requireAuth, spjController.postDeleteDokumen);
+
+router.get('/spj/pajak/:id', requireAuth, spjController.getPajak);
+router.post('/spj/pajak/tambah', requireAuth, upload.single('file_bukti'), spjController.postTambahPajak);
+router.post('/spj/pajak/hapus', requireAuth, spjController.postDeletePajak);
+
+if (!fs_module.existsSync('./public/uploads/produk_hukum')) fs_module.mkdirSync('./public/uploads/produk_hukum', { recursive: true });
+const phStorage = multer.memoryStorage();
+const uploadPH = multer({ storage: phStorage });
+
+router.get('/produk-hukum', requireAuth, produkHukumController.getIndex);
+router.post('/produk-hukum/tambah', requireAuth, uploadPH.single('file_pdf'), produkHukumController.postTambah);
+router.post('/produk-hukum/edit', requireAuth, uploadPH.single('file_pdf'), produkHukumController.postEdit);
+router.post('/produk-hukum/hapus', requireAuth, produkHukumController.postDelete);
+
+// === ARSIP UPLOAD ROUTE ===
+router.post('/arsip/upload', requireAuth, upload.single('file'), arsipController.postUpload);
+
+// === WORKSPACE ROUTES ===
+router.get('/workspace', requireAuth, workspaceController.getIndex);
+router.get('/workspace/:id', requireAuth, workspaceController.getDetail);
+router.post('/workspace/:id/upload', requireAuth, upload.single('file'), workspaceController.postDocument);
+
+// === LAPORAN ROUTES ===
+router.get('/laporan', requireAuth, laporanController.getIndex);
+router.post('/laporan/upload', requireAuth, upload.single('file_laporan'), laporanController.postUpload);
+
+// === MASTER DATA ROUTES ===
+router.get('/master_data', requireAuth, masterController.getIndex);
+router.post('/master_data/rekening', requireAuth, masterController.postRekening);
+router.post('/master_data/klasifikasi', requireAuth, masterController.postKlasifikasi);
+router.post('/master_data/perangkat', requireAuth, upload.single('file_sk'), masterController.postPerangkat);
+router.post('/master_data/delete', requireAuth, masterController.deleteData);
+
+// === PENGATURAN ROUTES ===
+router.get('/pengaturan', requireAuth, pengaturanController.getIndex);
+router.post('/pengaturan/update', requireAuth, pengaturanController.postUpdate);
+
+
+module.exports = router;

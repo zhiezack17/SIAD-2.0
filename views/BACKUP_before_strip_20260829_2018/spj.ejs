@@ -1,0 +1,111 @@
+
+<div class="kembali-btn-wrapper" style="margin-bottom: 20px;">
+    <a href="/dashboard" style="display: inline-block; text-decoration: none; background: #e2e8f0; color: #334155; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #cbd5e1; transition: background 0.2s;">
+        ⬅️ Kembali ke Dashboard
+    </a>
+</div>
+<div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h2 style="margin:0; color: #1e293b;">Modul Kegiatan (SPJ)</h2>
+            <p style="margin:5px 0 0 0; color: #64748b;">Manajemen Data Induk SPJ</p>
+        </div>
+        <button onclick="bukaModalSPJ()" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Tambah Data</button>
+    </div>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left;">
+                <th style="padding: 12px;">No</th>
+                <th style="padding: 12px;">Nama Kegiatan</th>
+                <th style="padding: 12px;">Pagu Anggaran</th>
+                <th style="padding: 12px;">Lokasi</th>
+                <th style="padding: 12px;">Status</th>
+                <th style="padding: 12px;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach((item, index) => { %>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px;"><%= index + 1 %></td>
+                <td style="padding: 12px; font-weight: bold;"><%= item.nama_kegiatan %><br><small style="color:#64748b;"><%= item.tahun %></small></td>
+                <td style="padding: 12px;">Rp <%= Number(item.pagu_anggaran).toLocaleString('id-ID') %></td>
+                <td style="padding: 12px;"><%= item.lokasi %></td>
+                <td style="padding: 12px;"><span style="background:#fef08a; padding:4px 8px; border-radius:4px; font-size:12px;"><%= item.status || 'draft' %></span></td>
+                <td style="padding: 12px; display: flex; gap: 8px;">
+                    <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">📂 Dokumen</button>
+                    <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" style="background:#3b82f6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">💸 Pajak</button>
+                    <button onclick="editSPJ('<%= item.id %>', '<%= item.nama_kegiatan %>', '<%= item.tahun %>', '<%= item.pagu_anggaran %>', '<%= item.lokasi %>', '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', '<%= item.keterangan %>')" style="background:#eab308; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">✏️</button>
+                    <form action="/spj/delete" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data ini?')">
+                        <input type="hidden" name="id" value="<%= item.id %>">
+                        <button type="submit" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<!-- MODAL SPJ -->
+<div id="modalSPJ" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50;">
+    <div style="background: white; padding: 24px; border-radius: 8px; width: 100%; max-width: 500px;">
+        <h3 id="modalTitleSPJ" style="margin-top:0;">Tambah Kegiatan</h3>
+        <form id="formSPJ" action="/spj/tambah" method="POST" style="display:flex; flex-direction:column; gap:12px;">
+            <input type="text" name="nama" placeholder="Nama Kegiatan" required style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <div style="display:flex; gap:10px;">
+                <input type="number" name="tahun" placeholder="Tahun" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:100%;">
+                <input type="number" name="pagu" placeholder="Pagu (Rp)" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:100%;">
+            </div>
+            <input type="text" name="lokasi" placeholder="Lokasi" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <div style="display:flex; gap:10px;">
+                <input type="date" name="tgl_mulai" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:100%;">
+                <input type="date" name="tgl_selesai" style="padding:8px; border:1px solid #ccc; border-radius:4px; width:100%;">
+            </div>
+            <select name="status" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+                <option value="draft">Draft</option>
+                <option value="diajukan">Diajukan</option>
+                <option value="disetujui">Disetujui</option>
+                <option value="selesai">Selesai</option>
+            </select>
+            <textarea name="ket" placeholder="Keterangan..." style="padding:8px; border:1px solid #ccc; border-radius:4px;"></textarea>
+            
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                <button type="button" onclick="document.getElementById('modalSPJ').style.display='none'" style="padding:8px 16px; border:none; background:#ccc; border-radius:4px; cursor:pointer;">Batal</button>
+                <button type="submit" style="padding:8px 16px; border:none; background:#1d4ed8; color:white; border-radius:4px; cursor:pointer;">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function bukaModalSPJ() {
+    document.getElementById('modalTitleSPJ').textContent = 'Tambah Kegiatan';
+    const form = document.getElementById('formSPJ');
+    form.reset();
+    form.action = '/spj/tambah';
+    let idIn = document.getElementById('edit-spj-id');
+    if(idIn) idIn.remove();
+    document.getElementById('modalSPJ').style.display = 'flex';
+}
+function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket) {
+    document.getElementById('modalTitleSPJ').textContent = 'Edit Kegiatan';
+    const form = document.getElementById('formSPJ');
+    form.action = '/spj/edit';
+    
+    let idIn = document.getElementById('edit-spj-id');
+    if(!idIn) { idIn = document.createElement('input'); idIn.type = 'hidden'; idIn.name = 'id'; idIn.id = 'edit-spj-id'; form.appendChild(idIn); }
+    idIn.value = id;
+    
+    form.querySelector('[name="nama"]').value = nama;
+    form.querySelector('[name="tahun"]').value = tahun;
+    form.querySelector('[name="pagu"]').value = pagu;
+    form.querySelector('[name="lokasi"]').value = lokasi;
+    form.querySelector('[name="tgl_mulai"]').value = tgl_mulai;
+    form.querySelector('[name="tgl_selesai"]').value = tgl_selesai;
+    form.querySelector('[name="status"]').value = status;
+    form.querySelector('[name="ket"]').value = ket;
+    
+    document.getElementById('modalSPJ').style.display = 'flex';
+}
+</script>

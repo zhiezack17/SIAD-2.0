@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            color: #000;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+        .kop-surat {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .kop-surat h4 {
+            margin: 0;
+            font-size: 14pt;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+        .kop-surat h3 {
+            margin: 0;
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .kop-surat h2 {
+            margin: 0;
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .kop-surat p {
+            margin: 4px 0 0 0;
+            font-size: 10pt;
+            font-style: italic;
+        }
+        .judul-dokumen {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .judul-dokumen h3 {
+            margin: 0;
+            font-size: 13pt;
+            text-decoration: underline;
+            text-transform: uppercase;
+        }
+        .judul-dokumen p {
+            margin: 4px 0 0 0;
+            font-size: 11pt;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+        table.data-table th, table.data-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+        }
+        .meta-table {
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+        .meta-table td {
+            padding: 4px 0;
+            vertical-align: top;
+        }
+        .ttd-container {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            page-break-inside: avoid;
+        }
+        .ttd-box {
+            text-align: center;
+            padding: 10px;
+            font-size: 11pt;
+        }
+        .ttd-space {
+            height: 65px;
+        }
+        .stamp-status {
+            display: inline-block;
+            border: 2px dashed #059669;
+            color: #059669;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                min-height: auto;
+                padding: 10mm 15mm;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button onclick="window.print()" class="no-print">🖨️ Cetak Dokumen (PDF / Kertas A4)</button>
+
+    <div class="page">
+        <!-- KOP SURAT PEMERINTAHAN DESA -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+            <tr>
+                <td style="width: 85px; text-align: center; vertical-align: middle;">
+                    <img src="/img/logo-rohil.png" onerror="this.src='/images/logo_rohil.png'; this.onerror=null;" alt="Logo Pemkab Rohil" style="width: 75px; height: auto; max-height: 90px; object-fit: contain;">
+                </td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <h4 style="margin:0; font-size:13pt; text-transform:uppercase; letter-spacing:0.5px;">PEMERINTAH KABUPATEN ROKAN HILIR</h4>
+                    <h3 style="margin:2px 0; font-size:12pt; text-transform:uppercase;">KECAMATAN <%= (kegiatan.kecamatan_nama || 'BAGAN SINEMBAH').toUpperCase() %></h3>
+                    <h2 style="margin:2px 0; font-size:15pt; text-transform:uppercase; text-decoration:underline;">KEPENGHULUAN <%= (kegiatan.kepenghuluan_nama || 'BAGAN BATU').toUpperCase() %></h2>
+                    <p style="margin:3px 0 0 0; font-size:9.5pt; font-style:italic;"><%= kegiatan.alamat_desa || 'Jalan Lintas Riau - Sumut, Kabupaten Rokan Hilir, Riau' %></p>
+                </td>
+                <td style="width: 85px;"></td>
+            </tr>
+        </table>
+        <div style="border-top: 3px solid #000; border-bottom: 1px solid #000; height: 3px; margin: 6px 0 15px 0;"></div>
+
+        <!-- JUDUL LEMBAR VERIFIKASI -->
+        <div class="judul-dokumen">
+            <h3>Lembar Verifikasi & Pengesahan SPJ Kegiatan</h3>
+            <p>Nomor Registrasi: SPJ/<%= kegiatan.tahun || '2026' %>/<%= String(kegiatan.id).padStart(4, '0') %></p>
+        </div>
+
+        <!-- INFORMASI KEGIATAN -->
+        <table class="meta-table">
+            <tr>
+                <td style="width: 25%;">Nama Kegiatan</td>
+                <td style="width: 3%;">:</td>
+                <td style="font-weight: bold;"><%= kegiatan.nama_kegiatan %></td>
+            </tr>
+            <tr>
+                <td>Tahun Anggaran</td>
+                <td>:</td>
+                <td><%= kegiatan.tahun %></td>
+            </tr>
+            <tr>
+                <td>Tahap / Semester</td>
+                <td>:</td>
+                <td style="font-weight: bold; color: #1e3a8a;"><%= kegiatan.tahap || 'Tahap 1' %></td>
+            </tr>
+            <tr>
+                <td>Pagu Anggaran</td>
+                <td>:</td>
+                <td style="font-weight: bold;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></td>
+            </tr>
+            <tr>
+                <td>Lokasi Kegiatan</td>
+                <td>:</td>
+                <td><%= kegiatan.lokasi || '-' %></td>
+            </tr>
+            <tr>
+                <td>Waktu Pelaksanaan</td>
+                <td>:</td>
+                <td>
+                    <%= kegiatan.tanggal_mulai ? new Date(kegiatan.tanggal_mulai).toLocaleDateString('id-ID') : '-' %> 
+                    s/d 
+                    <%= kegiatan.tanggal_selesai ? new Date(kegiatan.tanggal_selesai).toLocaleDateString('id-ID') : '-' %>
+                </td>
+            </tr>
+            <tr>
+                <td>Status Pengesahan</td>
+                <td>:</td>
+                <td>
+                    <span class="stamp-status">
+                        <%= kegiatan.tahap_verifikasi === 'SELESAI_FINAL' ? 'TELAH DISETUJUI & DISAHKAN' : (kegiatan.tahap_verifikasi || 'DALAM PROSES') %>
+                    </span>
+                </td>
+            </tr>
+        </table>
+
+        <!-- DAFTAR DOKUMEN BUKTI FISIK -->
+        <p style="margin: 15px 0 6px 0; font-weight: bold;">I. Daftar Kelengkapan Bukti Fisik / Kuitansi Terlampir:</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">No</th>
+                    <th>Nama Dokumen Bukti Pembayaran / Nota</th>
+                    <th style="width: 28%;">Waktu Unggah Sistem</th>
+                    <th style="width: 20%;">Arsip Digital</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(dokumen && dokumen.length > 0) { %>
+                    <% dokumen.forEach((doc, i) => { %>
+                    <tr>
+                        <td style="text-align: center;"><%= i + 1 %></td>
+                        <td><%= doc.nama_dokumen %></td>
+                        <td style="text-align: center;"><%= doc.created_at ? new Date(doc.created_at).toLocaleDateString('id-ID') : '-' %></td>
+                        <td style="text-align: center; color: #059669; font-weight: bold;">Tersimpan (Drive)</td>
+                    </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="4" style="text-align: center; font-style: italic;">Belum ada dokumen yang dilampirkan.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- DAFTAR POTONGAN PAJAK -->
+        <p style="margin: 15px 0 6px 0; font-weight: bold;">II. Rincian Pemotongan & Penyetoran Pajak:</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">No</th>
+                    <th>Jenis Pemotongan Pajak</th>
+                    <th style="width: 35%;">Jumlah Pajak Disetor (Rp)</th>
+                    <th style="width: 20%;">Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(pajak && pajak.length > 0) { %>
+                    <% pajak.forEach((p, i) => { %>
+                    <tr>
+                        <td style="text-align: center;"><%= i + 1 %></td>
+                        <td><%= p.jenis_pajak %></td>
+                        <td style="text-align: right; font-weight: bold;">Rp <%= Number(p.nominal).toLocaleString('id-ID') %></td>
+                        <td style="text-align: center;">Tercatat</td>
+                    </tr>
+                    <% }) %>
+                    <tr style="background: #f8fafc; font-weight: bold;">
+                        <td colspan="2" style="text-align: right;">Total Pajak Terpotong:</td>
+                        <td style="text-align: right;">Rp <%= Number(totalPajak).toLocaleString('id-ID') %></td>
+                        <td></td>
+                    </tr>
+                <% } else { %>
+                    <tr><td colspan="4" style="text-align: center; font-style: italic;">Tidak ada pemotongan pajak pada kegiatan ini.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- DAFTAR DOKUMENTASI FOTO KEGIATAN -->
+        <p style="margin: 15px 0 6px 0; font-weight: bold;">III. Daftar Bukti Fisik / Dokumentasi Foto Kegiatan Terlampir:</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">No</th>
+                    <th style="width: 32%;">Tahapan / Kategori</th>
+                    <th>Keterangan / Uraian Foto</th>
+                    <th style="width: 22%;">Status Digital</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(typeof foto !== 'undefined' && foto && foto.length > 0) { %>
+                    <% foto.forEach((f, i) => { %>
+                    <tr>
+                        <td style="text-align: center;"><%= i + 1 %></td>
+                        <td style="font-weight: bold;"><%= f.kategori || 'Dokumentasi' %></td>
+                        <td><%= f.judul_foto || '-' %></td>
+                        <td style="text-align: center; color: #059669; font-weight: bold;">Tersimpan (Drive)</td>
+                    </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="4" style="text-align: center; font-style: italic;">Belum ada foto dokumentasi yang dilampirkan.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- LEMBAR TANDA TANGAN 4 PEJABAT SESUAI ALUR BIROKRASI -->
+        <%
+            const pPejabat = (typeof pejabat !== 'undefined' && pejabat) ? pejabat : {};
+            const namaKaurKasi = pPejabat.pelaksana || '( .................................................. )';
+            const nipKaurKasi = pPejabat.pelaksana_nip ? ('NIP. ' + pPejabat.pelaksana_nip) : 'Kaur / Kasi Pelaksana';
+
+            const namaBendahara = kegiatan.verifikasi_bendahara_oleh || pPejabat.bendahara || '( .................................................. )';
+            const nipBendahara = pPejabat.bendahara_nip ? ('NIP. ' + pPejabat.bendahara_nip) : 'Bendahara Kepenghuluan';
+
+            const namaSekdes = kegiatan.verifikasi_sekdes_oleh || pPejabat.sekdes || '( .................................................. )';
+            const nipSekdes = pPejabat.sekdes_nip ? ('NIP. ' + pPejabat.sekdes_nip) : 'Sekretaris Kepenghuluan';
+
+            const namaPenghulu = kegiatan.persetujuan_penghulu_oleh || pPejabat.penghulu || '( .................................................. )';
+            const nipPenghulu = pPejabat.penghulu_nip ? ('NIP. ' + pPejabat.penghulu_nip) : 'Penghulu (Kepala Desa)';
+        %>
+        <div class="ttd-container">
+            <div class="ttd-box">
+                <p>Pelaksana Kegiatan (Kaur/Kasi),</p>
+                <div class="ttd-space"></div>
+                <p style="font-weight: bold; text-decoration: underline;"><%= namaKaurKasi %></p>
+                <p style="font-size: 10pt; color: #555;"><%= nipKaurKasi %></p>
+            </div>
+
+            <div class="ttd-box">
+                <p>Telah Diverifikasi Keuangan oleh,</p>
+                <div class="ttd-space">
+                    <% if (kegiatan.verifikasi_bendahara_oleh) { %>
+                        <div class="stamp-status">TERVERIFIKASI SISTEM</div>
+                        <div style="font-size: 9pt; color: #555;"><%= kegiatan.verifikasi_bendahara_at ? new Date(kegiatan.verifikasi_bendahara_at).toLocaleDateString('id-ID') : '' %></div>
+                    <% } %>
+                </div>
+                <p style="font-weight: bold; text-decoration: underline;"><%= namaBendahara %></p>
+                <p style="font-size: 10pt; color: #555;"><%= nipBendahara %></p>
+            </div>
+
+            <div class="ttd-box">
+                <p>Telah Diperiksa Kelengkapan oleh,</p>
+                <div class="ttd-space">
+                    <% if (kegiatan.verifikasi_sekdes_oleh) { %>
+                        <div class="stamp-status">TERVERIFIKASI SISTEM</div>
+                        <div style="font-size: 9pt; color: #555;"><%= kegiatan.verifikasi_sekdes_at ? new Date(kegiatan.verifikasi_sekdes_at).toLocaleDateString('id-ID') : '' %></div>
+                    <% } %>
+                </div>
+                <p style="font-weight: bold; text-decoration: underline;"><%= namaSekdes %></p>
+                <p style="font-size: 10pt; color: #555;"><%= nipSekdes %></p>
+            </div>
+
+            <div class="ttd-box">
+                <p>Disahkan & Disetujui oleh,</p>
+                <div class="ttd-space">
+                    <% if (kegiatan.persetujuan_penghulu_oleh) { %>
+                        <div class="stamp-status" style="border-color: #1d4ed8; color: #1d4ed8;">SAH & FINAL</div>
+                        <div style="font-size: 9pt; color: #555;"><%= kegiatan.persetujuan_penghulu_at ? new Date(kegiatan.persetujuan_penghulu_at).toLocaleDateString('id-ID') : '' %></div>
+                    <% } %>
+                </div>
+                <p style="font-weight: bold; text-decoration: underline;"><%= namaPenghulu %></p>
+                <p style="font-size: 10pt; color: #555;"><%= nipPenghulu %></p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 5px; font-size: 9pt; color: #777; text-align: right;">
+            Dicetak otomatis melalui Aplikasi SIAD 2.0 pada <%= new Date().toLocaleString('id-ID') %>
+        <!-- VALIDASI ELEKTRONIK & QR CODE RESMI PEMERIKSAAN -->
+        <div style="margin-top: 35px; border: 1.5px solid #0f172a; border-radius: 6px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; background: #fafafa; page-break-inside: avoid;">
+            <div style="display: flex; align-items: center; gap: 18px;">
+                <% if (typeof qrDataUri !== 'undefined' && qrDataUri) { %>
+                    <img src="<%= qrDataUri %>" alt="QR Validasi" style="width: 105px; height: 105px; border: 1px solid #cbd5e1; background: #fff; padding: 4px; border-radius: 4px;">
+                <% } %>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                        <span style="font-weight: bold; font-size: 11pt; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">Validasi Dokumen Digital Resmi</span>
+                        <span style="background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 8.5pt; font-weight: bold;">TERDAFTAR</span>
+                    </div>
+                    <p style="margin: 0; font-size: 9.5pt; color: #334155; line-height: 1.35;">
+                        Dokumen ini telah disahkan dan diverifikasi secara bertingkat melalui <strong>SIAD 2.0 Kab. Rokan Hilir</strong>.<br>
+                        Pindai QR Code di samping menggunakan smartphone untuk memeriksa keabsahan arsip, riwayat pengesahan, dan rincian belanja secara real-time.
+                    </p>
+                    <p style="margin: 4px 0 0 0; font-size: 8.5pt; color: #64748b; font-family: monospace;">
+                        Kode Enkripsi: SIAD-ROHIL-SPJ-<%= String(kegiatan.id).padStart(5, '0') %>-<%= kegiatan.tahun %> | Status: <%= kegiatan.tahap_verifikasi %>
+                    </p>
+                </div>
+            </div>
+            <div style="text-align: right; border-left: 1px dashed #cbd5e1; padding-left: 15px; min-width: 140px;">
+                <div style="font-size: 8pt; color: #64748b;">Tanggal Cetak:</div>
+                <div style="font-size: 9.5pt; font-weight: bold; color: #0f172a;"><%= new Date().toLocaleDateString('id-ID') %></div>
+                <div style="font-size: 8pt; color: #64748b; margin-top: 4px;">Pemeriksa:</div>
+                <div style="font-size: 8.5pt; color: #1d4ed8; font-weight: bold;">Inspektorat / BPK / Pimpinan</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px; font-size: 8pt; color: #94a3b8; text-align: center;">
+            Sistem Informasi Arsip & Dokumen Desa (SIAD 2.0) &bull; Pemerintah Kabupaten Rokan Hilir &bull; Dokumen Sah Tanpa Memerlukan Cap Basah Apabila Terverifikasi Secara Digital
+        </div>
+    </div>
+
+</body>
+</html>

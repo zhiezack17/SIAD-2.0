@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm 15mm 15mm 15mm;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 20px;
+            font-size: 12pt;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .header-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .kop-logo {
+            width: 75px;
+            height: auto;
+        }
+        .kop-title-kab {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .kop-title-kec {
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+        }
+        .kop-title-desa {
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+            text-decoration: underline;
+        }
+        .kop-alamat {
+            font-size: 10pt;
+            font-style: italic;
+            margin: 4px 0 0 0;
+        }
+        .double-line {
+            border: none;
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin: 8px 0 15px 0;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            text-decoration: underline;
+        }
+        .doc-subtitle {
+            text-align: center;
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .meta-table {
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+        .meta-table td {
+            padding: 3px 0;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-bottom: 20px;
+        }
+        table.data-table th, table.data-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+        }
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+        .signature-table td {
+            vertical-align: top;
+            text-align: center;
+            width: 50%;
+            font-size: 11pt;
+        }
+        .sig-space {
+            height: 70px;
+        }
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOMBOL AKSI CETAK DI SCREEN -->
+    <div class="no-print" style="background: #f1f5f9; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #cbd5e1;">
+        <span style="font-family: sans-serif; font-size: 13px; color: #334155;">
+            📄 <b>Pratinjau Cetak Standar Permendagri No. 20/2018</b> (Ukuran Kertas: A4 / Folio Landscape)
+        </span>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.close()" style="padding: 8px 16px; border: 1px solid #94a3b8; background: white; border-radius: 6px; cursor: pointer; font-weight: bold;">Tutup</button>
+            <button onclick="window.print()" style="padding: 8px 20px; border: none; background: #1d4ed8; color: white; border-radius: 6px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">🖨️ Cetak / Simpan PDF</button>
+        </div>
+    </div>
+
+    <!-- KOP RESMI PEMKAB ROKAN HILIR -->
+    <table class="header-table">
+        <tr>
+            <td style="width: 85px; text-align: center; vertical-align: middle;">
+                <img src="/img/logo-rohil.png" onerror="this.src='/images/logo_rohil.png'; this.onerror=null;" alt="Logo Pemkab Rokan Hilir" style="width: 75px; height: auto; max-height: 90px; object-fit: contain;">
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <div class="kop-title-kab">PEMERINTAH KABUPATEN ROKAN HILIR</div>
+                <div class="kop-title-kec">KECAMATAN <%= (desa.kecamatan_nama || 'BAGAN SINEMBAH').toUpperCase() %></div>
+                <div class="kop-title-desa">KEPENGHULUAN <%= (desa.nama || 'BAGAN BATU').toUpperCase() %></div>
+                <div class="kop-alamat"><%= desa.alamat || desa.alamat_kantor || 'Jalan Lintas Riau - Sumut, Kabupaten Rokan Hilir, Riau' %></div>
+            </td>
+            <td style="width: 85px;"></td>
+        </tr>
+    </table>
+    <div class="double-line"></div>
+
+    <!-- JUDUL LAPORAN -->
+    <div class="doc-title">BUKU PEMBANTU PAJAK</div>
+    <div class="doc-subtitle">TAHUN ANGGARAN <%= tahun %></div>
+
+    <table class="meta-table">
+        <tr>
+            <td style="width: 15%;">Kepenghuluan</td>
+            <td style="width: 35%;">: <b><%= desa.nama || '-' %></b></td>
+            <td style="width: 15%;">Tahun Anggaran</td>
+            <td style="width: 35%;">: <b><%= tahun %></b></td>
+        </tr>
+        <tr>
+            <td>Kecamatan</td>
+            <td>: <b><%= desa.kecamatan_nama || '-' %></b></td>
+            <td>Kabupaten</td>
+            <td>: <b>Rokan Hilir</b></td>
+        </tr>
+    </table>
+    <!-- META DATA INFORMASI (KIRI & KANAN DENGAN BAGIAN TENGAH KOSONG) -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; font-size: 10pt;">
+        <!-- BLOK KIRI -->
+        <table style="border-collapse: collapse; width: auto;">
+            <tr>
+                <td style="padding: 2px 10px 2px 0; font-weight: bold; width: 110px;">Kepenghuluan</td>
+                <td style="padding: 2px 0;">: <b><%= desa.nama || '-' %></b></td>
+            </tr>
+            <tr>
+                <td style="padding: 2px 10px 2px 0; font-weight: bold;">Kecamatan</td>
+                <td style="padding: 2px 0;">: <b><%= desa.kecamatan_nama || '-' %></b></td>
+            </tr>
+        </table>
+
+        <!-- BLOK KANAN (DIGESER MENTOK KE KANAN AGAR TENGAH KOSONG) -->
+        <table style="border-collapse: collapse; width: auto;">
+            <tr>
+                <td style="padding: 2px 10px 2px 0; font-weight: bold; width: 120px;">Tahun Anggaran</td>
+                <td style="padding: 2px 0;">: <b><%= tahun %></b></td>
+            </tr>
+            <tr>
+                <td style="padding: 2px 10px 2px 0; font-weight: bold;">Kabupaten</td>
+                <td style="padding: 2px 0;">: <b>Rokan Hilir</b></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- TABEL UTAMA BUKU PEMBANTU PAJAK -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 30px;">No</th>
+                <th rowspan="2" style="width: 80px;">Tanggal Setor</th>
+                <th rowspan="2" style="width: 140px;">No. Bukti / NTPN</th>
+                <th rowspan="2">Uraian / Objek Belanja & Rekanan</th>
+                <th colspan="5">Pemotongan Pajak (Rp)</th>
+                <th rowspan="2" style="width: 100px;">Penyetoran Ke Kas Negara (Rp)</th>
+            </tr>
+            <tr>
+                <th style="width: 85px;">PPN</th>
+                <th style="width: 85px;">PPh 21</th>
+                <th style="width: 85px;">PPh 22</th>
+                <th style="width: 85px;">PPh 23</th>
+                <th style="width: 85px;">Pajak Daerah</th>
+            </tr>
+            <tr style="background-color: #fafafa; font-size: 8pt; text-align: center;">
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6</th>
+                <th>7</th>
+                <th>8</th>
+                <th>9</th>
+                <th>10</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (pajakList && pajakList.length > 0) { %>
+                <% pajakList.forEach((p, index) => { 
+                    const tgl = p.tanggal_setor ? new Date(p.tanggal_setor).toLocaleDateString('id-ID') : (p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-');
+                    const nom = Number(p.nominal) || 0;
+                    const j = (p.jenis_pajak || '').toUpperCase();
+                    let ppn = 0, pph21 = 0, pph22 = 0, pph23 = 0, daerah = 0;
+                    if (j.includes('PPN')) ppn = nom;
+                    else if (j.includes('21')) pph21 = nom;
+                    else if (j.includes('22')) pph22 = nom;
+                    else if (j.includes('23')) pph23 = nom;
+                    else daerah = nom;
+                %>
+                <tr>
+                    <td class="text-center"><%= index + 1 %></td>
+                    <td class="text-center"><%= tgl %></td>
+                    <td style="font-family: monospace;">
+                        <%= p.ntpn ? 'NTPN: ' + p.ntpn : (p.kode_billing ? 'Bill: ' + p.kode_billing : '-') %>
+                    </td>
+                    <td>
+                        <b><%= p.nama_kegiatan || 'Kegiatan SPJ' %></b><br>
+                        <%= p.uraian || '-' %>
+                        <% if (p.nama_wp_rekanan) { %>
+                            <br><i>Rekanan/WP: <%= p.nama_wp_rekanan %></i>
+                        <% } %>
+                    </td>
+                    <td class="text-right"><%= ppn > 0 ? ppn.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= pph21 > 0 ? pph21.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= pph22 > 0 ? pph22.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= pph23 > 0 ? pph23.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= daerah > 0 ? daerah.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right font-bold"><%= nom.toLocaleString('id-ID') %></td>
+                </tr>
+                <% }) %>
+                <!-- TOTAL AKHIR -->
+                <tr style="background-color: #f2f2f2; font-weight: bold;">
+                    <td colspan="4" class="text-right">JUMLAH TOTAL:</td>
+                    <td class="text-right"><%= summary.totalPPN > 0 ? summary.totalPPN.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= summary.totalPPh21 > 0 ? summary.totalPPh21.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= summary.totalPPh22 > 0 ? summary.totalPPh22.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= summary.totalPPh23 > 0 ? summary.totalPPh23.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right"><%= summary.totalDaerah > 0 ? summary.totalDaerah.toLocaleString('id-ID') : '-' %></td>
+                    <td class="text-right" style="font-size: 11pt;"><%= summary.totalSemua.toLocaleString('id-ID') %></td>
+                </tr>
+            <% } else { %>
+                <tr>
+                    <td colspan="10" class="text-center" style="padding: 20px;">Belum ada catatan transaksi pemotongan dan penyetoran pajak untuk Tahun Anggaran <%= tahun %>.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+    <!-- TANDA TANGAN RESMI PENGHULU DAN BENDAHARA -->
+    <table class="signature-table">
+        <tr>
+            <td>
+                Mengetahui,<br>
+                <b>PENGHULU <%= (desa.nama || 'BAGAN BATU BARAT').toUpperCase() %></b>
+                <div class="sig-space"></div>
+                <b><u><%= namaPenghulu %></u></b><br>
+                <span>NIPD. -</span>
+            </td>
+            <td>
+                <%= (desa.nama || 'Bagan Batu Barat') %>, <%= tanggalCetak %><br>
+                <b>KAUR KEUANGAN / BENDAHARA</b>
+                <div class="sig-space"></div>
+                <b><u><%= namaBendahara %></u></b><br>
+                <span>NIPD. -</span>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
+

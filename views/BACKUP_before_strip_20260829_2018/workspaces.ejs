@@ -1,0 +1,78 @@
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header"><img src="/img/logo.png" style="height: 32px; margin-right: 8px;"> SIAD 2.0</div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/workspace" class="nav-item"><i class="fa-solid fa-folder-tree"></i> Workspace</a>
+            <div style="margin-bottom: 5px;">
+                <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); if(m.style.display==='none'){ m.style.display='flex'; document.getElementById('surat-icon').className='fa-solid fa-minus'; } else { m.style.display='none'; document.getElementById('surat-icon').className='fa-solid fa-plus'; }" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-envelope" style="width: 20px;"></i> Surat</span>
+                    <i id="surat-icon" class="fa-solid fa-minus" style="font-size: 14px;"></i>
+                </div>
+                <div id="surat-menu" style="display: flex; flex-direction: column; gap: 8px; padding-left: 35px; margin-top: 8px; margin-bottom: 8px;">
+                    <a href="/surat?tab=masuk" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Masuk</a>
+                    <a href="/surat?tab=keluar" style="text-decoration: none; color: #64748b; font-size: 14px;">Surat Keluar</a>
+                </div>
+            </div>
+            <a href="/spj" class="nav-item"><i class="fa-solid fa-briefcase"></i> Kegiatan (SPJ)</a>
+            <a href="/produk-hukum" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Produk Hukum</a>
+            <a href="/arsip" class="nav-item"><i class="fa-solid fa-box-archive"></i> Arsip Lainnya</a>
+            <a href="/aset" class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Aset</a>
+            <a href="/bumdes" class="nav-item"><i class="fa-solid fa-store"></i> BUMDes</a>
+            <a href="/master_data" class="nav-item"><i class="fa-solid fa-database"></i> Master Data</a>
+            <a href="/laporan" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+            <a href="/pengaturan" class="nav-item"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+        </nav>
+    </aside>
+    <script>(function(){ var p = location.pathname; document.querySelectorAll('.sidebar-nav .nav-item').forEach(function(a){ var h = a.getAttribute && a.getAttribute('href'); if (h && (h === p || (p.startsWith('/surat') && h.startsWith('/surat')) || (h !== '/dashboard' && p.startsWith(h)))) { a.classList.add('active'); } }); })();</script>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="search-bar"><i class="fa-solid fa-search"></i><input type="text" placeholder="Cari Workspace..." style="border: none; outline: none; margin-left: 10px; width: 300px;"></div>
+            <div class="user-profile">
+                <span style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
+                    <strong><%= user ? user.nama : 'Guest' %></strong><small style="color: var(--text-muted);"><%= user ? user.peran : '' %></small>
+                </span>
+                <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; margin-left: 10px;"><i class="fa-solid fa-user"></i></div>
+                <a href="/logout" style="margin-left: 15px; color: #dc2626;"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+        </header>
+        <div class="dashboard-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h2 style="font-size: 1.5rem; margin-bottom: 5px;">Workspace Kolaborasi</h2>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Ruang kerja terpadu untuk proyek dan kegiatan.</p>
+                </div>
+                <button class="btn btn-primary"><i class="fa-solid fa-folder-plus"></i> Buat Workspace Baru</button>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 2rem;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);"><div class="stat-title" style="color: #1e40af;">Total Workspace</div><div class="stat-value" style="color: #1d4ed8;"><%= workspaces ? workspaces.length : 0 %></div></div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);"><div class="stat-title" style="color: #991b1b;">Butuh Perhatian</div><div class="stat-value" style="color: #b91c1c;">0</div></div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);"><div class="stat-title" style="color: #166534;">Selesai</div><div class="stat-value" style="color: #15803d;">1</div></div>
+            </div>
+            <div class="card" style="padding: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+                    <% if (workspaces && workspaces.length > 0) { %>
+                        <% workspaces.forEach(ws => { %>
+                            <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; transition: all 0.2s ease;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 8px; background: <%= ws.type_warna || '#fef3c7' %>; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fa-solid <%= ws.type_icon || 'fa-folder' %>"></i></div>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase;"><%= ws.type_nama || 'General' %></span>
+                                    </div>
+                                    <span style="background: <%= ws.status==='SELESAI'?'#dcfce7':'#fef3c7' %>; color: <%= ws.status==='SELESAI'?'#166534':'#b45309' %>; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;"><%= ws.status %></span>
+                                </div>
+                                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-dark);"><a href="/workspace" style="text-decoration: none; color: inherit;"><%= ws.nama %></a></h3>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 5px;"><i class="fa-solid fa-location-dot"></i> <%= ws.kepenghuluan_nama || 'Tidak ada lokasi' %></p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-regular fa-clock"></i> <%= new Date(ws.created_at).toLocaleDateString('id-ID') %></div>
+                                    <a href="/workspace" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--primary); color: white; border-radius: 4px; text-decoration: none;">Buka Workspace</a>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

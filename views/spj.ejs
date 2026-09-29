@@ -1,0 +1,661 @@
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<div class="kembali-btn-wrapper" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <a href="/dashboard" style="display: inline-block; text-decoration: none; background: #e2e8f0; color: #334155; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #cbd5e1; transition: background 0.2s;">
+        ⬅️ Kembali ke Dashboard
+    </a>
+
+    <!-- TAB SWITCHER: KEGIATAN SPJ VS REKAPITULASI PAJAK -->
+    <div style="display: flex; gap: 8px; background: #e2e8f0; padding: 4px; border-radius: 10px;">
+        <a href="/spj?tab=kegiatan" style="text-decoration: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px; <%= tab === 'kegiatan' ? 'background: white; color: #1d4ed8; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'color: #64748b;' %>">
+            📁 Induk Kegiatan SPJ
+        </a>
+        <a href="/spj?tab=pajak" style="text-decoration: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px; <%= tab === 'pajak' ? 'background: #1d4ed8; color: white; box-shadow: 0 2px 4px rgba(29,78,216,0.3);' : 'color: #64748b;' %>">
+            🧾 Rekapitulasi Pajak (Buku Pembantu)
+        </a>
+    </div>
+</div>
+
+<% if (tab === 'pajak') { %>
+<!-- ========================================== -->
+<!-- TAB REKAPITULASI PAJAK (BUKU PEMBANTU PAJAK) -->
+<!-- ========================================== -->
+<div style="margin-bottom: 25px;">
+    <!-- 4 KARTU KPI RINGKASAN PAJAK -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #10b981;">
+            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">💰 Total Pajak Disetor</div>
+            <div style="font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 5px;">Rp <%= Number(summary.totalSemua || 0).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11px; color: #10b981; margin-top: 4px; font-weight: 600;">Semua Jenis Pajak</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #3b82f6;">
+            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">🟦 Total PPN (11% / 12%)</div>
+            <div style="font-size: 22px; font-weight: 800; color: #1d4ed8; margin-top: 5px;">Rp <%= Number(summary.totalPPN || 0).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Pajak Pertambahan Nilai</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #f59e0b;">
+            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">🟧 Total PPh (21, 22, 23)</div>
+            <div style="font-size: 22px; font-weight: 800; color: #d97706; margin-top: 5px;">Rp <%= Number((summary.totalPPh21 || 0) + (summary.totalPPh22 || 0) + (summary.totalPPh23 || 0)).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Honor, Material & Jasa</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #8b5cf6;">
+            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">🟪 Pajak Daerah / Galian C</div>
+            <div style="font-size: 22px; font-weight: 800; color: #7c3aed; margin-top: 5px;">Rp <%= Number(summary.totalPajakDaerah || 0).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Restoran & Mineral Batuan</div>
+        </div>
+    </div>
+
+    <!-- ACTION & FILTER BAR -->
+    <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
+            <div>
+                <h2 style="margin:0; color: #0f172a; font-size: 20px;">Buku Pembantu Pajak</h2>
+                <p style="margin:4px 0 0 0; color: #64748b; font-size: 13px;">Rekapitulasi Pemotongan dan Penyetoran Pajak Sesuai Permendagri No. 20/2018</p>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <!-- FILTER TAHUN -->
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label style="font-size: 13px; font-weight: bold; color: #475569;">Tahun:</label>
+                    <select onchange="location.href='/spj?tab=pajak&tahun='+this.value" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-weight: bold; font-size: 13px; color: #1e293b;">
+                        <option value="" <%= !filterTahun ? 'selected' : '' %>>Semua Tahun</option>
+                        <% if (typeof tahunList !== 'undefined') { tahunList.forEach(th => { %>
+                            <option value="<%= th %>" <%= String(filterTahun) === String(th) ? 'selected' : '' %>><%= th %></option>
+                        <% }) } %>
+                    </select>
+                </div>
+
+                <!-- TOMBOL EKSPOR EXCEL -->
+                <button onclick="exportPajakToExcel()" style="background: #15803d; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                    📥 Unduh Excel (.xlsx)
+                </button>
+
+                <!-- TOMBOL CETAK BUKU PEMBANTU PAJAK RESMI -->
+                <a href="/spj/pajak/cetak-buku<%= filterTahun ? '?tahun=' + filterTahun : '' %>" target="_blank" style="text-decoration: none; background: #0f172a; color: white; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                    🖨️ Cetak Buku Pajak (PDF)
+                </a>
+
+                <!-- TOMBOL SETOR PAJAK CEPAT -->
+                <button onclick="document.getElementById('modalSetorPajak').style.display='flex'" style="background: #1d4ed8; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    + Input Setoran Pajak
+                </button>
+            </div>
+        </div>
+
+        <!-- TABEL REKAPITULASI PAJAK -->
+        <div style="overflow-x: auto;">
+            <table id="tabelPajak" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left;">
+                        <th style="padding: 12px 10px; width: 40px;">No</th>
+                        <th style="padding: 12px 10px; width: 100px;">Tgl Setor</th>
+                        <th style="padding: 12px 10px;">Kegiatan SPJ</th>
+                        <th style="padding: 12px 10px;">Uraian Belanja / Rekanan</th>
+                        <th style="padding: 12px 10px;">NTPN / Kode Billing</th>
+                        <th style="padding: 12px 10px; width: 110px;">Jenis Pajak</th>
+                        <th style="padding: 12px 10px; text-align: right; width: 130px;">Nominal Setor</th>
+                        <th style="padding: 12px 10px; text-align: center; width: 90px;">Bukti BPN</th>
+                        <th style="padding: 12px 10px; text-align: center; width: 60px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof dataPajak !== 'undefined' && dataPajak && dataPajak.length > 0) { %>
+                        <% dataPajak.forEach((p, idx) => { 
+                            const tgl = p.tanggal_setor ? new Date(p.tanggal_setor).toLocaleDateString('id-ID') : (p.created_at ? new Date(p.created_at).toLocaleDateString('id-ID') : '-');
+                            let badgeBg = '#e0f2fe'; let badgeTxt = '#0369a1';
+                            const j = (p.jenis_pajak || '').toUpperCase();
+                            if (j.includes('PPN')) { badgeBg = '#dbeafe'; badgeTxt = '#1e40af'; }
+                            else if (j.includes('21')) { badgeBg = '#fef3c7'; badgeTxt = '#b45309'; }
+                            else if (j.includes('22')) { badgeBg = '#f3e8ff'; badgeTxt = '#7e22ce'; }
+                            else if (j.includes('23')) { badgeBg = '#ede9fe'; badgeTxt = '#6d28d9'; }
+                            else if (j.includes('DAERAH')) { badgeBg = '#ccfbf1'; badgeTxt = '#0f766e'; }
+                        %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 10px;"><%= idx + 1 %></td>
+                            <td style="padding: 10px; font-weight: 600; color: #475569;"><%= tgl %></td>
+                            <td style="padding: 10px; font-weight: bold; color: #0f172a;">
+                                <%= p.nama_kegiatan || 'Kegiatan #' + p.kegiatan_id %>
+                                <% if (p.kegiatan_tahun) { %>
+                                    <span style="font-size: 11px; color: #64748b; font-weight: normal;">(TA <%= p.kegiatan_tahun %>)</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 10px; color: #334155;">
+                                <div><%= p.uraian || '-' %></div>
+                                <% if (p.nama_wp_rekanan) { %>
+                                    <small style="color: #64748b; font-style: italic;">WP: <%= p.nama_wp_rekanan %></small>
+                                <% } %>
+                            </td>
+                            <td style="padding: 10px;">
+                                <% if (p.ntpn) { %>
+                                    <div style="font-family: monospace; font-weight: bold; color: #166534; background: #dcfce7; padding: 2px 6px; border-radius: 4px; display: inline-block; font-size: 11px;">NTPN: <%= p.ntpn %></div>
+                                <% } %>
+                                <% if (p.kode_billing) { %>
+                                    <div style="font-family: monospace; font-size: 11px; color: #475569; margin-top: 2px;">Bill: <%= p.kode_billing %></div>
+                                <% } %>
+                                <% if (!p.ntpn && !p.kode_billing) { %> - <% } %>
+                            </td>
+                            <td style="padding: 10px;">
+                                <span style="background: <%= badgeBg %>; color: <%= badgeTxt %>; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; display: inline-block;">
+                                    <%= p.jenis_pajak %>
+                                </span>
+                            </td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold; color: #0f172a;">
+                                Rp <%= Number(p.nominal || 0).toLocaleString('id-ID') %>
+                            </td>
+                            <td style="padding: 10px; text-align: center;">
+                                <% if (p.file_url) { %>
+                                    <a href="<%= p.file_url %>" target="_blank" style="background: #eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; font-size: 11px; display: inline-block;">Lihat Drive</a>
+                                <% } else { %>
+                                    <span style="color: #94a3b8; font-size: 11px;">-</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 10px; text-align: center;">
+                                <form action="/spj/pajak/hapus" method="POST" onsubmit="return confirm('Hapus setoran pajak ini?')" style="margin:0;">
+                                    <input type="hidden" name="id" value="<%= p.id %>">
+                                    <input type="hidden" name="kegiatan_id" value="<%= p.kegiatan_id %>">
+                                    <input type="hidden" name="redirect_to" value="rekap">
+                                    <button type="submit" style="background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                        <!-- BARIS TOTAL FOOTER -->
+                        <tr style="background: #f8fafc; font-weight: bold; border-top: 2px solid #cbd5e1;">
+                            <td colspan="6" style="padding: 14px 10px; text-align: right; color: #0f172a; font-size: 14px;">
+                                TOTAL PENYETORAN PAJAK:
+                            </td>
+                            <td style="padding: 14px 10px; text-align: right; color: #15803d; font-size: 15px; font-weight: 800;">
+                                Rp <%= Number(summary.totalSemua || 0).toLocaleString('id-ID') %>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="9" style="padding: 40px; text-align: center; color: #94a3b8;">
+                                <div style="font-size: 32px; margin-bottom: 10px;">🧾</div>
+                                Belum ada data penyetoran pajak untuk filter yang dipilih. Silakan klik tombol <b>"+ Input Setoran Pajak"</b> di atas.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL INPUT SETORAN PAJAK CEPAT -->
+<div id="modalSetorPajak" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50;">
+    <div style="background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 550px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+            <h3 style="margin:0; color: #0f172a;">Input Setoran Pajak (BPN / NTPN)</h3>
+            <button onclick="document.getElementById('modalSetorPajak').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+        </div>
+        <form action="/spj/pajak/tambah" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 12px;">
+            <input type="hidden" name="redirect_to" value="rekap">
+            
+            <div>
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Kegiatan SPJ <span style="color:red;">*</span></label>
+                <select name="kegiatan_id" required style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-size: 13px;">
+                    <option value="">-- Pilih Kegiatan --</option>
+                    <% if (typeof kegiatanList !== 'undefined') { kegiatanList.forEach(k => { %>
+                        <option value="<%= k.id %>"><%= k.nama_kegiatan %> (<%= k.tahun %>)</option>
+                    <% }) } %>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Jenis Pajak <span style="color:red;">*</span></label>
+                    <select name="jenis_pajak" required style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-size: 13px;">
+                        <option value="PPN">PPN (Pajak Pertambahan Nilai)</option>
+                        <option value="PPh 21">PPh Pasal 21 (Upah/Honor)</option>
+                        <option value="PPh 22">PPh Pasal 22 (Barang/Material)</option>
+                        <option value="PPh 23">PPh Pasal 23 (Sewa/Jasa)</option>
+                        <option value="Pajak Daerah">Pajak Daerah / Restoran / Galian C</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Nominal Setor (Rp) <span style="color:red;">*</span></label>
+                    <input type="number" name="nominal" required placeholder="Cth: 250000" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">NTPN (Bukti Setor Bank)</label>
+                    <input type="text" name="ntpn" placeholder="16 Digit NTPN" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Kode Billing DJP</label>
+                    <input type="text" name="kode_billing" placeholder="15 Digit Kode Billing" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Tanggal Penyetoran</label>
+                    <input type="date" name="tanggal_setor" value="<%= new Date().toISOString().split('T')[0] %>" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Nama Rekanan / WP</label>
+                    <input type="text" name="nama_wp_rekanan" placeholder="Cth: UD. Bangun Jaya" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                </div>
+            </div>
+
+            <div>
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Uraian Belanja</label>
+                <input type="text" name="uraian" placeholder="Cth: Pemotongan Pajak Belanja Semen Pembangunan Semenisasi RT.02" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+            </div>
+
+            <div>
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Unggah Bukti Setor / BPN (PDF/Gambar)</label>
+                <input type="file" name="file_bukti" style="width: 100%; padding: 8px 10px; border: 1px dashed #94a3b8; border-radius: 6px; background: #f8fafc; font-size: 13px;">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="document.getElementById('modalSetorPajak').style.display='none'" style="padding: 9px 16px; border: none; background: #e2e8f0; color: #475569; border-radius: 6px; font-weight: bold; cursor: pointer;">Batal</button>
+                <button type="submit" style="padding: 9px 18px; border: none; background: #1d4ed8; color: white; border-radius: 6px; font-weight: bold; cursor: pointer;">Simpan Setoran</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// EXPORT DATA PAJAK KE EXCEL MENGGUNAKAN SHEETJS
+function exportPajakToExcel() {
+    const table = document.getElementById('tabelPajak');
+    if (!table) return alert('Tabel data pajak tidak ditemukan!');
+
+    const rows = [];
+    const headers = ['No', 'Tanggal Setor', 'Kegiatan SPJ', 'Uraian Belanja', 'Nama Rekanan/WP', 'NTPN', 'Kode Billing', 'Jenis Pajak', 'Nominal Setor (Rp)'];
+    rows.push(headers);
+
+    const tbodyRows = table.querySelectorAll('tbody tr');
+    let no = 1;
+    tbodyRows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (cells.length >= 7 && !tr.innerText.includes('TOTAL PENYETORAN')) {
+            const tgl = cells[1] ? cells[1].innerText.trim() : '';
+            const keg = cells[2] ? cells[2].innerText.trim().replace(/\n/g, ' ') : '';
+            const uraianEl = cells[3];
+            const uraian = uraianEl ? (uraianEl.querySelector('div') ? uraianEl.querySelector('div').innerText.trim() : uraianEl.innerText.trim()) : '';
+            const wp = uraianEl && uraianEl.querySelector('small') ? uraianEl.querySelector('small').innerText.replace('WP: ', '').trim() : '';
+            
+            const ntpnEl = cells[4];
+            let ntpnVal = '';
+            let billVal = '';
+            if (ntpnEl) {
+                const ntpnDiv = ntpnEl.querySelector('div:first-child');
+                if (ntpnDiv && ntpnDiv.innerText.includes('NTPN:')) ntpnVal = ntpnDiv.innerText.replace('NTPN:', '').trim();
+                const billDiv = ntpnEl.querySelector('div:nth-child(2)');
+                if (billDiv && billDiv.innerText.includes('Bill:')) billVal = billDiv.innerText.replace('Bill:', '').trim();
+            }
+
+            const jenis = cells[5] ? cells[5].innerText.trim() : '';
+            const nominalStr = cells[6] ? cells[6].innerText.replace(/[^0-9]/g, '') : '0';
+            const nominal = Number(nominalStr) || 0;
+
+            rows.push([no++, tgl, keg, uraian, wp, ntpnVal, billVal, jenis, nominal]);
+        }
+    });
+
+    if (rows.length <= 1) {
+        return alert('Tidak ada data setoran pajak untuk diekspor!');
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+
+    ws['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 14 }, // Tgl Setor
+        { wch: 35 }, // Kegiatan
+        { wch: 40 }, // Uraian
+        { wch: 25 }, // WP
+        { wch: 20 }, // NTPN
+        { wch: 18 }, // Billing
+        { wch: 18 }, // Jenis
+        { wch: 18 }  // Nominal
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Rekapitulasi Pajak');
+
+    const tahun = '<%= filterTahun || "Semua_Tahun" %>';
+    XLSX.writeFile(wb, `Rekapitulasi_Pajak_SIAD_${tahun}.xlsx`);
+}
+</script>
+
+<% } else { %>
+<!-- ========================================== -->
+<!-- TAB KEGIATAN SPJ (DEFAULT LIST) -->
+<!-- ========================================== -->
+<div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h2 style="margin:0; color: #1e293b;">Modul Kegiatan (SPJ)</h2>
+            <p style="margin:5px 0 0 0; color: #64748b;">Manajemen Data Induk SPJ & Alur Verifikasi Bertingkat</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- TOMBOL CETAK REKAPITULASI REALISASI SPJ (SISKEUDES) -->
+            <button onclick="bukaModalFilterRekap()" style="background: #0f172a; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                🖨️ Rekapitulasi Realisasi (Siskeudes)
+            </button>
+            <button onclick="bukaModalSPJ()" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(29,78,216,0.3);">
+                + Tambah Kegiatan
+            </button>
+        </div>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
+                    <th style="padding: 12px 10px; width: 35px;">No</th>
+                    <th style="padding: 12px 10px;">Nama Kegiatan & Bidang APBDes</th>
+                    <th style="padding: 12px 10px; width: 140px;">Pagu Anggaran</th>
+                    <th style="padding: 12px 10px; width: 130px;">Lokasi</th>
+                    <th style="padding: 12px 10px; width: 130px;">Status Verifikasi</th>
+                    <th style="padding: 12px 10px; width: 110px; text-align: center;">Notifikasi</th>
+                    <th style="padding: 12px 10px; width: 160px; text-align: right;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                    <% data.forEach((item, index) => { %>
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 12px 10px; text-align: center;"><%= index + 1 %></td>
+                        <td style="padding: 12px 10px;">
+                            <div style="font-weight: bold; color: #0f172a; font-size: 13.5px;"><%= item.nama_kegiatan %></div>
+                            <div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+                                <span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px;">
+                                    TA <%= item.tahun %> • <%= item.tahap || 'Tahap 1' %>
+                                </span>
+                                <span style="background: #f1f5f9; color: #334155; padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px; border: 1px solid #e2e8f0;">
+                                    🏷️ <%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>
+                                </span>
+                                <% if (item.kode_rekening) { %>
+                                    <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 10.5px; font-weight: bold;">
+                                        Rek: <%= item.kode_rekening %>
+                                    </span>
+                                <% } %>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 10px; font-weight: bold; color: #1e293b;">Rp <%= Number(item.pagu_anggaran).toLocaleString('id-ID') %></td>
+                        <td style="padding: 12px 10px; color: #475569;"><%= item.lokasi || '-' %></td>
+                        <td style="padding: 12px 10px;">
+                            <% 
+                                const tahapVerif = item.tahap_verifikasi || 'DRAFT'; 
+                                let bg = '#fef08a'; let txt = '#854d0e'; let lbl = 'Draft (Kaur)';
+                                if (tahapVerif === 'VERIFIKASI_BENDAHARA') { bg = '#fef3c7'; txt = '#b45309'; lbl = 'Menunggu Bendahara'; }
+                                else if (tahapVerif === 'VERIFIKASI_SEKDES') { bg = '#e0e7ff'; txt = '#3730a3'; lbl = 'Menunggu Sekdes'; }
+                                else if (tahapVerif === 'VERIFIKASI_PENGHULU') { bg = '#dbeafe'; txt = '#1d4ed8'; lbl = 'Menunggu Penghulu'; }
+                                else if (tahapVerif === 'SELESAI_FINAL') { bg = '#dcfce7'; txt = '#15803d'; lbl = 'Disahkan (Sah)'; }
+                                else if (tahapVerif === 'PERLU_REVISI') { bg = '#fee2e2'; txt = '#b91c1c'; lbl = 'Perlu Revisi'; }
+                            %>
+                            <span style="background:<%= bg %>; color:<%= txt %>; padding:4px 9px; border-radius:12px; font-size:11.5px; font-weight:bold; display:inline-block;"><%= lbl %></span>
+                        </td>
+                        
+                        <!-- TOMBOL CEPAT NOTIFIKASI WHATSAPP BERJENJANG -->
+                        <td style="padding: 12px 10px; text-align: center;">
+                            <% 
+                                const paguFmt = 'Rp ' + Number(item.pagu_anggaran).toLocaleString('id-ID');
+                                let waMsg = '';
+                                let waBtnLabel = '📲 WA Sekdes';
+                                let waBgColor = '#25D366';
+
+                                if (tahapVerif === 'DRAFT' || !tahapVerif) {
+                                    waMsg = `Halo Bapak/Ibu Sekdes, mohon izin menyampaikan bahwa berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}, ${item.tahap || 'Tahap 1'}) dengan anggaran *${paguFmt}* telah selesai diinput di aplikasi SIAD 2.0 dan menunggu verifikasi Bapak/Ibu Sekdes. Terima kasih 🙏`;
+                                    waBtnLabel = '📲 WA Sekdes';
+                                    waBgColor = '#25D366';
+                                } else if (tahapVerif === 'VERIFIKASI_BENDAHARA') {
+                                    waMsg = `Halo Bendahara, berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}, ${item.tahap || 'Tahap 1'}) sebesar *${paguFmt}* telah diajukan dan menunggu verifikasi kelengkapan keuangan & penyetoran pajak di aplikasi SIAD 2.0. Terima kasih 🙏`;
+                                    waBtnLabel = '📲 WA Bendahara';
+                                    waBgColor = '#16a34a';
+                                } else if (tahapVerif === 'VERIFIKASI_SEKDES') {
+                                    waMsg = `Halo Bapak/Ibu Sekdes, berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}) telah diverifikasi Bendahara dan sekarang siap untuk diverifikasi administratif oleh Bapak/Ibu Sekdes di SIAD 2.0. Terima kasih 🙏`;
+                                    waBtnLabel = '📲 WA Sekdes';
+                                    waBgColor = '#25D366';
+                                } else if (tahapVerif === 'VERIFIKASI_PENGHULU') {
+                                    waMsg = `Yth. Bapak Penghulu, berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}, ${item.tahap || 'Tahap 1'}) sebesar *${paguFmt}* telah lengkap diverifikasi oleh Sekdes dan Bendahara. Mohon kesediaan Bapak Penghulu untuk memberikan persetujuan / pengesahan akhir di aplikasi SIAD 2.0. Terima kasih 🙏`;
+                                    waBtnLabel = '📲 WA Penghulu';
+                                    waBgColor = '#047857';
+                                } else if (tahapVerif === 'PERLU_REVISI') {
+                                    const catRevisi = item.catatan_revisi || 'Mohon cek kelengkapan bukti dan nota';
+                                    waMsg = `Pemberitahuan Revisi SPJ: Berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}) memerlukan perbaikan. Catatan revisi: "${catRevisi}". Mohon segera diperbaiki melalui aplikasi SIAD 2.0. Terima kasih 🙏`;
+                                    waBtnLabel = '📲 WA Revisi';
+                                    waBgColor = '#dc2626';
+                                } else if (tahapVerif === 'SELESAI_FINAL') {
+                                    waMsg = `Pemberitahuan Resmi: SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}, ${item.tahap || 'Tahap 1'}) sebesar *${paguFmt}* telah SAH & SELESAI disahkan oleh Penghulu di aplikasi SIAD 2.0. Lembar pengesahan ber-barcode resmi dapat diunduh di sistem. Terima kasih.`;
+                                    waBtnLabel = '📲 Bagikan WA';
+                                    waBgColor = '#059669';
+                                }
+                            %>
+                            <a href="https://api.whatsapp.com/send?text=<%= encodeURIComponent(waMsg) %>" target="_blank" title="Kirim Notifikasi Cepat ke WhatsApp" style="text-decoration:none; background:<%= waBgColor %>; color:white; padding:5px 9px; border-radius:6px; font-size:11px; font-weight:bold; display:inline-flex; align-items:center; gap:3px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                <%= waBtnLabel %>
+                            </a>
+                        </td>
+
+                        <td style="padding: 12px 10px; text-align: right;">
+                            <div style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
+                                <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" title="Berkas & Alur Verifikasi" style="background:#10b981; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">📂 Berkas</button>
+                                <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" title="Kelola Pajak" style="background:#3b82f6; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">💸</button>
+                                <a href="/spj/cetak/<%= item.id %>" target="_blank" title="Cetak Lembar Pengesahan" style="text-decoration:none; background:#0f172a; color:white; padding:6px 9px; border-radius:4px; font-size:11.5px; font-weight:bold;">🖨️</a>
+                                <button onclick="editSPJ('<%= item.id %>', '<%= item.nama_kegiatan %>', '<%= item.tahun %>', '<%= item.pagu_anggaran %>', '<%= item.lokasi %>', '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', '<%= item.keterangan %>', '<%= item.tahap || 'Tahap 1' %>', '<%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>', '<%= item.kode_rekening || '' %>')" title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
+                                <form action="/spj/delete" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Hapus kegiatan ini?')">
+                                    <input type="hidden" name="id" value="<%= item.id %>">
+                                    <button type="submit" title="Hapus Kegiatan" style="background:#ef4444; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8;">
+                            <div style="font-size: 32px; margin-bottom: 10px;">📁</div>
+                            Belum ada kegiatan SPJ. Klik tombol <b>"+ Tambah Kegiatan"</b> di atas untuk menambahkan kegiatan baru.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL FILTER CETAK REKAPITULASI REALISASI SPJ (SISKEUDES) -->
+<div id="modalFilterRekap" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50;">
+    <div style="background: white; padding: 25px; border-radius: 10px; width: 100%; max-width: 460px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+            <div>
+                <h3 style="margin:0; color: #0f172a; font-size: 16px;">🖨️ Cetak Rekapitulasi Realisasi SPJ</h3>
+                <p style="margin:3px 0 0 0; color: #64748b; font-size: 12px;">Format Standar Siskeudes / Permendagri No. 20/2018</p>
+            </div>
+            <button onclick="document.getElementById('modalFilterRekap').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+        </div>
+        
+        <form onsubmit="bukaLembarRekap(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+                <label style="display:block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Tahun Anggaran <span style="color:red;">*</span></label>
+                <select id="rekapTahun" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-weight: bold; font-size: 13px;">
+                    <% if (typeof tahunList !== 'undefined' && tahunList.length > 0) { %>
+                        <% tahunList.forEach(th => { %>
+                            <option value="<%= th %>"><%= th %></option>
+                        <% }) %>
+                    <% } else { %>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div>
+                <label style="display:block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Tahap / Periode Pelaporan <span style="color:red;">*</span></label>
+                <select id="rekapTahap" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-weight: 600; font-size: 13px;">
+                    <option value="Semua">Semua Tahap (Rekap Tahunan Penuh)</option>
+                    <option value="Tahap 1">Tahap 1 (Pencairan Tahap Pertama)</option>
+                    <option value="Tahap 2">Tahap 2 (Pencairan Tahap Kedua)</option>
+                    <option value="Semester 1">Semester 1 (Januari - Juni)</option>
+                    <option value="Semester 2">Semester 2 (Juli - Desember)</option>
+                </select>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; font-size: 11.5px; color: #64748b; line-height: 1.4;">
+                ℹ️ Lembar rekapitulasi akan tersusun otomatis dalam <b>5 Bidang APBDes Siskeudes</b> lengkap dengan subtotal per bidang, grand total realisasi, dan kolom tanda tangan (Penghulu, Sekdes, Bendahara).
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="document.getElementById('modalFilterRekap').style.display='none'" style="padding: 9px 16px; border: none; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 6px; cursor: pointer;">Batal</button>
+                <button type="submit" style="padding: 9px 20px; border: none; background: #0f172a; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    🖨️ Buka Laporan Cetak
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL TAMBAH / EDIT SPJ -->
+<div id="modalSPJ" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50;">
+    <div style="background: white; padding: 24px; border-radius: 10px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+            <h3 id="modalTitleSPJ" style="margin:0; color:#0f172a;">Tambah Kegiatan SPJ</h3>
+            <button onclick="document.getElementById('modalSPJ').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+        </div>
+        <form id="formSPJ" action="/spj/tambah" method="POST" style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Nama Kegiatan <span style="color:red;">*</span></label>
+                <input type="text" name="nama" placeholder="Cth: Pembangunan Semenisasi Jalan Lingkungan" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+            </div>
+
+            <!-- BIDANG APBDES STANDAR SISKEUDES -->
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Bidang Kegiatan (Standar Siskeudes / Permendagri 20/2018) <span style="color:red;">*</span></label>
+                <select name="bidang" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-size:12.5px; font-weight:600;">
+                    <option value="Bidang 1: Penyelenggaraan Pemerintahan Desa">Bidang 1: Penyelenggaraan Pemerintahan Desa</option>
+                    <option value="Bidang 2: Pelaksanaan Pembangunan Desa">Bidang 2: Pelaksanaan Pembangunan Desa</option>
+                    <option value="Bidang 3: Pembinaan Kemasyarakatan Desa">Bidang 3: Pembinaan Kemasyarakatan Desa</option>
+                    <option value="Bidang 4: Pemberdayaan Masyarakat Desa">Bidang 4: Pemberdayaan Masyarakat Desa</option>
+                    <option value="Bidang 5: Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa">Bidang 5: Penanggulangan Bencana, Keadaan Darurat & Mendesak</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Kode Rekening Kegiatan</label>
+                    <input type="text" name="kode_rekening" placeholder="Cth: 2.01.01" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; font-family:monospace;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Pagu Anggaran (Rp) <span style="color:red;">*</span></label>
+                    <input type="number" name="pagu" placeholder="Cth: 75000000" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahun Anggaran</label>
+                    <input type="number" name="tahun" placeholder="Tahun" value="<%= new Date().getFullYear() %>" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahap / Semester</label>
+                    <select name="tahap" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-weight:600;">
+                        <option value="Tahap 1">Tahap 1</option>
+                        <option value="Tahap 2">Tahap 2</option>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Lokasi Kegiatan</label>
+                <input type="text" name="lokasi" placeholder="Cth: RT.02 / RW.01 Kepenghuluan" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tgl Mulai</label>
+                    <input type="date" name="tgl_mulai" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tgl Selesai</label>
+                    <input type="date" name="tgl_selesai" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white;">
+                </div>
+            </div>
+
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Status Kegiatan</label>
+                <select name="status" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white;">
+                    <option value="draft">Draft</option>
+                    <option value="diajukan">Diajukan</option>
+                    <option value="disetujui">Disetujui</option>
+                    <option value="selesai">Selesai</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Keterangan / Uraian</label>
+                <textarea name="ket" rows="2" placeholder="Catatan kegiatan..." style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; resize:vertical;"></textarea>
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                <button type="button" onclick="document.getElementById('modalSPJ').style.display='none'" style="padding:9px 18px; border:none; background:#e2e8f0; color:#475569; font-weight:700; border-radius:6px; cursor:pointer;">Batal</button>
+                <button type="submit" style="padding:9px 20px; border:none; background:#1d4ed8; color:white; font-weight:700; border-radius:6px; cursor:pointer; box-shadow:0 2px 4px rgba(29,78,216,0.3);">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function bukaModalFilterRekap() {
+    document.getElementById('modalFilterRekap').style.display = 'flex';
+}
+
+function bukaLembarRekap(e) {
+    e.preventDefault();
+    const thn = document.getElementById('rekapTahun').value;
+    const thp = document.getElementById('rekapTahap').value;
+    window.open('/spj/cetak-rekap?tahun=' + encodeURIComponent(thn) + '&tahap=' + encodeURIComponent(thp), '_blank');
+    document.getElementById('modalFilterRekap').style.display = 'none';
+}
+
+function bukaModalSPJ() {
+    document.getElementById('modalTitleSPJ').textContent = 'Tambah Kegiatan SPJ';
+    const form = document.getElementById('formSPJ');
+    form.reset();
+    form.action = '/spj/tambah';
+    let idIn = document.getElementById('edit-spj-id');
+    if(idIn) idIn.remove();
+    document.getElementById('modalSPJ').style.display = 'flex';
+}
+
+function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek) {
+    document.getElementById('modalTitleSPJ').textContent = 'Edit Kegiatan SPJ';
+    const form = document.getElementById('formSPJ');
+    form.action = '/spj/edit';
+    
+    let idIn = document.getElementById('edit-spj-id');
+    if(!idIn) { 
+        idIn = document.createElement('input'); 
+        idIn.type = 'hidden'; 
+        idIn.name = 'id'; 
+        idIn.id = 'edit-spj-id'; 
+        form.appendChild(idIn); 
+    }
+    idIn.value = id;
+    
+    form.querySelector('[name="nama"]').value = nama;
+    form.querySelector('[name="tahun"]').value = tahun;
+    if(form.querySelector('[name="tahap"]')) form.querySelector('[name="tahap"]').value = tahap || 'Tahap 1';
+    if(form.querySelector('[name="bidang"]')) form.querySelector('[name="bidang"]').value = bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
+    if(form.querySelector('[name="kode_rekening"]')) form.querySelector('[name="kode_rekening"]').value = kodeRek || '';
+    form.querySelector('[name="pagu"]').value = pagu;
+    form.querySelector('[name="lokasi"]').value = lokasi;
+    form.querySelector('[name="tgl_mulai"]').value = tgl_mulai;
+    form.querySelector('[name="tgl_selesai"]').value = tgl_selesai;
+    form.querySelector('[name="status"]').value = status;
+    form.querySelector('[name="ket"]').value = ket;
+    
+    document.getElementById('modalSPJ').style.display = 'flex';
+}
+</script>
+<% } %>

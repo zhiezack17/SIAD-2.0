@@ -1,0 +1,68 @@
+
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 30px;">
+    <div class="kembali-btn-wrapper" style="padding: 0 0 20px 0;">
+        <a href="/workspace" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; font-weight: bold; border: 1px solid #cbd5e1;">⬅️ Kembali ke Workspace</a>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <h2 style="margin:0; color: #1e293b; font-size: 24px;">📁 <%= workspace.nama %></h2>
+        <p style="color: #64748b;"><%= workspace.deskripsi %></p>
+        
+        <hr style="border: 1px solid #f1f5f9; margin: 20px 0;">
+        
+        <div style="display: flex; gap: 30px;">
+            <!-- Form Upload -->
+            <div style="flex: 1; background: #f8fafc; padding: 20px; border-radius: 8px;">
+                <h3 style="margin-top: 0;">Unggah Dokumen Baru</h3>
+                <form action="/workspace/<%= workspace.id %>/upload" method="POST" enctype="multipart/form-data">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Jenis Dokumen</label>
+                        <input type="text" name="jenis_dokumen" placeholder="Contoh: Proposal, Laporan" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;" required>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">File Dokumen</label>
+                        <input type="file" name="file" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; box-sizing: border-box;" required>
+                    </div>
+                    <button type="submit" style="background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer;">Mulai Unggah ke Drive</button>
+                </form>
+            </div>
+            
+            <!-- Tabel Dokumen -->
+            <div style="flex: 2;">
+                <h3 style="margin-top: 0;">Daftar Dokumen</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f1f5f9; text-align: left;">
+                            <th style="padding: 12px; border-bottom: 2px solid #cbd5e1;">Nama File</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #cbd5e1;">Jenis</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #cbd5e1;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof documents !== 'undefined' && documents && documents.length > 0) { %>
+                            <% documents.forEach(doc => { %>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;"><%= doc.nama_file_asli %></td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;"><%= doc.jenis_dokumen %></td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
+                                        <% if (doc.drive_url || doc.path_lokal) { %>
+                                            <a href="<%= doc.drive_url || doc.path_lokal %>" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: bold;">Lihat di Drive</a>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="3" style="text-align: center; padding: 20px; color: #94a3b8;">Belum ada dokumen di Workspace ini.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('status') && urlParams.get('msg')) {
+        alert(urlParams.get('msg'));
+        window.location.href = window.location.pathname;
+    }
+</script>

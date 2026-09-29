@@ -1,0 +1,149 @@
+<%
+    const _r = (typeof userRole !== 'undefined' && userRole ? userRole : (user && (user.peran || user.role) ? (user.peran || user.role) : '')).toLowerCase();
+    const _isKaurUmum = _r === 'kaur_umum' || _r.includes('kaur_umum') || _r.includes('kaur umum') || (stats && stats.is_kaur_umum === true);
+%>
+            <div class="page-header">
+                <div>
+                    <h1 style="margin:0 0 4px 0;"><i class="fa-solid fa-house"></i> Dashboard</h1>
+                    <p style="margin:0;color:var(--text-secondary);font-size:13px;">Selamat datang kembali, <strong><%= user ? (user.nama_lengkap || user.nama) : 'Administrator SIAD Kab. Rokan Hilir' %></strong>.</p>
+                </div>
+                <div>
+                    <% if (!_isKaurUmum) { %>
+                    <a href="/workspace" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Workspace Baru</a>
+                    <% } else { %>
+                    <a href="/surat?tab=masuk" class="btn btn-primary"><i class="fa-solid fa-envelope"></i> Kelola Persuratan</a>
+                    <% } %>
+                </div>
+            </div>
+
+            <% if (_isKaurUmum) { %>
+            <!-- STATS GRID KHUSUS KAUR UMUM (HANYA PERSURATAN) -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;">
+                <div class="stat-card blue">
+                    <div class="stat-label">Surat Masuk</div>
+                    <div class="stat-value"><%= (stats && stats.surat_masuk !== undefined) ? stats.surat_masuk : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Surat Keluar</div>
+                    <div class="stat-value"><%= (stats && stats.surat_keluar !== undefined) ? stats.surat_keluar : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-label">Total Arsip Surat</div>
+                    <div class="stat-value"><%= (stats && stats.total_surat !== undefined) ? stats.total_surat : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                </div>
+            </div>
+            <% } else { %>
+            <!-- STATS GRID STANDAR DESA / KABUPATEN -->
+            <div class="stats-grid">
+                <div class="stat-card red">
+                    <div class="stat-label">Total Workspace</div>
+                    <div class="stat-value"><%= stats ? stats.total_workspace : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-briefcase"></i></div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-label">Dokumen Terarsip</div>
+                    <div class="stat-value"><%= stats ? stats.total_dokumen : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-label">Belum Lengkap (SPJ)</div>
+                    <div class="stat-value"><%= stats ? stats.belum_lengkap : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Sudah Diverifikasi (SPJ)</div>
+                    <div class="stat-value"><%= stats ? stats.sudah_verifikasi : 0 %></div>
+                    <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                </div>
+            </div>
+            <% } %>
+
+            <div class="charts-row">
+                <!-- CHART DOKUMEN PER TAHUN -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 class="card-title" style="margin: 0;">
+                            <i class="fa-solid fa-chart-column" style="color: var(--accent-blue); margin-right: 6px;"></i> 
+                            <%= _isKaurUmum ? 'Arsip Surat per Tahun' : 'Arsip Dokumen per Tahun' %>
+                        </h3>
+                        <span style="font-size: 11px; font-weight: 700; color: #10b981; background: #ecfdf5; padding: 3px 8px; border-radius: 6px;">Real-Time Database</span>
+                    </div>
+                    <%
+                        const cData = (typeof chartData !== 'undefined' && chartData) ? chartData : { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+                        const maxVal = Math.max(cData[2023] || 0, cData[2024] || 0, cData[2025] || 0, cData[2026] || 0, 1);
+                    %>
+                    <div style="height: 220px; display: flex; align-items: flex-end; justify-content: space-around; padding-top: 20px; border-bottom: 2px solid #f1f5f9;">
+                        <% [2023, 2024, 2025, 2026].forEach(th => { 
+                            const val = cData[th] || 0;
+                            const pct = val > 0 ? Math.max(15, Math.round((val / maxVal) * 85)) : 4;
+                            const barBg = val > 0 ? 'linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%)' : '#e2e8f0';
+                        %>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; width: 60px;">
+                            <span style="font-size: 11.5px; font-weight: 700; color: <%= val > 0 ? '#1e293b' : '#94a3b8' %>;"><%= val %></span>
+                            <div style="width: 42px; height: <%= pct %>%; min-height: 8px; background: <%= barBg %>; border-radius: 6px 6px 0 0; transition: height 0.5s ease; box-shadow: <%= val > 0 ? '0 4px 10px rgba(37,99,235,0.2)' : 'none' %>;"></div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; margin-top: 10px; color: var(--text-muted); font-size: 12px; font-weight: 600;">
+                        <span>2023</span>
+                        <span>2024</span>
+                        <span>2025</span>
+                        <span>2026</span>
+                    </div>
+                </div>
+
+                <% if (_isKaurUmum) { %>
+                <!-- WIDGET AKSES CEPAT & KEAMANAN DATA UNTUK KAUR UMUM -->
+                <div class="card">
+                    <h3 class="card-title"><i class="fa-solid fa-bolt" style="color: var(--accent-yellow); margin-right: 6px;"></i> Akses Cepat Persuratan</h3>
+                    <div style="display: flex; gap: 14px; flex-direction: column; margin-top: 15px;">
+                        <a href="/surat?tab=masuk" class="btn" style="background: rgba(46,91,255,0.08); color: var(--accent-blue); padding: 14px 18px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; font-weight: 700;">
+                            <span style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-inbox" style="font-size: 18px;"></i> Catat / Buka Surat Masuk & Disposisi
+                            </span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <a href="/surat?tab=keluar" class="btn" style="background: rgba(16,185,129,0.08); color: var(--accent-green); padding: 14px 18px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; font-weight: 700;">
+                            <span style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-paper-plane" style="font-size: 18px;"></i> Catat / Buka Surat Keluar Resmi
+                            </span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div style="margin-top: 20px; padding: 14px 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 12.5px; color: #475569; line-height: 1.5;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">
+                            <i class="fa-solid fa-shield-halved" style="color: #10b981;"></i> Proteksi & Kerahasiaan Data Aktif
+                        </div>
+                        Akun ini memiliki hak akses eksklusif untuk administrasi persuratan kepenghuluan. Modul keuangan (SPJ & Pajak), inventaris aset, dan BUMDes terkunci otomatis demi kepatuhan SOP tata kelola desa.
+                    </div>
+                </div>
+                <% } else { %>
+                <!-- WIDGET WORKSPACE TERBARU UNTUK ROLE LAINNYA -->
+                <div class="card">
+                    <h3 class="card-title">Workspace Terbaru</h3>
+                    <ul style="list-style: none;">
+                        <% if (workspaces && workspaces.length > 0) { %>
+                            <% workspaces.forEach(ws => { %>
+                            <li style="padding: 16px 12px; border-bottom: 1px solid var(--border); border-radius: 12px; transition: background 0.2s; cursor: pointer;" onmouseover="this.style.background='rgba(46,91,255,0.04)'" onmouseout="this.style.background='transparent'" font-size: 14px; display: flex; align-items: center;">
+                                <i class="fa-solid <%= ws.type_icon || 'fa-folder' %>" style="color: <%= ws.type_warna || '#fbbf24' %>; margin-right: 10px; font-size: 1.2rem;"></i>
+                                <div style="flex-grow: 1;">
+                                    <a href="/workspace/<%= ws.id %>" style="text-decoration: none; color: var(--text-color); font-weight: 500;">
+                                        <%= ws.nama %>
+                                    </a>
+                                    <div style="color: var(--text-muted); font-size: 12px;"><%= ws.kepenghuluan_nama %> • <%= ws.type_nama %></div>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 12px; white-space: nowrap;">
+                                    <%= new Date(ws.created_at).toLocaleDateString('id-ID') %>
+                                </div>
+                            </li>
+                            <% }); %>
+                        <% } else { %>
+                            <li style="padding: 10px 0; font-size: 14px; color: var(--text-muted); text-align: center;">Belum ada workspace dibuat.</li>
+                        <% } %>
+                    </ul>
+                </div>
+                <% } %>
+            </div>

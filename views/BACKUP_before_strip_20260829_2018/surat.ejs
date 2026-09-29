@@ -1,0 +1,147 @@
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 20px;">
+    
+    <!-- Kotak Notifikasi -->
+    <div id="notifArea" style="display: none; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold;"></div>
+
+    <!-- Tombol Kembali -->
+    <div style="margin-bottom: 20px;">
+        <a href="/dashboard" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            ⬅️ Kembali ke Dashboard
+        </a>
+    </div>
+
+    <!-- Header & Tab Navigasi -->
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 25px;">
+        <h2 style="margin: 0 0 20px 0; color: #1e293b; font-size: 24px;">📧 Manajemen Surat</h2>
+        
+        <div style="display: flex; gap: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+            <a href="/surat?tab=masuk" style="text-decoration: none; background: <%= tab === 'masuk' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'masuk' ? 'white' : '#475569' %>; padding: 10px 20px; border-radius: 6px; font-weight: bold;">📥 Surat Masuk</a>
+            <a href="/surat?tab=keluar" style="text-decoration: none; background: <%= tab === 'keluar' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'keluar' ? 'white' : '#475569' %>; padding: 10px 20px; border-radius: 6px; font-weight: bold;">📤 Surat Keluar</a>
+        </div>
+    </div>
+
+    <!-- Area Konten Utama -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px; align-items: start;">
+        
+        <!-- Kolom Kiri: Form Tambah Data -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">
+                ➕ Tambah <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
+            </h3>
+            
+            <form action="/surat/<%= tab %>" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Nomor Surat</label>
+                    <input type="text" name="nomor_surat" required placeholder="Cth: 140/01/Ds-SA/2026" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Tanggal Surat</label>
+                    <input type="date" name="tanggal_surat" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                
+                <% if (tab === 'masuk') { %>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Asal / Pengirim</label>
+                    <input type="text" name="pengirim" required placeholder="Cth: Kantor Camat / Dinas..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <% } else { %>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Tujuan / Penerima</label>
+                    <input type="text" name="tujuan" required placeholder="Cth: Bapak Bupati / Camat..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <% } %>
+
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Perihal</label>
+                    <textarea name="perihal" rows="2" required placeholder="Ringkasan isi surat..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Upload File Surat (Scan/PDF)</label>
+                    <input type="file" name="file_surat" required style="width: 100%; padding: 10px; border: 1px dashed #94a3b8; border-radius: 6px; background: #f8fafc;">
+                    <small style="color: #64748b; font-style: italic;">*Akan dicadangkan ke Google Drive otomatis</small>
+                </div>
+                <button type="submit" style="background: #10b981; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer;">
+                    💾 Simpan & Upload
+                </button>
+            </form>
+        </div>
+
+        <!-- Kolom Kanan: Tabel Data Tersimpan -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">
+                📋 Daftar <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
+            </h3>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; text-align: left;">
+                        <th style="padding: 12px 8px;">No. Surat & Tanggal</th>
+                        <th style="padding: 12px 8px;"><%= tab === 'masuk' ? 'Pengirim' : 'Tujuan' %></th>
+                        <th style="padding: 12px 8px;">Perihal</th>
+                        <th style="padding: 12px 8px; width: 100px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                        <% data.forEach(function(item) { %>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 12px 8px;">
+                                    <div style="font-weight: bold; color: #0f172a;"><%= item.nomor_surat %></div>
+                                    <div style="color: #64748b; font-size: 12px;">
+                                        <%= new Date(item.tanggal_surat).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px 8px; color: #475569;">
+                                    <%= tab === 'masuk' ? item.pengirim : item.tujuan %>
+                                </td>
+                                <td style="padding: 12px 8px; color: #475569;">
+                                    <%= item.perihal %>
+                                </td>
+                                <td style="padding: 12px 8px;">
+                                    <div style="display: flex; gap: 6px; flex-direction: column;">
+                                        <% if (item.file_url) { %>
+                                            <a href="<%= item.file_url %>" target="_blank" style="background: #eef2ff; color: #4f46e5; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; text-align: center; display: block;">Lihat Drive</a>
+                                        <% } %>
+                                        <form action="/surat/delete" method="POST" style="margin:0;" onsubmit="return confirm('Hapus surat ini secara permanen?');">
+                                            <input type="hidden" name="id" value="<%= item.id %>">
+                                            <input type="hidden" name="type" value="<%= tab %>">
+                                            <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%;">Hapus</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" style="padding: 30px; text-align: center; color: #94a3b8;">Belum ada surat yang tersimpan di brankas ini.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Membaca status keberhasilan dari alamat URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const notifArea = document.getElementById('notifArea');
+    
+    if (status === 'success') {
+        notifArea.style.display = 'block';
+        notifArea.style.background = '#dcfce7';
+        notifArea.style.color = '#166534';
+        notifArea.style.borderLeft = '5px solid #22c55e';
+        notifArea.innerHTML = '✅ Sukses! Surat berhasil disimpan dan otomatis diunggah ke Google Drive.';
+        window.history.replaceState({}, document.title, window.location.pathname + "?tab=<%= tab %>");
+    } else if (status === 'error') {
+        notifArea.style.display = 'block';
+        notifArea.style.background = '#fee2e2';
+        notifArea.style.color = '#991b1b';
+        notifArea.style.borderLeft = '5px solid #ef4444';
+        notifArea.innerHTML = '❌ Terjadi kesalahan saat mengunggah surat!';
+        window.history.replaceState({}, document.title, window.location.pathname + "?tab=<%= tab %>");
+    }
+</script>

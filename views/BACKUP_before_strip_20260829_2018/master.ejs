@@ -1,0 +1,140 @@
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 20px;">
+    <!-- Tombol Kembali -->
+    <div style="margin-bottom: 20px;">
+        <a href="/dashboard" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            ⬅️ Kembali ke Dashboard
+        </a>
+    </div>
+
+    <!-- Header & Tab Navigasi -->
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 25px;">
+        <h2 style="margin: 0 0 20px 0; color: #1e293b; font-size: 24px;">🛠️ Pengaturan Master Data</h2>
+        
+        <div style="display: flex; gap: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+            <a href="/master_data?tab=rekening" style="text-decoration: none; background: <%= tab === 'rekening' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'rekening' ? 'white' : '#475569' %>; padding: 10px 20px; border-radius: 6px; font-weight: bold;">Kode Rekening</a>
+            <a href="/master_data?tab=klasifikasi" style="text-decoration: none; background: <%= tab === 'klasifikasi' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'klasifikasi' ? 'white' : '#475569' %>; padding: 10px 20px; border-radius: 6px; font-weight: bold;">Klasifikasi Surat</a>
+            <a href="/master_data?tab=perangkat" style="text-decoration: none; background: <%= tab === 'perangkat' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'perangkat' ? 'white' : '#475569' %>; padding: 10px 20px; border-radius: 6px; font-weight: bold;">Data Perangkat Desa</a>
+        </div>
+    </div>
+
+    <!-- Area Konten Utama -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px; align-items: start;">
+        
+        <!-- Kolom Kiri: Form Tambah Data -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">➕ Tambah Data Baru</h3>
+            
+            <% if (tab === 'rekening') { %>
+            <form action="/master_data/rekening" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Kode Rekening</label>
+                    <input type="text" name="kode" required placeholder="Cth: 1.1.1" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Uraian / Deskripsi</label>
+                    <input type="text" name="uraian" required placeholder="Cth: Pendapatan Asli Desa" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <button type="submit" style="background: #10b981; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer;">Simpan Data</button>
+            </form>
+
+            <% } else if (tab === 'klasifikasi') { %>
+            <form action="/master_data/klasifikasi" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Kode Klasifikasi</label>
+                    <input type="text" name="kode" required placeholder="Cth: 005" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Keterangan</label>
+                    <input type="text" name="keterangan" required placeholder="Cth: Undangan Rapat" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <button type="submit" style="background: #10b981; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer;">Simpan Data</button>
+            </form>
+
+            <% } else if (tab === 'perangkat') { %>
+            <form action="/master_data/perangkat" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Nama Lengkap</label>
+                    <input type="text" name="nama" required placeholder="Nama perangkat desa" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Jabatan</label>
+                    <input type="text" name="jabatan" required placeholder="Cth: Kepala Urusan Keuangan" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">NIP / NIK (Opsional)</label>
+                    <input type="text" name="nip" placeholder="Nomor identitas jika ada" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color:#334155;">Upload File SK</label>
+                    <input type="file" name="file_sk" style="width: 100%; padding: 10px; border: 1px dashed #94a3b8; border-radius: 6px; background: #f8fafc;">
+                    <small style="color: #64748b; font-style: italic;">*File SK otomatis dicadangkan ke Google Drive</small>
+                </div>
+                <button type="submit" style="background: #10b981; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer;">💾 Simpan & Upload SK</button>
+            </form>
+            <% } %>
+        </div>
+
+        <!-- Kolom Kanan: Tabel Data Tersimpan -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px;">📋 Daftar Data Tersimpan</h3>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; text-align: left;">
+                        <% if (tab === 'rekening') { %>
+                            <th style="padding: 12px 8px;">Kode</th>
+                            <th style="padding: 12px 8px;">Uraian Rekening</th>
+                        <% } else if (tab === 'klasifikasi') { %>
+                            <th style="padding: 12px 8px;">Kode</th>
+                            <th style="padding: 12px 8px;">Keterangan Klasifikasi</th>
+                        <% } else if (tab === 'perangkat') { %>
+                            <th style="padding: 12px 8px;">Nama & NIP</th>
+                            <th style="padding: 12px 8px;">Jabatan</th>
+                            <th style="padding: 12px 8px;">File SK</th>
+                        <% } %>
+                        <th style="padding: 12px 8px; text-align:right;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                        <% data.forEach(function(item) { %>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <% if (tab === 'rekening') { %>
+                                    <td style="padding: 12px 8px; font-weight: bold; color: #0f172a;"><%= item.kode %></td>
+                                    <td style="padding: 12px 8px; color: #475569;"><%= item.uraian %></td>
+                                <% } else if (tab === 'klasifikasi') { %>
+                                    <td style="padding: 12px 8px; font-weight: bold; color: #0f172a;"><%= item.kode %></td>
+                                    <td style="padding: 12px 8px; color: #475569;"><%= item.keterangan %></td>
+                                <% } else if (tab === 'perangkat') { %>
+                                    <td style="padding: 12px 8px;">
+                                        <div style="font-weight: bold; color: #0f172a;"><%= item.nama %></div>
+                                        <div style="color: #64748b; font-size: 13px;"><%= item.nip || '-' %></div>
+                                    </td>
+                                    <td style="padding: 12px 8px; color: #475569;"><%= item.jabatan %></td>
+                                    <td style="padding: 12px 8px;">
+                                        <% if (item.file_sk_url) { %>
+                                            <a href="<%= item.file_sk_url %>" target="_blank" style="background: #eef2ff; color: #4f46e5; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold;">📄 Lihat SK</a>
+                                        <% } else { %>
+                                            <span style="color: #94a3b8; font-size: 12px;">Tanpa SK</span>
+                                        <% } %>
+                                    </td>
+                                <% } %>
+                                <td style="padding: 12px 8px; text-align:right;">
+                                    <form action="/master_data/delete" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini secara permanen?');">
+                                        <input type="hidden" name="id" value="<%= item.id %>">
+                                        <input type="hidden" name="type" value="<%= tab %>">
+                                        <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">Hapus</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" style="padding: 30px; text-align: center; color: #94a3b8;">Belum ada data yang tersimpan di tab ini.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

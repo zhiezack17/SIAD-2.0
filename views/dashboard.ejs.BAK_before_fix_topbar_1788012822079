@@ -1,0 +1,66 @@
+            <h2 style="margin-bottom: 5px;">Dashboard</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">
+                Selamat datang kembali, <%= user ? user.nama : 'Pengguna' %>.
+            </p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Workspace</div>
+                    <div class="stat-value"><%= stats ? stats.total_workspace : 0 %></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Dokumen Terarsip</div>
+                    <div class="stat-value"><%= stats ? stats.total_dokumen : 0 %></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Belum Lengkap</div>
+                    <div class="stat-value" style="color: #ef4444;">34</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Sudah Diverifikasi</div>
+                    <div class="stat-value" style="color: var(--accent);">96</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <h3 class="card-title">Dokumen per Tahun</h3>
+                    <div style="height: 250px; display: flex; align-items: flex-end; justify-content: space-around; padding-top: 20px;">
+                        <!-- Dummy chart bars -->
+                        <div style="width: 40px; height: 40%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="width: 40px; height: 60%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="width: 40px; height: 90%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                        <div style="width: 40px; height: 30%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; margin-top: 10px; color: var(--text-muted); font-size: 12px;">
+                        <span>2023</span>
+                        <span>2024</span>
+                        <span>2025</span>
+                        <span>2026</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">Workspace Terbaru</h3>
+                    <ul style="list-style: none;">
+                        <% if (workspaces && workspaces.length > 0) { %>
+                            <% workspaces.forEach(ws => { %>
+                            <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; display: flex; align-items: center;">
+                                <i class="fa-solid <%= ws.type_icon || 'fa-folder' %>" style="color: <%= ws.type_warna || '#fbbf24' %>; margin-right: 10px; font-size: 1.2rem;"></i>
+                                <div style="flex-grow: 1;">
+                                    <a href="/workspace/<%= ws.id %>" style="text-decoration: none; color: var(--text-color); font-weight: 500;">
+                                        <%= ws.nama %>
+                                    </a>
+                                    <div style="color: var(--text-muted); font-size: 12px;"><%= ws.kepenghuluan_nama %> • <%= ws.type_nama %></div>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 12px; white-space: nowrap;">
+                                    <%= new Date(ws.created_at).toLocaleDateString('id-ID') %>
+                                </div>
+                            </li>
+                            <% }); %>
+                        <% } else { %>
+                            <li style="padding: 10px 0; font-size: 14px; color: var(--text-muted); text-align: center;">Belum ada workspace dibuat.</li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        
