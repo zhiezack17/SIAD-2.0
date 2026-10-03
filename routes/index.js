@@ -241,6 +241,7 @@ router.post('/spj/edit', requireAuth, ac.blockKaurUmum, spjController.postEdit);
 router.post('/spj/delete', requireAuth, ac.blockKaurUmum, spjController.postDelete);
 router.post('/spj/verifikasi', requireAuth, ac.blockKaurUmum, spjController.postVerifikasi);
 router.get('/spj/cetak-rekap', requireAuth, ac.blockKaurUmum, spjController.getCetakRekapitulasi);
+router.get('/spj/cetak-sptjb/:id', requireAuth, ac.blockKaurUmum, spjController.getCetakSptjb);
 router.get('/spj/cetak/:id', requireAuth, ac.blockKaurUmum, spjController.getCetakVerifikasi);
 router.get('/validasi/spj/:id', spjController.getValidasiPublik);
 

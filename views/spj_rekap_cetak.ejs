@@ -214,16 +214,17 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 30px;">NO</th>
-                <th style="width: 90px;">KODE REK</th>
-                <th>BIDANG / URAIAN KEGIATAN</th>
-                <th style="width: 110px;">LOKASI</th>
-                <th style="width: 70px;">TAHAP</th>
-                <th style="width: 115px;">PAGU ANGGARAN (Rp)</th>
-                <th style="width: 115px;">REALISASI SPJ (Rp)</th>
-                <th style="width: 110px;">SISA / SELISIH (Rp)</th>
-                <th style="width: 50px;">%</th>
-                <th style="width: 110px;">STATUS VERIFIKASI</th>
+                <th style="width: 28px;">NO</th>
+                <th style="width: 85px;">KODE REK</th>
+                <th>BIDANG / SUB BIDANG / KEGIATAN</th>
+                <th style="width: 80px;">SUMBER DANA</th>
+                <th style="width: 95px;">LOKASI</th>
+                <th style="width: 65px;">TAHAP</th>
+                <th style="width: 110px;">PAGU (Rp)</th>
+                <th style="width: 110px;">REALISASI (Rp)</th>
+                <th style="width: 105px;">SISA (Rp)</th>
+                <th style="width: 45px;">%</th>
+                <th style="width: 95px;">STATUS SPJ</th>
             </tr>
             <tr style="font-size: 8pt; background: #fafafa;">
                 <th>1</th>
@@ -233,9 +234,10 @@
                 <th>5</th>
                 <th>6</th>
                 <th>7</th>
-                <th>8 = 6 - 7</th>
-                <th>9 = 7/6</th>
+                <th>8</th>
+                <th>9 = 7 - 8</th>
                 <th>10</th>
+                <th>11</th>
             </tr>
         </thead>
         <tbody>
@@ -253,50 +255,84 @@
                 <tr class="bidang-header">
                     <td class="text-center font-bold">&bull;</td>
                     <td class="font-bold"><%= bg.kodeBidang %></td>
-                    <td colspan="8" class="font-bold"><%= bg.namaBidang.toUpperCase() %></td>
+                    <td colspan="9" class="font-bold"><%= bg.namaBidang.toUpperCase() %></td>
                 </tr>
 
-                <% if (bg.kegiatan && bg.kegiatan.length > 0) { %>
-                    <% bg.kegiatan.forEach((k) => { 
-                        const pagu = Number(k.pagu_anggaran) || 0;
-                        const isFinal = k.tahap_verifikasi === 'SELESAI_FINAL' || (k.status && k.status.toUpperCase() === 'SELESAI');
-                        // Realisasi SPJ sah dihitung jika sudah diverifikasi/selesai atau pagu diajukan
-                        const realisasi = isFinal ? pagu : (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU' || k.tahap_verifikasi === 'VERIFIKASI_SEKDES' ? pagu : 0);
-                        const sisa = pagu - realisasi;
-                        const persen = pagu > 0 ? ((realisasi / pagu) * 100).toFixed(1) : '0';
-
-                        let statusLabel = 'Draft (Kaur)';
-                        if (k.tahap_verifikasi === 'VERIFIKASI_BENDAHARA') statusLabel = 'Menunggu Bendahara';
-                        else if (k.tahap_verifikasi === 'VERIFIKASI_SEKDES') statusLabel = 'Paraf Sekdes';
-                        else if (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU') statusLabel = 'Menunggu Penghulu';
-                        else if (k.tahap_verifikasi === 'SELESAI_FINAL') statusLabel = 'SAH (Final)';
-                        else if (k.tahap_verifikasi === 'PERLU_REVISI') statusLabel = 'Perlu Revisi';
+                <% if (bg.subBidangGroups && bg.subBidangGroups.length > 0) { %>
+                    <% bg.subBidangGroups.forEach((sbg) => { 
+                        const sbSisa = sbg.subtotalPagu - sbg.subtotalRealisasi;
+                        const sbPersen = sbg.subtotalPagu > 0 ? ((sbg.subtotalRealisasi / sbg.subtotalPagu) * 100).toFixed(1) : '0';
                     %>
-                    <tr>
-                        <td class="text-center"><%= nomorGlobal++ %></td>
-                        <td class="text-center" style="font-family: monospace;"><%= k.kode_rekening || bg.kodeBidang + '.' + String(nomorGlobal - 1).padStart(2, '0') %></td>
-                        <td>
-                            <b><%= k.nama_kegiatan %></b>
-                            <% if (k.keterangan) { %>
-                                <br><span style="font-size: 8.5pt; color: #475569;"><%= k.keterangan %></span>
-                            <% } %>
-                        </td>
-                        <td><%= k.lokasi || '-' %></td>
-                        <td class="text-center"><%= k.tahap || 'Tahap 1' %></td>
-                        <td class="text-right font-bold"><%= pagu.toLocaleString('id-ID') %></td>
-                        <td class="text-right font-bold"><%= realisasi.toLocaleString('id-ID') %></td>
-                        <td class="text-right"><%= sisa.toLocaleString('id-ID') %></td>
-                        <td class="text-center"><%= persen %>%</td>
-                        <td class="text-center">
-                            <span class="status-badge"><%= statusLabel %></span>
-                        </td>
-                    </tr>
+                        <!-- BARIS HEADER SUB BIDANG -->
+                        <% if (sbg.namaSubBidang && sbg.namaSubBidang !== 'Kegiatan Reguler / Umum') { %>
+                        <tr style="background-color: #f1f5f9; font-weight: bold; font-size: 9.5pt;">
+                            <td class="text-center">&bull;</td>
+                            <td></td>
+                            <td colspan="9" style="padding-left: 14px; color: #1e293b;">
+                                📂 <%= sbg.namaSubBidang %>
+                            </td>
+                        </tr>
+                        <% } %>
+
+                        <% sbg.kegiatan.forEach((k) => { 
+                            const pagu = Number(k.pagu_anggaran) || 0;
+                            const isFinal = k.tahap_verifikasi === 'SELESAI_FINAL' || (k.status && k.status.toUpperCase() === 'SELESAI');
+                            const realisasi = isFinal ? (Number(k.realisasi_anggaran) || pagu) : (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU' || k.tahap_verifikasi === 'VERIFIKASI_SEKDES' ? pagu : 0);
+                            const sisa = pagu - realisasi;
+                            const persen = pagu > 0 ? ((realisasi / pagu) * 100).toFixed(1) : '0';
+
+                            let statusLabel = 'Draft';
+                            if (k.tahap_verifikasi === 'VERIFIKASI_BENDAHARA') statusLabel = 'Verif Bendahara';
+                            else if (k.tahap_verifikasi === 'VERIFIKASI_SEKDES') statusLabel = 'Paraf Sekdes';
+                            else if (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU') statusLabel = 'Menunggu Penghulu';
+                            else if (k.tahap_verifikasi === 'SELESAI_FINAL') statusLabel = 'SAH (Final)';
+                            else if (k.tahap_verifikasi === 'PERLU_REVISI') statusLabel = 'Perlu Revisi';
+                        %>
+                        <tr>
+                            <td class="text-center"><%= nomorGlobal++ %></td>
+                            <td class="text-center" style="font-family: monospace;"><%= k.kode_rekening || bg.kodeBidang + '.' + String(nomorGlobal - 1).padStart(2, '0') %></td>
+                            <td style="padding-left: <%= (sbg.namaSubBidang && sbg.namaSubBidang !== 'Kegiatan Reguler / Umum') ? '24px' : '8px' %>;">
+                                <b><%= k.nama_kegiatan %></b>
+                                <% if (k.prioritas_permendes && k.prioritas_permendes !== 'non_prioritas') { %>
+                                    <span style="display: inline-block; font-size: 7.5pt; background: #dcfce7; color: #166534; padding: 1px 4px; border-radius: 3px; font-weight: bold; margin-left: 4px;">
+                                        <%= k.prioritas_permendes.toUpperCase().replace(/_/g, ' ') %>
+                                    </span>
+                                <% } %>
+                                <% if (k.keterangan) { %>
+                                    <br><span style="font-size: 8pt; color: #64748b;"><%= k.keterangan %></span>
+                                <% } %>
+                            </td>
+                            <td class="text-center" style="font-weight: 600; font-size: 8.5pt;"><%= k.sumber_dana ? k.sumber_dana.split(' ')[0] : 'DDS' %></td>
+                            <td><%= k.lokasi || '-' %></td>
+                            <td class="text-center"><%= k.tahap || 'Tahap 1' %></td>
+                            <td class="text-right font-bold"><%= pagu.toLocaleString('id-ID') %></td>
+                            <td class="text-right font-bold"><%= realisasi.toLocaleString('id-ID') %></td>
+                            <td class="text-right"><%= sisa.toLocaleString('id-ID') %></td>
+                            <td class="text-center"><%= persen %>%</td>
+                            <td class="text-center">
+                                <span class="status-badge"><%= statusLabel %></span>
+                            </td>
+                        </tr>
+                        <% }) %>
+
+                        <!-- BARIS SUBTOTAL SUB BIDANG (Jika memiliki nama sub bidang) -->
+                        <% if (sbg.namaSubBidang && sbg.namaSubBidang !== 'Kegiatan Reguler / Umum') { %>
+                        <tr style="background-color: #f8fafc; font-size: 9pt; font-style: italic;">
+                            <td colspan="6" class="text-right" style="padding-right: 10px;">Subtotal <%= sbg.namaSubBidang %>:</td>
+                            <td class="text-right font-bold"><%= sbg.subtotalPagu.toLocaleString('id-ID') %></td>
+                            <td class="text-right font-bold"><%= sbg.subtotalRealisasi.toLocaleString('id-ID') %></td>
+                            <td class="text-right"><%= sbSisa.toLocaleString('id-ID') %></td>
+                            <td class="text-center"><%= sbPersen %>%</td>
+                            <td></td>
+                        </tr>
+                        <% } %>
+
                     <% }) %>
                 <% } else { %>
                     <tr>
                         <td></td>
                         <td class="text-center">-</td>
-                        <td colspan="8" style="font-style: italic; color: #64748b;">(Tidak ada kegiatan untuk bidang ini pada periode yang dipilih)</td>
+                        <td colspan="9" style="font-style: italic; color: #64748b;">(Tidak ada kegiatan untuk bidang ini pada periode yang dipilih)</td>
                     </tr>
                 <% } %>
 
@@ -306,7 +342,7 @@
                     const subPersen = bg.subtotalPagu > 0 ? ((bg.subtotalRealisasi / bg.subtotalPagu) * 100).toFixed(1) : '0';
                 %>
                 <tr class="bidang-subtotal">
-                    <td colspan="5" class="text-right">SUBTOTAL <%= bg.namaBidang.toUpperCase() %>:</td>
+                    <td colspan="6" class="text-right">SUBTOTAL <%= bg.namaBidang.toUpperCase() %>:</td>
                     <td class="text-right font-bold"><%= bg.subtotalPagu.toLocaleString('id-ID') %></td>
                     <td class="text-right font-bold"><%= bg.subtotalRealisasi.toLocaleString('id-ID') %></td>
                     <td class="text-right font-bold"><%= subSisa.toLocaleString('id-ID') %></td>
@@ -323,7 +359,7 @@
 
             <!-- BARIS GRAND TOTAL KESELURUHAN -->
             <tr style="background-color: #cbd5e1; font-weight: bold; font-size: 10.5pt; border-top: 2px solid #000;">
-                <td colspan="5" class="text-right">TOTAL REALISASI SELURUH BIDANG:</td>
+                <td colspan="6" class="text-right">TOTAL REALISASI SELURUH BIDANG (APBDES):</td>
                 <td class="text-right"><%= grandTotalPagu.toLocaleString('id-ID') %></td>
                 <td class="text-right"><%= grandTotalRealisasi.toLocaleString('id-ID') %></td>
                 <td class="text-right"><%= grandSisa.toLocaleString('id-ID') %></td>
