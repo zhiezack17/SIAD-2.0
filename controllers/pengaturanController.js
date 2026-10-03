@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const ac = require('../middleware/access');
+const bcrypt = require('bcrypt');
 
 const pengaturanController = {
     getIndex: async (req, res) => {
@@ -23,6 +24,19 @@ const pengaturanController = {
             let kepenghuluanList = [];
             let generatedUsers = [];
             let generatedDesa = null;
+            let daftarPengguna = [];
+
+            // Ambil daftar pengguna kepenghuluan aktif
+            const activeId = did || (req.session && req.session.active_kepenghuluan_id ? Number(req.session.active_kepenghuluan_id) : null);
+            if (activeId) {
+                const userListRes = await db.query(`
+                    SELECT id, username, nama_lengkap, peran, role, aktif 
+                    FROM pengguna 
+                    WHERE kepenghuluan_id = $1 
+                    ORDER BY id ASC
+                `, [activeId]);
+                daftarPengguna = userListRes.rows;
+            }
 
             if (ac.isSuperAdmin(req)) {
                 const listRes = await db.query(`
@@ -54,6 +68,7 @@ const pengaturanController = {
                 kepenghuluanList: kepenghuluanList,
                 generatedUsers: generatedUsers,
                 generatedDesa: generatedDesa,
+                daftarPengguna: daftarPengguna,
                 query: req.query
             });
         } catch (error) {
@@ -172,6 +187,12 @@ const pengaturanController = {
                     nama_lengkap: `Kaur Tata Usaha & Umum ${kep.nama}`,
                     peran: 'kaur_umum',
                     role: 'kaur_umum'
+                },
+                {
+                    username: `aset_${slug}`,
+                    nama_lengkap: `Pengelola Aset ${kep.nama}`,
+                    peran: 'pengelola_aset',
+                    role: 'pengelola_aset'
                 }
             ];
 
@@ -204,6 +225,85 @@ const pengaturanController = {
         } catch (error) {
             console.error('Error inisialisasi desa:', error);
             res.redirect('/pengaturan?status=error_init');
+        }
+    },
+
+    postTambahPengguna: async (req, res) => {
+        try {
+            if (!ac.isAdmin(req)) {
+                return res.status(403).send('Akses Ditolak: Hanya Administrator yang dapat menambah/mengedit akun pengguna.');
+            }
+            const { username, nama_lengkap, role, kepenghuluan_id, password } = req.body;
+            if (!username || !nama_lengkap || !role) {
+                return res.redirect('/pengaturan?status=error_param');
+            }
+
+            const did = ac.getDesaId(req);
+            const targetKepId = did || (ac.isSuperAdmin(req) && kepenghuluan_id ? Number(kepenghuluan_id) : (req.session.active_kepenghuluan_id ? Number(req.session.active_kepenghuluan_id) : null));
+
+            let passHash;
+            if (password && password.trim()) {
+                passHash = await bcrypt.hash(password.trim(), 10);
+            } else {
+                const adminRes = await db.query("SELECT password FROM pengguna WHERE username = 'admin_rohil' LIMIT 1");
+                passHash = adminRes.rows[0].password;
+            }
+
+            let peran = role;
+            if (role === 'admin') peran = 'admin_desa';
+            else if (role === 'penghulu') peran = 'pimpinan';
+            else if (role === 'sekretaris') peran = 'sekdes';
+            else if (role === 'kaur') peran = 'operator';
+            else if (role === 'pengelola_aset') peran = 'pengelola_aset';
+
+            await db.query(`
+                INSERT INTO pengguna (username, password, nama_lengkap, peran, role, kepenghuluan_id, aktif, created_at)
+                VALUES ($1, $2, $3, $4, $5, $6, true, NOW())
+                ON CONFLICT (username) DO UPDATE 
+                SET nama_lengkap = EXCLUDED.nama_lengkap, peran = EXCLUDED.peran, role = EXCLUDED.role, kepenghuluan_id = EXCLUDED.kepenghuluan_id, aktif = true
+            `, [username.trim().toLowerCase(), passHash, nama_lengkap.trim(), peran, role, targetKepId]);
+
+            res.redirect('/pengaturan?status=user_saved');
+        } catch (error) {
+            console.error('Error postTambahPengguna:', error);
+            res.redirect('/pengaturan?status=error_user&msg=' + encodeURIComponent(error.message));
+        }
+    },
+
+    postNonaktifkanDesa: async (req, res) => {
+        try {
+            if (!ac.isSuperAdmin(req)) {
+                return res.status(403).send('Akses Ditolak: Hanya Super Admin Rohil yang dapat menonaktifkan desa.');
+            }
+            const { kepenghuluan_id } = req.body;
+            if (!kepenghuluan_id) {
+                return res.redirect('/pengaturan?status=error_param');
+            }
+
+            const targetId = Number(kepenghuluan_id);
+
+            // Cek nama desa
+            const kepRes = await db.query('SELECT nama FROM kepenghuluan WHERE id = $1', [targetId]);
+            const namaDesa = kepRes.rows.length > 0 ? kepRes.rows[0].nama : `Desa #${targetId}`;
+
+            // Cek data transaksi/arsip
+            const spjCheck = await db.query('SELECT COUNT(*) FROM spj_kegiatan WHERE kepenghuluan_id = $1', [targetId]);
+            const smCheck = await db.query('SELECT COUNT(*) FROM surat_masuk WHERE kepenghuluan_id = $1', [targetId]);
+            const skCheck = await db.query('SELECT COUNT(*) FROM surat_keluar WHERE kepenghuluan_id = $1', [targetId]);
+            const totalDok = (Number(spjCheck.rows[0]?.count) || 0) + (Number(smCheck.rows[0]?.count) || 0) + (Number(skCheck.rows[0]?.count) || 0);
+
+            if (totalDok > 0) {
+                return res.redirect('/pengaturan?status=error_cannot_deactivate&msg=' + encodeURIComponent(`Kepenghuluan ${namaDesa} sudah memiliki ${totalDok} arsip dokumen aktif (SPJ/Surat). Tidak dapat dinonaktifkan secara otomatis demi keamanan arsip.`));
+            }
+
+            // Hapus pengguna dan profil_desa
+            await db.query('DELETE FROM pengguna WHERE kepenghuluan_id = $1', [targetId]);
+            await db.query('DELETE FROM profil_desa WHERE kepenghuluan_id = $1', [targetId]);
+
+            res.redirect('/pengaturan?status=deactivate_success&desa_nama=' + encodeURIComponent(namaDesa));
+        } catch (error) {
+            console.error('Error postNonaktifkanDesa:', error);
+            res.redirect('/pengaturan?status=error_deactivate&msg=' + encodeURIComponent(error.message));
         }
     }
 };

@@ -294,6 +294,8 @@ router.post('/master_data/delete', requireAuth, ac.blockKaurUmum, masterControll
 router.get('/pengaturan', requireAuth, ac.blockKaurUmum, pengaturanController.getIndex);
 router.post('/pengaturan/update', requireAuth, ac.blockKaurUmum, pengaturanController.postUpdate);
 router.post('/pengaturan/inisialisasi-desa', requireAuth, ac.blockKaurUmum, pengaturanController.postInisialisasiDesa);
+router.post('/pengaturan/nonaktifkan-desa', requireAuth, ac.blockKaurUmum, pengaturanController.postNonaktifkanDesa);
+router.post('/pengaturan/tambah-pengguna', requireAuth, ac.blockKaurUmum, pengaturanController.postTambahPengguna);
 
 // === ASET ROUTES (Modul Aset Desa) ===
 router.get('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
