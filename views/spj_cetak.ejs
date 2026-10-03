@@ -218,7 +218,7 @@
                 <td>:</td>
                 <td>
                     <span class="stamp-status">
-                        <%= kegiatan.tahap_verifikasi === 'SELESAI_FINAL' ? 'TELAH DISETUJUI & DISAHKAN' : (kegiatan.tahap_verifikasi || 'DALAM PROSES') %>
+                        <%= kegiatan.tahap_verifikasi === 'SELESAI_FINAL' ? (Number(kegiatan.tahun) <= 2025 ? 'TELAH DISETUJUI & DISAHKAN (ARSIP HISTORIS)' : 'TELAH DISETUJUI & DISAHKAN') : (kegiatan.tahap_verifikasi || 'DALAM PROSES') %>
                     </span>
                 </td>
             </tr>

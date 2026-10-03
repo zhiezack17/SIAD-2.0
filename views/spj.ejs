@@ -385,18 +385,27 @@ function exportPajakToExcel() {
                         <td style="padding: 12px 10px; color: #475569;"><%= item.lokasi || '-' %></td>
                         <td style="padding: 12px 10px;">
                             <% 
+                                const isHistorisItem = Number(item.tahun) <= 2025;
                                 const tahapVerif = item.tahap_verifikasi || 'DRAFT'; 
                                 let bg = '#fef08a'; let txt = '#854d0e'; let lbl = 'Draft (Kaur)';
-                                if (tahapVerif === 'VERIFIKASI_BENDAHARA') { bg = '#fef3c7'; txt = '#b45309'; lbl = 'Menunggu Bendahara'; }
-                                else if (tahapVerif === 'VERIFIKASI_SEKDES') { bg = '#e0e7ff'; txt = '#3730a3'; lbl = 'Menunggu Sekdes'; }
-                                else if (tahapVerif === 'VERIFIKASI_PENGHULU') { bg = '#dbeafe'; txt = '#1d4ed8'; lbl = 'Menunggu Penghulu'; }
-                                else if (tahapVerif === 'SELESAI_FINAL') { bg = '#dcfce7'; txt = '#15803d'; lbl = 'Disahkan (Sah)'; }
-                                else if (tahapVerif === 'PERLU_REVISI') { bg = '#fee2e2'; txt = '#b91c1c'; lbl = 'Perlu Revisi'; }
+                                if (isHistorisItem) {
+                                    if (tahapVerif === 'SELESAI_FINAL') {
+                                        bg = '#dcfce7'; txt = '#15803d'; lbl = '🗄️ Arsip Sah (Direct)';
+                                    } else {
+                                        bg = '#fef3c7'; txt = '#b45309'; lbl = '🗄️ Arsip (Menunggu Sahkan)';
+                                    }
+                                } else {
+                                    if (tahapVerif === 'VERIFIKASI_BENDAHARA') { bg = '#fef3c7'; txt = '#b45309'; lbl = 'Menunggu Bendahara'; }
+                                    else if (tahapVerif === 'VERIFIKASI_SEKDES') { bg = '#e0e7ff'; txt = '#3730a3'; lbl = 'Menunggu Sekdes'; }
+                                    else if (tahapVerif === 'VERIFIKASI_PENGHULU') { bg = '#dbeafe'; txt = '#1d4ed8'; lbl = 'Menunggu Penghulu'; }
+                                    else if (tahapVerif === 'SELESAI_FINAL') { bg = '#dcfce7'; txt = '#15803d'; lbl = 'Disahkan (Sah)'; }
+                                    else if (tahapVerif === 'PERLU_REVISI') { bg = '#fee2e2'; txt = '#b91c1c'; lbl = 'Perlu Revisi'; }
+                                }
                             %>
                             <span style="background:<%= bg %>; color:<%= txt %>; padding:4px 9px; border-radius:12px; font-size:11.5px; font-weight:bold; display:inline-block;"><%= lbl %></span>
                         </td>
                         
-                        <!-- TOMBOL CEPAT NOTIFIKASI WHATSAPP BERJENJANG -->
+                        <!-- TOMBOL CEPAT NOTIFIKASI WHATSAPP BERJENJANG / ARSIP -->
                         <td style="padding: 12px 10px; text-align: center;">
                             <% 
                                 const paguFmt = 'Rp ' + Number(item.pagu_anggaran).toLocaleString('id-ID');
@@ -404,7 +413,11 @@ function exportPajakToExcel() {
                                 let waBtnLabel = '📲 WA Sekdes';
                                 let waBgColor = '#25D366';
 
-                                if (tahapVerif === 'DRAFT' || !tahapVerif) {
+                                if (isHistorisItem) {
+                                    waMsg = `Pemberitahuan Arsip: Berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}) sebesar *${paguFmt}* telah tersimpan & diarsipkan di aplikasi SIAD 2.0. Status: Sah & Disahkan Langsung tanpa kendala berjenjang.`;
+                                    waBtnLabel = '📲 Info Arsip';
+                                    waBgColor = '#059669';
+                                } else if (tahapVerif === 'DRAFT' || !tahapVerif) {
                                     waMsg = `Halo Bapak/Ibu Sekdes, mohon izin menyampaikan bahwa berkas SPJ Kegiatan *${item.nama_kegiatan}* (TA ${item.tahun}, ${item.tahap || 'Tahap 1'}) dengan anggaran *${paguFmt}* telah selesai diinput di aplikasi SIAD 2.0 dan menunggu verifikasi Bapak/Ibu Sekdes. Terima kasih 🙏`;
                                     waBtnLabel = '📲 WA Sekdes';
                                     waBgColor = '#25D366';
@@ -553,7 +566,8 @@ function exportPajakToExcel() {
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;">
                     <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahun Anggaran</label>
-                    <input type="number" name="tahun" placeholder="Tahun" value="<%= new Date().getFullYear() %>" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                    <input type="number" name="tahun" placeholder="Tahun" value="<%= new Date().getFullYear() %>" oninput="updateTahunNotice()" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                    <div id="noticeTahunSPJ" style="margin-top: 5px; font-size: 11.5px; border-radius: 6px; padding: 6px 10px; display: none;"></div>
                 </div>
                 <div style="flex:1;">
                     <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahap / Semester</label>
@@ -618,6 +632,28 @@ function bukaLembarRekap(e) {
     document.getElementById('modalFilterRekap').style.display = 'none';
 }
 
+function updateTahunNotice() {
+    const thnInput = document.querySelector('#formSPJ [name="tahun"]');
+    const noticeEl = document.getElementById('noticeTahunSPJ');
+    if (!thnInput || !noticeEl) return;
+    const val = parseInt(thnInput.value, 10);
+    if (val && val <= 2025) {
+        noticeEl.style.display = 'block';
+        noticeEl.style.background = '#f0fdf4';
+        noticeEl.style.color = '#166534';
+        noticeEl.style.border = '1px solid #86efac';
+        noticeEl.innerHTML = '⚡ <b>Mode Arsip Historis (&le; 2025):</b> Otomatis langsung disahkan (Final) dari akun Bendahara tanpa perlu verifikasi 4 akun berjenjang.';
+    } else if (val && val >= 2026) {
+        noticeEl.style.display = 'block';
+        noticeEl.style.background = '#eff6ff';
+        noticeEl.style.color = '#1e40af';
+        noticeEl.style.border = '1px solid #bfdbfe';
+        noticeEl.innerHTML = '🏛️ <b>Mode Berjalan (&ge; 2026):</b> Menggunakan alur verifikasi bertingkat 4 tahap (Kaur ➔ Bendahara ➔ Sekdes ➔ Penghulu).';
+    } else {
+        noticeEl.style.display = 'none';
+    }
+}
+
 function bukaModalSPJ() {
     document.getElementById('modalTitleSPJ').textContent = 'Tambah Kegiatan SPJ';
     const form = document.getElementById('formSPJ');
@@ -626,6 +662,7 @@ function bukaModalSPJ() {
     let idIn = document.getElementById('edit-spj-id');
     if(idIn) idIn.remove();
     document.getElementById('modalSPJ').style.display = 'flex';
+    updateTahunNotice();
 }
 
 function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek) {
@@ -656,6 +693,7 @@ function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, 
     form.querySelector('[name="ket"]').value = ket;
     
     document.getElementById('modalSPJ').style.display = 'flex';
+    updateTahunNotice();
 }
 </script>
 <% } %>

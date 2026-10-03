@@ -131,25 +131,64 @@ const spjController = {
         try {
             const { nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, ket } = req.body;
             const did = ac.getDesaId(req);
+            const userNama = req.session && req.session.user ? (req.session.user.nama || req.session.user.username) : 'Bendahara/Admin';
+            const tahunNum = tahun ? Number(tahun) : new Date().getFullYear();
+            const isHistoris = tahunNum <= 2025;
 
-            const sql = `
-                INSERT INTO spj_kegiatan 
-                (nama_kegiatan, tahun, pagu_anggaran, lokasi, tanggal_mulai, tanggal_selesai, status, keterangan, kepenghuluan_id, tahap_verifikasi)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                RETURNING id
-            `;
-            const p = [
-                nama, 
-                tahun ? Number(tahun) : new Date().getFullYear(), 
-                pagu ? Number(pagu) : 0, 
-                lokasi || '', 
-                tgl_mulai || null, 
-                tgl_selesai || null, 
-                'DRAFT', 
-                ket || '', 
-                did || null,
-                'DRAFT'
-            ];
+            let sql = '';
+            let p = [];
+
+            if (isHistoris) {
+                // === ALUR CEPAT ARSIP HISTORIS (TAHUN <= 2025) ===
+                // Langsung disahkan Final dari akun Bendahara tanpa harus verifikasi 4 akun
+                sql = `
+                    INSERT INTO spj_kegiatan 
+                    (nama_kegiatan, tahun, pagu_anggaran, lokasi, tanggal_mulai, tanggal_selesai, status, keterangan, kepenghuluan_id, tahap_verifikasi,
+                     verifikasi_bendahara_oleh, verifikasi_bendahara_at,
+                     verifikasi_sekdes_oleh, verifikasi_sekdes_at,
+                     persetujuan_penghulu_oleh, persetujuan_penghulu_at,
+                     catatan_revisi)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), $12, NOW(), $13, NOW(), $14)
+                    RETURNING id
+                `;
+                p = [
+                    nama,
+                    tahunNum,
+                    pagu ? Number(pagu) : 0,
+                    lokasi || '',
+                    tgl_mulai || null,
+                    tgl_selesai || null,
+                    'SELESAI',
+                    ket || '',
+                    did || null,
+                    'SELESAI_FINAL',
+                    userNama,
+                    userNama + ' (Arsip Otomatis)',
+                    userNama + ' (Arsip Otomatis)',
+                    `[ARSIP HISTORIS TA ${tahunNum}] Dokumen diinput langsung & disahkan sebagai arsip digital tanpa verifikasi bertingkat.`
+                ];
+            } else {
+                // === ALUR KETAT BERJENJANG (TAHUN >= 2026) ===
+                // Wajib mengikuti alur 4 akun: Kaur -> Bendahara -> Sekdes -> Penghulu
+                sql = `
+                    INSERT INTO spj_kegiatan 
+                    (nama_kegiatan, tahun, pagu_anggaran, lokasi, tanggal_mulai, tanggal_selesai, status, keterangan, kepenghuluan_id, tahap_verifikasi)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    RETURNING id
+                `;
+                p = [
+                    nama, 
+                    tahunNum, 
+                    pagu ? Number(pagu) : 0, 
+                    lokasi || '', 
+                    tgl_mulai || null, 
+                    tgl_selesai || null, 
+                    'DRAFT', 
+                    ket || '', 
+                    did || null,
+                    'DRAFT'
+                ];
+            }
 
             await db.query(sql, p);
             res.redirect('/spj');
@@ -164,17 +203,35 @@ const spjController = {
             const { id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, ket } = req.body;
             const admin = ac.isAdmin(req);
             const did = ac.getDesaId(req);
+            const userNama = req.session && req.session.user ? (req.session.user.nama || req.session.user.username) : 'Bendahara/Admin';
+            const tahunNum = tahun ? Number(tahun) : null;
 
             let sql = `
                 UPDATE spj_kegiatan 
                 SET nama_kegiatan=$1, tahun=$2, pagu_anggaran=$3, lokasi=$4, tanggal_mulai=$5, tanggal_selesai=$6, keterangan=$7
-                WHERE id=$8
             `;
-            let p = [nama, tahun || null, pagu || 0, lokasi, tgl_mulai || null, tgl_selesai || null, ket, id];
+            let p = [nama, tahunNum, pagu || 0, lokasi, tgl_mulai || null, tgl_selesai || null, ket];
+
+            // Jika tahun adalah 2025 ke bawah, pastikan status otomatis disahkan ke arsip final
+            if (tahunNum && tahunNum <= 2025) {
+                sql += `, tahap_verifikasi = CASE WHEN tahap_verifikasi != 'SELESAI_FINAL' THEN 'SELESAI_FINAL' ELSE tahap_verifikasi END,
+                         status = CASE WHEN status != 'SELESAI' THEN 'SELESAI' ELSE status END,
+                         verifikasi_bendahara_oleh = COALESCE(verifikasi_bendahara_oleh, $8),
+                         verifikasi_bendahara_at = COALESCE(verifikasi_bendahara_at, NOW()),
+                         verifikasi_sekdes_oleh = COALESCE(verifikasi_sekdes_oleh, $9),
+                         verifikasi_sekdes_at = COALESCE(verifikasi_sekdes_at, NOW()),
+                         persetujuan_penghulu_oleh = COALESCE(persetujuan_penghulu_oleh, $10),
+                         persetujuan_penghulu_at = COALESCE(persetujuan_penghulu_at, NOW())
+                `;
+                p.push(userNama, userNama + ' (Arsip Otomatis)', userNama + ' (Arsip Otomatis)');
+            }
+
+            sql += ` WHERE id=$${p.length + 1}`;
+            p.push(id);
 
             // Proteksi IDOR
             if (!admin && did) {
-                sql += ` AND (kepenghuluan_id=$9 OR kepenghuluan_id IS NULL)`;
+                sql += ` AND (kepenghuluan_id=$${p.length + 1} OR kepenghuluan_id IS NULL)`;
                 p.push(did);
             }
 
@@ -233,6 +290,8 @@ const spjController = {
 
             const k = check.rows[0];
             const currentTahap = k.tahap_verifikasi || 'DRAFT';
+            const tahunNum = Number(k.tahun);
+            const isHistoris = tahunNum <= 2025;
 
             let nextTahap = currentTahap;
             let newStatus = k.status || 'DRAFT';
@@ -255,18 +314,70 @@ const spjController = {
                 updateParams.push(catatanFull);
                 updateFields.push(`catatan_revisi = $${updateParams.length}`);
 
-            } else if (aksi === 'ajukan') {
-                // Kaur / Operator mengajukan ke Bendahara
-                nextTahap = 'VERIFIKASI_BENDAHARA';
-                newStatus = 'DIAJUKAN';
+            } else if (aksi === 'bypass_arsip' || (isHistoris && aksi === 'setujui_bendahara')) {
+                // === JALUR CEPAT ARSIP HISTORIS TAHUN <= 2025 ===
+                // Bendahara (atau Admin) langsung mengesahkan final tanpa melalui 4 akun
+                nextTahap = 'SELESAI_FINAL';
+                newStatus = 'SELESAI';
+                
                 updateParams.push(nextTahap);
                 updateFields.push(`tahap_verifikasi = $${updateParams.length}`);
+                
                 updateParams.push(newStatus);
                 updateFields.push(`status = $${updateParams.length}`);
-                updateFields.push(`catatan_revisi = NULL`);
+
+                updateParams.push(userNama);
+                updateFields.push(`verifikasi_bendahara_oleh = $${updateParams.length}`);
+                updateFields.push(`verifikasi_bendahara_at = NOW()`);
+
+                updateParams.push(userNama + ' (Arsip Otomatis)');
+                updateFields.push(`verifikasi_sekdes_oleh = $${updateParams.length}`);
+                updateFields.push(`verifikasi_sekdes_at = NOW()`);
+
+                updateParams.push(userNama + ' (Arsip Otomatis)');
+                updateFields.push(`persetujuan_penghulu_oleh = $${updateParams.length}`);
+                updateFields.push(`persetujuan_penghulu_at = NOW()`);
+
+                updateParams.push(`[ARSIP HISTORIS TA ${tahunNum}] Dokumen diverifikasi & disahkan langsung oleh Bendahara/Admin tanpa verifikasi berjenjang.`);
+                updateFields.push(`catatan_revisi = $${updateParams.length}`);
+
+            } else if (aksi === 'ajukan') {
+                if (isHistoris && (userRole.includes('bendahara') || admin)) {
+                    // Jika Bendahara langsung yang mengajukan dokumen masa lalu (<= 2025), langsung FINAL
+                    nextTahap = 'SELESAI_FINAL';
+                    newStatus = 'SELESAI';
+                    updateParams.push(nextTahap);
+                    updateFields.push(`tahap_verifikasi = $${updateParams.length}`);
+                    updateParams.push(newStatus);
+                    updateFields.push(`status = $${updateParams.length}`);
+
+                    updateParams.push(userNama);
+                    updateFields.push(`verifikasi_bendahara_oleh = $${updateParams.length}`);
+                    updateFields.push(`verifikasi_bendahara_at = NOW()`);
+
+                    updateParams.push(userNama + ' (Arsip Otomatis)');
+                    updateFields.push(`verifikasi_sekdes_oleh = $${updateParams.length}`);
+                    updateFields.push(`verifikasi_sekdes_at = NOW()`);
+
+                    updateParams.push(userNama + ' (Arsip Otomatis)');
+                    updateFields.push(`persetujuan_penghulu_oleh = $${updateParams.length}`);
+                    updateFields.push(`persetujuan_penghulu_at = NOW()`);
+
+                    updateParams.push(`[ARSIP HISTORIS TA ${tahunNum}] Disahkan langsung oleh Bendahara/Admin.`);
+                    updateFields.push(`catatan_revisi = $${updateParams.length}`);
+                } else {
+                    // Alur standar: Kaur / Operator mengajukan ke Bendahara
+                    nextTahap = 'VERIFIKASI_BENDAHARA';
+                    newStatus = 'DIAJUKAN';
+                    updateParams.push(nextTahap);
+                    updateFields.push(`tahap_verifikasi = $${updateParams.length}`);
+                    updateParams.push(newStatus);
+                    updateFields.push(`status = $${updateParams.length}`);
+                    updateFields.push(`catatan_revisi = NULL`);
+                }
 
             } else if (aksi === 'setujui_bendahara' && (userRole.includes('bendahara') || admin)) {
-                // Bendahara memverifikasi keuangan & pajak
+                // TAHUN >= 2026: Bendahara memverifikasi keuangan & pajak -> ke Sekdes
                 nextTahap = 'VERIFIKASI_SEKDES';
                 newStatus = 'DIVERIFIKASI_BENDAHARA';
                 updateParams.push(nextTahap);
@@ -280,7 +391,7 @@ const spjController = {
                 updateFields.push(`catatan_revisi = NULL`);
 
             } else if (aksi === 'setujui_sekdes' && (userRole.includes('sekdes') || userRole.includes('sekretaris') || admin)) {
-                // Sekdes memverifikasi administrasi
+                // Sekdes memverifikasi administrasi -> ke Penghulu
                 nextTahap = 'VERIFIKASI_PENGHULU';
                 newStatus = 'DIVERIFIKASI_SEKDES';
                 updateParams.push(nextTahap);
@@ -294,7 +405,7 @@ const spjController = {
                 updateFields.push(`catatan_revisi = NULL`);
 
             } else if (aksi === 'setujui_penghulu' && (userRole.includes('penghulu') || userRole.includes('pimpinan') || admin)) {
-                // Penghulu memberikan persetujuan akhir
+                // Penghulu memberikan persetujuan akhir (Sah)
                 nextTahap = 'SELESAI_FINAL';
                 newStatus = 'SELESAI';
                 updateParams.push(nextTahap);

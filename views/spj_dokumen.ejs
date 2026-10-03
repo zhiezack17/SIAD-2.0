@@ -25,12 +25,21 @@
                 <span style="font-size: 13px; color: #64748b; display: block; margin-bottom: 4px;">Status Saat Ini:</span>
                 <% 
                     const tahap = kegiatan.tahap_verifikasi || 'DRAFT'; 
+                    const isHistoris = Number(kegiatan.tahun) <= 2025;
                     let badgeBg = '#f1f5f9'; let badgeColor = '#475569'; let badgeText = 'Draft / Pengajuan';
-                    if (tahap === 'VERIFIKASI_BENDAHARA') { badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = 'Verifikasi Bendahara'; }
-                    else if (tahap === 'VERIFIKASI_SEKDES') { badgeBg = '#e0e7ff'; badgeColor = '#3730a3'; badgeText = 'Verifikasi Sekdes'; }
-                    else if (tahap === 'VERIFIKASI_PENGHULU') { badgeBg = '#dbeafe'; badgeColor = '#1d4ed8'; badgeText = 'Persetujuan Penghulu'; }
-                    else if (tahap === 'SELESAI_FINAL') { badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = 'Selesai & Disahkan'; }
-                    else if (tahap === 'PERLU_REVISI') { badgeBg = '#fee2e2'; badgeColor = '#b91c1c'; badgeText = 'Perlu Revisi'; }
+                    if (isHistoris) {
+                        if (tahap === 'SELESAI_FINAL') {
+                            badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = '🗄️ Arsip Disahkan (Sah)';
+                        } else {
+                            badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = '🗄️ Arsip (Menunggu Sahkan)';
+                        }
+                    } else {
+                        if (tahap === 'VERIFIKASI_BENDAHARA') { badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = 'Verifikasi Bendahara'; }
+                        else if (tahap === 'VERIFIKASI_SEKDES') { badgeBg = '#e0e7ff'; badgeColor = '#3730a3'; badgeText = 'Verifikasi Sekdes'; }
+                        else if (tahap === 'VERIFIKASI_PENGHULU') { badgeBg = '#dbeafe'; badgeColor = '#1d4ed8'; badgeText = 'Persetujuan Penghulu'; }
+                        else if (tahap === 'SELESAI_FINAL') { badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = 'Selesai & Disahkan'; }
+                        else if (tahap === 'PERLU_REVISI') { badgeBg = '#fee2e2'; badgeColor = '#b91c1c'; badgeText = 'Perlu Revisi'; }
+                    }
                 %>
                 <span style="background: <%= badgeBg %>; color: <%= badgeColor %>; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px;">
                     <%= badgeText %>
@@ -40,7 +49,7 @@
     </div>
 
     <!-- Peringatan Catatan Revisi Jika Ada -->
-    <% if (kegiatan.catatan_revisi) { %>
+    <% if (kegiatan.catatan_revisi && tahap === 'PERLU_REVISI') { %>
     <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 5px solid #ef4444; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
         <h4 style="margin: 0 0 5px 0; color: #991b1b; display: flex; align-items: center; gap: 8px;">
             ⚠️ Catatan Revisi dari Verifikator:
@@ -49,9 +58,66 @@
     </div>
     <% } %>
 
-    <!-- STEPPER ALUR VERIFIKASI 4 TAHAP -->
+    <% if (isHistoris) { %>
+    <!-- ============================================================ -->
+    <!-- PANEL KHUSUS ARSIP HISTORIS TAHUN <= 2025 (JALUR CEPAT) -->
+    <!-- ============================================================ -->
+    <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="background: #16a34a; color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px;">🗄️</div>
+                <div>
+                    <h4 style="margin: 0; color: #166534; font-size: 15px; font-weight: 800;">Mode Arsip Historis (Tahun Anggaran <%= kegiatan.tahun %> &le; 2025)</h4>
+                    <p style="margin: 4px 0 0 0; color: #15803d; font-size: 13px; max-width: 650px; line-height: 1.4;">
+                        Dokumen tahun anggaran ini masuk ke jalur cepat digitalisasi arsip kepenghuluan. Tidak memerlukan verifikasi berjenjang 4 akun. Dokumen langsung disahkan dari akun Bendahara dan bukti fisik dapat dilengkapi kapan saja.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <% if (tahap !== 'SELESAI_FINAL' && (userRole.includes('bendahara') || isAdmin || userRole.includes('kaur') || userRole.includes('operator'))) { %>
+                <form action="/spj/verifikasi" method="POST" style="margin:0;">
+                    <input type="hidden" name="kegiatan_id" value="<%= kegiatan.id %>">
+                    <input type="hidden" name="aksi" value="bypass_arsip">
+                    <button type="submit" style="background: #15803d; color: white; padding: 11px 22px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(21,128,61,0.3); font-size: 13.5px;">
+                        ⚡ Sahkan Dokumen Arsip Sekarang (Langsung Sah)
+                    </button>
+                </form>
+                <% } else if (tahap === 'SELESAI_FINAL') { %>
+                <span style="background: #dcfce7; color: #166534; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 13px; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; gap: 6px;">
+                    ✅ Status: Disahkan sebagai Arsip Digital Resmi
+                </span>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Alur Ringkas Arsip -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; padding-top: 15px; border-top: 1px solid #bbf7d0;">
+            <div style="background: white; border: 1px solid #86efac; border-radius: 6px; padding: 10px 14px;">
+                <div style="font-size: 11px; font-weight: bold; color: #15803d;">LANGKAH 1</div>
+                <div style="font-weight: bold; color: #0f172a; font-size: 13px;">Input Dokumen & Pajak</div>
+                <div style="font-size: 11.5px; color: #64748b;">Langsung oleh Bendahara / Operator</div>
+            </div>
+            <div style="background: white; border: 1px solid #86efac; border-radius: 6px; padding: 10px 14px;">
+                <div style="font-size: 11px; font-weight: bold; color: #15803d;">LANGKAH 2</div>
+                <div style="font-weight: bold; color: #0f172a; font-size: 13px;">Pengesahan Arsip Cepat</div>
+                <div style="font-size: 11.5px; color: <%= tahap === 'SELESAI_FINAL' ? '#16a34a' : '#d97706' %>; font-weight: 600;">
+                    <%= tahap === 'SELESAI_FINAL' ? '✓ Disahkan oleh Bendahara/Admin' : 'Menunggu Pengesahan 1-Klik' %>
+                </div>
+            </div>
+            <div style="background: white; border: 1px solid #86efac; border-radius: 6px; padding: 10px 14px;">
+                <div style="font-size: 11px; font-weight: bold; color: #15803d;">STATUS AKHIR</div>
+                <div style="font-weight: bold; color: #0f172a; font-size: 13px;">Tersimpan Permanen (Sah)</div>
+                <div style="font-size: 11.5px; color: #64748b;">Dapat dicetak & dicek QR Code</div>
+            </div>
+        </div>
+    </div>
+    <% } else { %>
+    <!-- ============================================================ -->
+    <!-- STEPPER ALUR VERIFIKASI 4 TAHAP (TAHUN >= 2026 BERJALAN) -->
+    <!-- ============================================================ -->
     <div style="background: white; border-radius: 12px; padding: 20px 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 25px;">
-        <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Alur Verifikasi Bertingkat (SOP Administrasi Desa)</h4>
+        <h4 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Alur Verifikasi Bertingkat (SOP Administrasi Desa TA <%= kegiatan.tahun %>)</h4>
         
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; position: relative;">
             <% 
@@ -151,11 +217,14 @@
             </div>
         </div>
     </div>
+    <% } %>
 
     <% 
         const rRole = String(typeof userRole !== 'undefined' ? userRole : '').toLowerCase();
         const isPimpinanOrSekdes = rRole.includes('penghulu') || rRole.includes('pimpinan') || rRole.includes('kades') || rRole.includes('sekdes') || rRole.includes('sekretaris');
-        const isReadOnly = !isAdmin && (isPimpinanOrSekdes || tahap === 'SELESAI_FINAL');
+        // KETENTUAN KHUSUS TAHUN <= 2025:
+        // Jika arsip historis, bendahara, kaur, dan admin bebas mengunggah dokumen bukti fisik dan pajak kapan saja tanpa terkunci!
+        const isReadOnly = !isAdmin && !isHistoris && (isPimpinanOrSekdes || tahap === 'SELESAI_FINAL');
     %>
 
     <% if (tahap === 'SELESAI_FINAL') { %>

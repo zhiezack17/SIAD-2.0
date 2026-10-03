@@ -264,9 +264,11 @@
                         <i class="fa-solid fa-shield-check"></i>
                     </div>
                     <div>
-                        <div class="badge-title">DOKUMEN RESMI & TERVERIFIKASI DIGITAL</div>
+                        <div class="badge-title"><%= Number(kegiatan.tahun) <= 2025 ? 'ARSIP DIGITAL HISTORIS RESMI & TERVALIDASI' : 'DOKUMEN RESMI & TERVERIFIKASI DIGITAL' %></div>
                         <div class="badge-desc">
-                            Dokumen SPJ ini sah, terdaftar resmi di database Kabupaten Rokan Hilir, dan telah melewati seluruh tahapan verifikasi bendahara, sekdes, serta pengesahan akhir oleh Penghulu.
+                            <%= Number(kegiatan.tahun) <= 2025 
+                                ? 'Dokumen SPJ Tahun Anggaran ' + kegiatan.tahun + ' ini sah dan terdaftar resmi di database arsip digital SIAD 2.0 Kepenghuluan, serta telah disahkan untuk keperluan pengarsipan resmi.' 
+                                : 'Dokumen SPJ ini sah, terdaftar resmi di database Kabupaten Rokan Hilir, dan telah melewati seluruh tahapan verifikasi bendahara, sekdes, serta pengesahan akhir oleh Penghulu.' %>
                         </div>
                     </div>
                 </div>
