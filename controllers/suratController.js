@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { uploadToDrive } = require('../config/drive');
+const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 const ExcelJS = require('exceljs');
 
@@ -120,6 +120,17 @@ const suratController = {
             const admin = ac.isAdmin(req); const did = ac.getDesaId(req);
             let sql, p;
             const tbl = type === 'masuk' ? 'surat_masuk' : 'surat_keluar';
+
+            // 1. Ambil file_url surat sebelum dihapus dan bersihkan di Google Drive
+            try {
+                const sCheck = await db.query(`SELECT file_url FROM ${tbl} WHERE id = $1`, [id]);
+                if (sCheck.rows.length > 0 && sCheck.rows[0].file_url) {
+                    await deleteFromDrive(sCheck.rows[0].file_url);
+                }
+            } catch (errDrive) {
+                console.warn('[Surat:deleteSurat] Gagal hapus di Drive:', errDrive.message);
+            }
+
             if (admin || !did) {
                 sql = `DELETE FROM ${tbl} WHERE id = $1`; p = [id];
             } else {

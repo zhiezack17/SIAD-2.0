@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { uploadToDrive } = require('../config/drive');
+const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 
 const produkHukumController = {
@@ -101,6 +101,17 @@ const produkHukumController = {
         try {
             const admin = ac.isAdmin(req); const did = ac.getDesaId(req); const id = req.body.id;
             let sql, p;
+
+            // 1. Ambil file_url sebelum dihapus dan bersihkan di Google Drive
+            try {
+                const phCheck = await db.query('SELECT file_url FROM produk_hukum WHERE id=$1', [id]);
+                if (phCheck.rows.length > 0 && phCheck.rows[0].file_url) {
+                    await deleteFromDrive(phCheck.rows[0].file_url);
+                }
+            } catch (errDrive) {
+                console.warn('[ProdukHukum:postDelete] Gagal hapus di Drive:', errDrive.message);
+            }
+
             if (admin || !did) {
                 sql = 'DELETE FROM produk_hukum WHERE id=$1'; p = [id];
             } else {

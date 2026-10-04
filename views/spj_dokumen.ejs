@@ -1,42 +1,24 @@
 <div class="content-wrapper" style="padding: 20px; background-color: #f8fafc; min-height: 100vh;">
     <!-- Top Navigation Bar -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <a href="/spj" style="display: inline-block; text-decoration: none; background: white; color: #0f172a; padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">⬅️ Kembali ke Induk SPJ</a>
         
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <a href="/spj/cetak-sptjb/<%= kegiatan.id %>" target="_blank" style="text-decoration: none; background: #166534; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 4px rgba(22,101,52,0.25); display: flex; align-items: center; gap: 8px;">
-                📜 Cetak SPTJB (Permendagri 20/2018)
-            </a>
-            <a href="/spj/cetak/<%= kegiatan.id %>" target="_blank" style="text-decoration: none; background: #0f172a; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px;">
-                🖨️ Cetak Lembar Pengesahan SPJ
-            </a>
-        </div>
+        <a href="/spj/cetak/<%= kegiatan.id %>" target="_blank" style="text-decoration: none; background: #0f172a; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px;">
+            🖨️ Cetak Lembar Pengesahan SPJ
+        </a>
     </div>
 
     <!-- Header Informasi Kegiatan -->
     <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 6px solid #2563eb;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
                 <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 8px;">
                     <%= kegiatan.kepenghuluan_nama || 'Kepenghuluan' %> &bull; Tahun Anggaran <%= kegiatan.tahun %>
                 </span>
                 <h2 style="margin: 0 0 8px 0; color: #0f172a; font-size: 22px;"><%= kegiatan.nama_kegiatan %></h2>
-                <p style="margin: 0; color: #64748b; font-size: 13.5px; line-height: 1.6;">
+                <p style="margin: 0; color: #64748b; font-size: 14px;">
                     Lokasi: <strong><%= kegiatan.lokasi || '-' %></strong> &nbsp;|&nbsp; 
-                    Pagu: <strong style="color:#059669;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></strong>
-                    <% if (kegiatan.realisasi_anggaran) { %>
-                        &nbsp;|&nbsp; Realisasi: <strong style="color:#2563eb;">Rp <%= Number(kegiatan.realisasi_anggaran).toLocaleString('id-ID') %></strong>
-                    <% } %>
-                    <br>
-                    <span>📁 <strong><%= kegiatan.bidang || 'Penyelenggaraan Pemerintahan Desa' %></strong></span>
-                    <% if (kegiatan.sub_bidang) { %> &bull; <span style="color:#334155;"><%= kegiatan.sub_bidang %></span> <% } %>
-                    &nbsp;|&nbsp; <span>💰 Sumber: <strong style="color:#b45309;"><%= kegiatan.sumber_dana || 'DDS (Dana Desa)' %></strong></span>
-                    <% if (kegiatan.prioritas_permendes && kegiatan.prioritas_permendes !== 'non_prioritas') { %>
-                        &nbsp;|&nbsp; <span style="background:#dcfce7; color:#166534; padding:2px 7px; border-radius:4px; font-weight:700; font-size:11.5px; border:1px solid #86efac;">⭐ Prioritas: <%= kegiatan.prioritas_permendes.toUpperCase().replace(/_/g, ' ') %></span>
-                    <% } %>
-                    <% if (kegiatan.nama_pelaksana) { %>
-                        <br><span>👤 Pelaksana (PKA): <strong><%= kegiatan.nama_pelaksana %></strong> (<%= kegiatan.jabatan_pelaksana || 'Kaur / Kasi' %>)</span>
-                    <% } %>
+                    Pagu Anggaran: <strong style="color:#059669;">Rp <%= Number(kegiatan.pagu_anggaran).toLocaleString('id-ID') %></strong>
                 </p>
             </div>
             <div style="text-align: right;">
@@ -237,109 +219,11 @@
     </div>
     <% } %>
 
-    <!-- ============================================================ -->
-    <!-- CHECKLIST KELENGKAPAN DOKUMEN WAJIB PERMENDAGRI NO. 20/2018 -->
-    <!-- ============================================================ -->
-    <%
-        const jBelanja = kegiatan.jenis_belanja || 'barang_jasa';
-        let checklistItems = [];
-        let labelBelanja = 'Pengadaan Barang & Jasa / Operasional';
-
-        if (jBelanja === 'modal_fisik') {
-            labelBelanja = 'Belanja Modal / Pembangunan Fisik (Infrastruktur)';
-            checklistItems = [
-                { id: 'rab', title: 'Rencana Anggaran Biaya (RAB) & Gambar Kerja', desc: 'RAB teknis yang disetujui PKA/Sekdes' },
-                { id: 'bapb_bast', title: 'Berita Acara Pemeriksaan & Serah Terima (BAST)', desc: 'Dari TPK kepada Kaur Keuangan/Penghulu' },
-                { id: 'hok', title: 'Daftar Tanda Terima Upah Pekerja (HOK)', desc: 'Presensi & tanda terima upah tenaga kerja lokal (PKTD)' },
-                { id: 'nota_toko', title: 'Kuitansi & Nota Faktur Pembelian Bahan Material', desc: 'Nota resmi toko/supplier berstempel' },
-                { id: 'foto_progres', title: 'Dokumentasi Foto Progres Fisik (0%, 50%, 100%)', desc: 'Foto titik nol hingga selesai dari sudut yang sama' },
-                { id: 'pajak', title: 'Bukti Penyetoran Pajak (PPN / PPh 21 / Galian C)', desc: 'NTPN / Surat Setoran Pajak Daerah & Pusat' }
-            ];
-        } else if (jBelanja === 'pegawai_honor') {
-            labelBelanja = 'Belanja Pegawai / Penghasilan Tetap (Siltap) / Honorarium';
-            checklistItems = [
-                { id: 'sk_tugas', title: 'SK Keputusan Penetapan Aparatur / Tim Kerja', desc: 'SK Penghulu dasar hukum penerimaan honor/siltap' },
-                { id: 'daftar_honor', title: 'Daftar Tanda Terima Pembayaran Honor / Siltap', desc: 'Memuat nama, NIK, jabatan, nominal bruto & netto' },
-                { id: 'bukti_transfer', title: 'Bukti Transfer Bank / Kuitansi Penerimaan', desc: 'Bukti pemindahbukuan rekening bila non-tunai' },
-                { id: 'laporan_kinerja', title: 'Laporan Pelaksanaan Tugas / Rekap Presensi', desc: 'Daftar hadir bulanan atau notulen kegiatan' },
-                { id: 'pajak_pph21', title: 'Bukti Setor Pajak Penghasilan (PPh Pasal 21)', desc: 'Setoran PPh 21 bila di atas PTKP' }
-            ];
-        } else if (jBelanja === 'bantuan_sosial') {
-            labelBelanja = 'Belanja Tak Terduga / Bantuan Langsung Tunai (BLT Dana Desa)';
-            checklistItems = [
-                { id: 'perkades_kpm', title: 'Perkades / SK Penetapan KPM BLT-DD', desc: 'Daftar KPM yang telah diverifikasi' },
-                { id: 'musdessus', title: 'Berita Acara Musdessus Penetapan KPM / Bencana', desc: 'Notulen & daftar hadir Musdessus BPD' },
-                { id: 'tanda_terima_blt', title: 'Daftar Tanda Terima Penyerahan Bantuan Tunai', desc: 'Tanda tangan/cap jempol KPM beserta fotokopi KTP/KK' },
-                { id: 'foto_penyerahan', title: 'Dokumentasi Foto Penyerahan Langsung kepada Warga', desc: 'Foto dokumentasi penyerahan bantuan' },
-                { id: 'ba_penyaluran', title: 'Berita Acara Penyaluran dari Bendahara / Tim Penyalur', desc: 'Pertanggungjawaban total dana yang disalurkan' }
-            ];
-        } else {
-            labelBelanja = 'Pengadaan Barang & Jasa / Operasional Perkantoran';
-            checklistItems = [
-                { id: 'kuitansi', title: 'Kuitansi Pengeluaran Kas Desa (Format Standar)', desc: 'Ditandatangani Penerima, PKA, Bendahara, Penghulu' },
-                { id: 'nota_faktur', title: 'Nota Penjualan / Faktur Toko Asli Berstempel', desc: 'Rincian jumlah, satuan, dan harga per unit' },
-                { id: 'bapb', title: 'Berita Acara Pemeriksaan / Penerimaan Barang (BAPB)', desc: 'Untuk pengadaan barang/sarana bernilai di atas Rp 10 Juta' },
-                { id: 'spk', title: 'Surat Pesanan / SPK / Perjanjian Kerjasama', desc: 'Jika pengadaan melibatkan pihak ketiga' },
-                { id: 'foto_barang', title: 'Dokumentasi Foto Barang yang Dibeli / Diterima', desc: 'Foto fisik barang di kantor desa' },
-                { id: 'pajak_ppn', title: 'Bukti Setor Pajak (PPN / PPh Pasal 22 / Pajak Daerah)', desc: 'Bila transaksi melampaui batas kewajiban pajak' }
-            ];
-        }
-
-        const uploadedNames = (dokumen || []).map(d => (d.nama_dokumen || '').toLowerCase());
-        const adaPajak = (pajak || []).length > 0;
-    %>
-    <div style="background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 25px; border-left: 5px solid #10b981;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
-            <div>
-                <h4 style="margin: 0; color: #065f46; font-size: 15px; font-weight: 800; display:flex; align-items:center; gap:8px;">
-                    📋 Checklist Standar Berkas Wajib SPJ (Permendagri No. 20/2018)
-                </h4>
-                <div style="font-size: 12px; color: #64748b; margin-top: 3px;">
-                    Kategori Belanja: <strong style="color:#0f172a;"><%= labelBelanja %></strong>
-                </div>
-            </div>
-            <div>
-                <a href="/spj/cetak-sptjb/<%= kegiatan.id %>" target="_blank" style="text-decoration:none; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:6px 14px; border-radius:6px; font-weight:bold; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
-                    📜 SPTJB Otomatis Tersedia
-                </a>
-            </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
-            <% checklistItems.forEach((chk, idx) => { 
-                let isFulfilled = false;
-                if (chk.id.includes('pajak')) {
-                    isFulfilled = adaPajak;
-                } else {
-                    const k = chk.id.toLowerCase();
-                    isFulfilled = uploadedNames.some(n => n.includes(k) || (k === 'nota_toko' && (n.includes('nota') || n.includes('faktur'))) || (k === 'foto_progres' && (n.includes('foto') || n.includes('dokumentasi'))) || (k === 'kuitansi' && n.includes('kuitansi')));
-                }
-            %>
-            <div style="background: <%= isFulfilled ? '#f0fdf4' : '#f8fafc' %>; border: 1px solid <%= isFulfilled ? '#86efac' : '#e2e8f0' %>; border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px;">
-                <div style="font-size: 16px; line-height: 1; margin-top: 2px;">
-                    <%= isFulfilled ? '✅' : '⚪' %>
-                </div>
-                <div style="flex: 1;">
-                    <div style="font-size: 12.5px; font-weight: 700; color: <%= isFulfilled ? '#166534' : '#1e293b' %>;">
-                        <%= chk.title %>
-                    </div>
-                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
-                        <%= chk.desc %>
-                    </div>
-                    <% if (!isReadOnly) { %>
-                    <a href="javascript:void(0)" onclick="quickSetDocName('<%= chk.title.replace(/'/g, '') %>')" style="font-size: 11px; color: #2563eb; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 4px;">
-                        + Gunakan Nama Ini di Upload
-                    </a>
-                    <% } %>
-                </div>
-            </div>
-            <% }) %>
-        </div>
-    </div>
-
     <% 
         const rRole = String(typeof userRole !== 'undefined' ? userRole : '').toLowerCase();
         const isPimpinanOrSekdes = rRole.includes('penghulu') || rRole.includes('pimpinan') || rRole.includes('kades') || rRole.includes('sekdes') || rRole.includes('sekretaris');
+        // KETENTUAN KHUSUS TAHUN <= 2025:
+        // Jika arsip historis, bendahara, kaur, dan admin bebas mengunggah dokumen bukti fisik dan pajak kapan saja tanpa terkunci!
         const isReadOnly = !isAdmin && !isHistoris && (isPimpinanOrSekdes || tahap === 'SELESAI_FINAL');
     %>
 
@@ -352,14 +236,9 @@
                 <span style="color: #047857; font-size: 13px;">Seluruh tahapan verifikasi administrasi dan pengesahan Penghulu telah lengkap dan tersimpan secara permanen.</span>
             </div>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <a href="/spj/cetak-sptjb/<%= kegiatan.id %>" target="_blank" style="background: #166534; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(22,101,52,0.25);">
-                📜 Cetak SPTJB
-            </a>
-            <a href="/spj/cetak/<%= kegiatan.id %>" target="_blank" style="background: #059669; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);">
-                🖨️ Cetak Lembar Pengesahan (A4)
-            </a>
-        </div>
+        <a href="/spj/cetak/<%= kegiatan.id %>" target="_blank" style="background: #059669; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);">
+            🖨️ Cetak Lembar Pengesahan (A4)
+        </a>
     </div>
     <% } %>
 
@@ -757,15 +636,6 @@
 </div>
 
 <script>
-function quickSetDocName(name) {
-    const input = document.querySelector('input[name="nama_dokumen"]');
-    if (input) {
-        input.value = name;
-        input.focus();
-        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
-
 function bukaModalRevisi(role) {
     document.getElementById('modalRevisi').style.display = 'flex';
 }

@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { uploadToDrive } = require('../config/drive');
+const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 const QRCode = require('qrcode');
 
@@ -129,18 +129,11 @@ const spjController = {
 
     postTambah: async (req, res) => {
         try {
-            const { 
-                nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, ket,
-                bidang, sub_bidang, kode_rekening, tahap,
-                sumber_dana, jenis_belanja, prioritas_permendes, realisasi_anggaran,
-                nama_pelaksana, jabatan_pelaksana
-            } = req.body;
+            const { nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, ket } = req.body;
             const did = ac.getDesaId(req);
             const userNama = req.session && req.session.user ? (req.session.user.nama || req.session.user.username) : 'Bendahara/Admin';
             const tahunNum = tahun ? Number(tahun) : new Date().getFullYear();
             const isHistoris = tahunNum <= 2025;
-            const paguVal = pagu ? Number(pagu) : 0;
-            const realisasiVal = realisasi_anggaran ? Number(realisasi_anggaran) : paguVal;
 
             let sql = '';
             let p = [];
@@ -151,22 +144,17 @@ const spjController = {
                 sql = `
                     INSERT INTO spj_kegiatan 
                     (nama_kegiatan, tahun, pagu_anggaran, lokasi, tanggal_mulai, tanggal_selesai, status, keterangan, kepenghuluan_id, tahap_verifikasi,
-                     bidang, sub_bidang, kode_rekening, tahap, sumber_dana, jenis_belanja, prioritas_permendes, realisasi_anggaran,
-                     nama_pelaksana, jabatan_pelaksana,
                      verifikasi_bendahara_oleh, verifikasi_bendahara_at,
                      verifikasi_sekdes_oleh, verifikasi_sekdes_at,
                      persetujuan_penghulu_oleh, persetujuan_penghulu_at,
                      catatan_revisi)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                            $11, $12, $13, $14, $15, $16, $17, $18,
-                            $19, $20,
-                            $21, NOW(), $22, NOW(), $23, NOW(), $24)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), $12, NOW(), $13, NOW(), $14)
                     RETURNING id
                 `;
                 p = [
                     nama,
                     tahunNum,
-                    paguVal,
+                    pagu ? Number(pagu) : 0,
                     lokasi || '',
                     tgl_mulai || null,
                     tgl_selesai || null,
@@ -174,16 +162,6 @@ const spjController = {
                     ket || '',
                     did || null,
                     'SELESAI_FINAL',
-                    bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa',
-                    sub_bidang || '',
-                    kode_rekening || '',
-                    tahap || 'Tahap 1',
-                    sumber_dana || 'DDS (Dana Desa)',
-                    jenis_belanja || 'barang_jasa',
-                    prioritas_permendes || 'non_prioritas',
-                    realisasiVal,
-                    nama_pelaksana || '',
-                    jabatan_pelaksana || 'Kaur / Kasi Pelaksana Kegiatan',
                     userNama,
                     userNama + ' (Arsip Otomatis)',
                     userNama + ' (Arsip Otomatis)',
@@ -194,35 +172,21 @@ const spjController = {
                 // Wajib mengikuti alur 4 akun: Kaur -> Bendahara -> Sekdes -> Penghulu
                 sql = `
                     INSERT INTO spj_kegiatan 
-                    (nama_kegiatan, tahun, pagu_anggaran, lokasi, tanggal_mulai, tanggal_selesai, status, keterangan, kepenghuluan_id, tahap_verifikasi,
-                     bidang, sub_bidang, kode_rekening, tahap, sumber_dana, jenis_belanja, prioritas_permendes, realisasi_anggaran,
-                     nama_pelaksana, jabatan_pelaksana)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                            $11, $12, $13, $14, $15, $16, $17, $18,
-                            $19, $20)
+                    (nama_kegiatan, tahun, pagu_anggaran, lokasi, tanggal_mulai, tanggal_selesai, status, keterangan, kepenghuluan_id, tahap_verifikasi)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                     RETURNING id
                 `;
                 p = [
                     nama, 
                     tahunNum, 
-                    paguVal, 
+                    pagu ? Number(pagu) : 0, 
                     lokasi || '', 
                     tgl_mulai || null, 
                     tgl_selesai || null, 
                     'DRAFT', 
                     ket || '', 
                     did || null,
-                    'DRAFT',
-                    bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa',
-                    sub_bidang || '',
-                    kode_rekening || '',
-                    tahap || 'Tahap 1',
-                    sumber_dana || 'DDS (Dana Desa)',
-                    jenis_belanja || 'barang_jasa',
-                    prioritas_permendes || 'non_prioritas',
-                    realisasiVal,
-                    nama_pelaksana || '',
-                    jabatan_pelaksana || 'Kaur / Kasi Pelaksana Kegiatan'
+                    'DRAFT'
                 ];
             }
 
@@ -236,42 +200,27 @@ const spjController = {
 
     postEdit: async (req, res) => {
         try {
-            const { 
-                id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, ket,
-                bidang, sub_bidang, kode_rekening, tahap,
-                sumber_dana, jenis_belanja, prioritas_permendes, realisasi_anggaran,
-                nama_pelaksana, jabatan_pelaksana
-            } = req.body;
+            const { id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, ket } = req.body;
             const admin = ac.isAdmin(req);
             const did = ac.getDesaId(req);
             const userNama = req.session && req.session.user ? (req.session.user.nama || req.session.user.username) : 'Bendahara/Admin';
             const tahunNum = tahun ? Number(tahun) : null;
-            const paguVal = pagu ? Number(pagu) : 0;
-            const realisasiVal = realisasi_anggaran ? Number(realisasi_anggaran) : paguVal;
 
             let sql = `
                 UPDATE spj_kegiatan 
-                SET nama_kegiatan=$1, tahun=$2, pagu_anggaran=$3, lokasi=$4, tanggal_mulai=$5, tanggal_selesai=$6, keterangan=$7,
-                    bidang=$8, sub_bidang=$9, kode_rekening=$10, tahap=$11, sumber_dana=$12, jenis_belanja=$13, prioritas_permendes=$14, realisasi_anggaran=$15,
-                    nama_pelaksana=$16, jabatan_pelaksana=$17
+                SET nama_kegiatan=$1, tahun=$2, pagu_anggaran=$3, lokasi=$4, tanggal_mulai=$5, tanggal_selesai=$6, keterangan=$7
             `;
-            let p = [
-                nama, tahunNum, paguVal, lokasi, tgl_mulai || null, tgl_selesai || null, ket,
-                bidang, sub_bidang || '', kode_rekening || '', tahap || 'Tahap 1',
-                sumber_dana || 'DDS (Dana Desa)', jenis_belanja || 'barang_jasa',
-                prioritas_permendes || 'non_prioritas', realisasiVal,
-                nama_pelaksana || '', jabatan_pelaksana || 'Kaur / Kasi Pelaksana Kegiatan'
-            ];
+            let p = [nama, tahunNum, pagu || 0, lokasi, tgl_mulai || null, tgl_selesai || null, ket];
 
             // Jika tahun adalah 2025 ke bawah, pastikan status otomatis disahkan ke arsip final
             if (tahunNum && tahunNum <= 2025) {
                 sql += `, tahap_verifikasi = CASE WHEN tahap_verifikasi != 'SELESAI_FINAL' THEN 'SELESAI_FINAL' ELSE tahap_verifikasi END,
                          status = CASE WHEN status != 'SELESAI' THEN 'SELESAI' ELSE status END,
-                         verifikasi_bendahara_oleh = COALESCE(verifikasi_bendahara_oleh, $${p.length + 1}),
+                         verifikasi_bendahara_oleh = COALESCE(verifikasi_bendahara_oleh, $8),
                          verifikasi_bendahara_at = COALESCE(verifikasi_bendahara_at, NOW()),
-                         verifikasi_sekdes_oleh = COALESCE(verifikasi_sekdes_oleh, $${p.length + 2}),
+                         verifikasi_sekdes_oleh = COALESCE(verifikasi_sekdes_oleh, $9),
                          verifikasi_sekdes_at = COALESCE(verifikasi_sekdes_at, NOW()),
-                         persetujuan_penghulu_oleh = COALESCE(persetujuan_penghulu_oleh, $${p.length + 3}),
+                         persetujuan_penghulu_oleh = COALESCE(persetujuan_penghulu_oleh, $10),
                          persetujuan_penghulu_at = COALESCE(persetujuan_penghulu_at, NOW())
                 `;
                 p.push(userNama, userNama + ' (Arsip Otomatis)', userNama + ' (Arsip Otomatis)');
@@ -299,6 +248,29 @@ const spjController = {
             const admin = ac.isAdmin(req);
             const did = ac.getDesaId(req);
             const id = req.body.id;
+
+            // 1. Bersihkan semua berkas fisik di Google Drive yang terhubung ke kegiatan ini
+            try {
+                const docs = await db.query('SELECT file_url FROM spj_dokumen WHERE kegiatan_id=$1', [id]);
+                for (const r of docs.rows) {
+                    if (r.file_url) await deleteFromDrive(r.file_url);
+                }
+                const fotos = await db.query('SELECT file_url FROM spj_foto WHERE kegiatan_id=$1', [id]);
+                for (const r of fotos.rows) {
+                    if (r.file_url) await deleteFromDrive(r.file_url);
+                }
+                const pajaks = await db.query('SELECT file_bukti FROM spj_pajak WHERE kegiatan_id=$1', [id]);
+                for (const r of pajaks.rows) {
+                    if (r.file_bukti) await deleteFromDrive(r.file_bukti);
+                }
+            } catch (errDrive) {
+                console.warn('[SPJ:postDelete] Peringatan saat membersihkan file Drive:', errDrive.message);
+            }
+
+            // 2. Hapus baris data relasi di database
+            await db.query('DELETE FROM spj_dokumen WHERE kegiatan_id=$1', [id]);
+            await db.query('DELETE FROM spj_foto WHERE kegiatan_id=$1', [id]);
+            await db.query('DELETE FROM spj_pajak WHERE kegiatan_id=$1', [id]);
 
             let sql = 'DELETE FROM spj_kegiatan WHERE id=$1';
             let p = [id];
@@ -565,6 +537,16 @@ const spjController = {
             const admin = ac.isAdmin(req);
             const did = ac.getDesaId(req);
 
+            // 1. Ambil file_url sebelum dihapus dari DB dan bersihkan di Google Drive
+            try {
+                const check = await db.query('SELECT file_url FROM spj_dokumen WHERE id=$1', [id]);
+                if (check.rows.length > 0 && check.rows[0].file_url) {
+                    await deleteFromDrive(check.rows[0].file_url);
+                }
+            } catch (errDrive) {
+                console.warn('[SPJ:postDeleteDokumen] Gagal hapus di Drive:', errDrive.message);
+            }
+
             let sql = 'DELETE FROM spj_dokumen WHERE id=$1';
             let p = [id];
 
@@ -638,6 +620,16 @@ const spjController = {
             const { id, kegiatan_id } = req.body;
             const admin = ac.isAdmin(req);
             const did = ac.getDesaId(req);
+
+            // 1. Ambil file_url sebelum dihapus dari DB dan bersihkan di Google Drive
+            try {
+                const check = await db.query('SELECT file_url FROM spj_foto WHERE id=$1', [id]);
+                if (check.rows.length > 0 && check.rows[0].file_url) {
+                    await deleteFromDrive(check.rows[0].file_url);
+                }
+            } catch (errDrive) {
+                console.warn('[SPJ:postDeleteFoto] Gagal hapus di Drive:', errDrive.message);
+            }
 
             let sql = 'DELETE FROM spj_foto WHERE id=$1';
             let p = [id];
@@ -739,6 +731,16 @@ const spjController = {
             const admin = ac.isAdmin(req);
             const did = ac.getDesaId(req);
 
+            // 1. Ambil file_bukti sebelum dihapus dari DB dan bersihkan di Google Drive
+            try {
+                const check = await db.query('SELECT file_bukti FROM spj_pajak WHERE id=$1', [id]);
+                if (check.rows.length > 0 && check.rows[0].file_bukti) {
+                    await deleteFromDrive(check.rows[0].file_bukti);
+                }
+            } catch (errDrive) {
+                console.warn('[SPJ:postDeletePajak] Gagal hapus di Drive:', errDrive.message);
+            }
+
             let sql = 'DELETE FROM spj_pajak WHERE id=$1';
             let p = [id];
 
@@ -839,95 +841,6 @@ const spjController = {
             });
         } catch (error) {
             console.error('[SPJ:getCetakVerifikasi]', error);
-            res.redirect('/spj');
-        }
-    },
-
-    // === CETAK SPTJB (SURAT PERNYATAAN TANGGUNG JAWAB BELANJA - PERMENDAGRI 20/2018) ===
-    getCetakSptjb: async (req, res) => {
-        try {
-            const admin = ac.isAdmin(req);
-            const did = ac.getDesaId(req);
-            const id = req.params.id;
-
-            let kSql = `
-                SELECT sk.*, k.nama AS kepenghuluan_nama, kec.nama AS kecamatan_nama
-                FROM spj_kegiatan sk
-                LEFT JOIN kepenghuluan k ON sk.kepenghuluan_id = k.id
-                LEFT JOIN kecamatan kec ON k.kecamatan_id = kec.id
-                WHERE sk.id=$1
-            `;
-            let kP = [id];
-            if (!admin && did) {
-                kSql += ' AND (sk.kepenghuluan_id=$2 OR sk.kepenghuluan_id IS NULL)';
-                kP.push(did);
-            }
-
-            const kRes = await db.query(kSql, kP);
-            if (kRes.rows.length === 0) return res.redirect('/spj');
-            const kegiatan = kRes.rows[0];
-            const targetDesaId = kegiatan.kepenghuluan_id || did || 1;
-
-            // Fetch profil desa & pejabat
-            const profRes = await db.query(`
-                SELECT pd.nama_desa, pd.nama_kepala_desa, pd.alamat,
-                       p_penghulu.nama_lengkap AS user_penghulu,
-                       p_bendahara.nama_lengkap AS user_bendahara
-                FROM profil_desa pd
-                LEFT JOIN pengguna p_penghulu ON p_penghulu.kepenghuluan_id = pd.kepenghuluan_id AND (p_penghulu.role::text IN ('penghulu', 'admin') OR p_penghulu.peran ILIKE '%pimpinan%')
-                LEFT JOIN pengguna p_bendahara ON p_bendahara.kepenghuluan_id = pd.kepenghuluan_id AND (p_bendahara.role::text IN ('bendahara', 'kaur') OR p_bendahara.peran ILIKE '%keuangan%')
-                WHERE pd.kepenghuluan_id = $1
-                LIMIT 1
-            `, [targetDesaId]);
-
-            const pRow = profRes.rows[0] || {};
-            const desa = {
-                nama: kegiatan.kepenghuluan_nama || pRow.nama_desa || 'Kepenghuluan',
-                kecamatan_nama: kegiatan.kecamatan_nama || 'Kecamatan',
-                nama_kepala_desa: pRow.nama_kepala_desa || pRow.user_penghulu || `Penghulu ${kegiatan.kepenghuluan_nama || ''}`,
-                alamat: pRow.alamat || `Kecamatan ${kegiatan.kecamatan_nama || ''}, Kabupaten Rokan Hilir`
-            };
-
-            // Terbilang Rupiah
-            function terbilang(n) {
-                const bilangan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
-                n = Math.floor(Number(n) || 0);
-                if (n < 12) return bilangan[n];
-                if (n < 20) return terbilang(n - 10) + ' Belas';
-                if (n < 100) return terbilang(Math.floor(n / 10)) + ' Puluh ' + terbilang(n % 10);
-                if (n < 200) return 'Seratus ' + terbilang(n - 100);
-                if (n < 1000) return terbilang(Math.floor(n / 100)) + ' Ratus ' + terbilang(n % 100);
-                if (n < 2000) return 'Seribu ' + terbilang(n - 1000);
-                if (n < 1000000) return terbilang(Math.floor(n / 1000)) + ' Ribu ' + terbilang(n % 1000);
-                if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + ' Juta ' + terbilang(n % 1000000);
-                if (n < 1000000000000) return terbilang(Math.floor(n / 1000000000)) + ' Miliar ' + terbilang(n % 1000000000);
-                return terbilang(Math.floor(n / 1000000000000)) + ' Triliun ' + terbilang(n % 1000000000000);
-            }
-
-            const paguNum = Number(kegiatan.pagu_anggaran) || 0;
-            const paguTerbilang = (terbilang(paguNum).trim() + ' Rupiah').replace(/\s+/g, ' ');
-
-            // Generate QR Code keabsahan
-            const verifyUrl = `https://siad-v2.com/validasi/spj/${kegiatan.id}`;
-            let qrDataUri = '';
-            try {
-                qrDataUri = await QRCode.toDataURL(verifyUrl, { width: 110, margin: 1 });
-            } catch (qe) {
-                console.error('[SPJ:QRCode]', qe);
-            }
-
-            res.render('spj_sptjb_cetak', {
-                layout: false,
-                title: `SPTJB - ${kegiatan.nama_kegiatan} - SIAD 2.0`,
-                kegiatan,
-                desa,
-                paguTerbilang,
-                qrDataUri,
-                verifyUrl,
-                tanggalCetak: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-            });
-        } catch (error) {
-            console.error('[SPJ:getCetakSptjb]', error);
             res.redirect('/spj');
         }
     },
@@ -1095,29 +1008,6 @@ const spjController = {
                     bidangGroups[1].subtotalRealisasi += isFinal ? p : 0;
                 });
             }
-
-            // Kelompokkan kegiatan di dalam bidang berdasarkan Sub Bidang (Siskeudes Compliant)
-            bidangGroups.forEach(bg => {
-                const subMap = {};
-                bg.kegiatan.forEach(k => {
-                    const sb = (k.sub_bidang && k.sub_bidang.trim()) ? k.sub_bidang.trim() : 'Kegiatan Reguler / Umum';
-                    if (!subMap[sb]) {
-                        subMap[sb] = {
-                            namaSubBidang: sb,
-                            subtotalPagu: 0,
-                            subtotalRealisasi: 0,
-                            kegiatan: []
-                        };
-                    }
-                    const pagu = Number(k.pagu_anggaran) || 0;
-                    const isFinal = k.tahap_verifikasi === 'SELESAI_FINAL' || (k.status && k.status.toUpperCase() === 'SELESAI');
-                    const realisasi = isFinal ? (Number(k.realisasi_anggaran) || pagu) : (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU' || k.tahap_verifikasi === 'VERIFIKASI_SEKDES' ? pagu : 0);
-                    subMap[sb].subtotalPagu += pagu;
-                    subMap[sb].subtotalRealisasi += realisasi;
-                    subMap[sb].kegiatan.push(k);
-                });
-                bg.subBidangGroups = Object.values(subMap);
-            });
 
             const tanggalCetak = new Date().toLocaleDateString('id-ID', {
                 day: 'numeric',

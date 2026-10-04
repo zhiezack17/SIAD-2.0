@@ -371,22 +371,9 @@ function exportPajakToExcel() {
                                 <span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px;">
                                     TA <%= item.tahun %> • <%= item.tahap || 'Tahap 1' %>
                                 </span>
-                                <span style="background: #ecfdf5; color: #047857; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px; border: 1px solid #a7f3d0;">
-                                    💰 <%= item.sumber_dana ? item.sumber_dana.split(' ')[0] : 'DDS' %>
-                                </span>
                                 <span style="background: #f1f5f9; color: #334155; padding: 2px 7px; border-radius: 4px; font-weight: 600; font-size: 11px; border: 1px solid #e2e8f0;">
                                     🏷️ <%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>
                                 </span>
-                                <% if (item.sub_bidang) { %>
-                                    <span style="background: #f8fafc; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 11px; border: 1px solid #cbd5e1;">
-                                        📂 <%= item.sub_bidang %>
-                                    </span>
-                                <% } %>
-                                <% if (item.prioritas_permendes && item.prioritas_permendes !== 'non_prioritas') { %>
-                                    <span style="background: #dcfce7; color: #166534; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 10.5px; border: 1px solid #86efac;">
-                                        ⭐ <%= item.prioritas_permendes.toUpperCase().replace(/_/g, ' ') %>
-                                    </span>
-                                <% } %>
                                 <% if (item.kode_rekening) { %>
                                     <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 10.5px; font-weight: bold;">
                                         Rek: <%= item.kode_rekening %>
@@ -463,12 +450,11 @@ function exportPajakToExcel() {
                         </td>
 
                         <td style="padding: 12px 10px; text-align: right;">
-                            <div style="display: flex; gap: 4px; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
-                                <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" title="Berkas & Alur Verifikasi" style="background:#10b981; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">📂 Berkas</button>
-                                <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" title="Kelola Pajak" style="background:#3b82f6; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">💸</button>
-                                <a href="/spj/cetak-sptjb/<%= item.id %>" target="_blank" title="Cetak SPTJB (Permendagri 20/2018)" style="text-decoration:none; background:#166534; color:white; padding:6px 8px; border-radius:4px; font-size:11.5px; font-weight:bold;">📜</a>
-                                <a href="/spj/cetak/<%= item.id %>" target="_blank" title="Cetak Lembar Pengesahan" style="text-decoration:none; background:#0f172a; color:white; padding:6px 8px; border-radius:4px; font-size:11.5px; font-weight:bold;">🖨️</a>
-                                <button onclick="editSPJ('<%= item.id %>', `<%= item.nama_kegiatan ? item.nama_kegiatan.replace(/'/g, '&#39;') : '' %>`, '<%= item.tahun %>', '<%= item.pagu_anggaran %>', `<%= item.lokasi ? item.lokasi.replace(/'/g, '&#39;') : '' %>`, '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', `<%= item.keterangan ? item.keterangan.replace(/'/g, '&#39;') : '' %>`, '<%= item.tahap || 'Tahap 1' %>', '<%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>', '<%= item.kode_rekening || '' %>', '<%= item.sub_bidang || '' %>', '<%= item.sumber_dana || 'DDS (Dana Desa)' %>', '<%= item.jenis_belanja || 'barang_jasa' %>', '<%= item.prioritas_permendes || 'non_prioritas' %>', '<%= item.realisasi_anggaran || '' %>', `<%= item.nama_pelaksana ? item.nama_pelaksana.replace(/'/g, '&#39;') : '' %>`, `<%= item.jabatan_pelaksana ? item.jabatan_pelaksana.replace(/'/g, '&#39;') : '' %>`)" title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
+                            <div style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
+                                <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" title="Berkas & Alur Verifikasi" style="background:#10b981; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">📂 Berkas</button>
+                                <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" title="Kelola Pajak" style="background:#3b82f6; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">💸</button>
+                                <a href="/spj/cetak/<%= item.id %>" target="_blank" title="Cetak Lembar Pengesahan" style="text-decoration:none; background:#0f172a; color:white; padding:6px 9px; border-radius:4px; font-size:11.5px; font-weight:bold;">🖨️</a>
+                                <button onclick="editSPJ('<%= item.id %>', '<%= item.nama_kegiatan %>', '<%= item.tahun %>', '<%= item.pagu_anggaran %>', '<%= item.lokasi %>', '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', '<%= item.keterangan %>', '<%= item.tahap || 'Tahap 1' %>', '<%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>', '<%= item.kode_rekening || '' %>')" title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
                                 <form action="/spj/delete" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Hapus kegiatan ini?')">
                                     <input type="hidden" name="id" value="<%= item.id %>">
                                     <button type="submit" title="Hapus Kegiatan" style="background:#ef4444; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">🗑️</button>
@@ -543,92 +529,40 @@ function exportPajakToExcel() {
 
 <!-- MODAL TAMBAH / EDIT SPJ -->
 <div id="modalSPJ" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50;">
-    <div style="background: white; padding: 24px; border-radius: 12px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+    <div style="background: white; padding: 24px; border-radius: 10px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
-            <h3 id="modalTitleSPJ" style="margin:0; color:#0f172a; font-size:18px;">Tambah Kegiatan SPJ</h3>
-            <button onclick="document.getElementById('modalSPJ').style.display='none'" style="background:none; border:none; font-size:22px; cursor:pointer; color:#64748b;">&times;</button>
+            <h3 id="modalTitleSPJ" style="margin:0; color:#0f172a;">Tambah Kegiatan SPJ</h3>
+            <button onclick="document.getElementById('modalSPJ').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
         </div>
         <form id="formSPJ" action="/spj/tambah" method="POST" style="display:flex; flex-direction:column; gap:12px;">
             <div>
                 <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Nama Kegiatan <span style="color:red;">*</span></label>
-                <input type="text" name="nama" placeholder="Cth: Pembangunan Semenisasi Jalan Lingkungan Dusun II" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                <input type="text" name="nama" placeholder="Cth: Pembangunan Semenisasi Jalan Lingkungan" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
             </div>
 
-            <!-- BIDANG & SUB-BIDANG KEGIATAN (STANDAR APBDES / SISKEUDES) -->
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Bidang APBDes <span style="color:red;">*</span></label>
-                    <select name="bidang" id="modalBidangSelect" required onchange="handleBidangChange(this.value)" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-size:12px; font-weight:600;">
-                        <option value="Bidang 1: Penyelenggaraan Pemerintahan Desa">1. Penyelenggaraan Pemerintahan Desa</option>
-                        <option value="Bidang 2: Pelaksanaan Pembangunan Desa">2. Pelaksanaan Pembangunan Desa</option>
-                        <option value="Bidang 3: Pembinaan Kemasyarakatan Desa">3. Pembinaan Kemasyarakatan Desa</option>
-                        <option value="Bidang 4: Pemberdayaan Masyarakat Desa">4. Pemberdayaan Masyarakat Desa</option>
-                        <option value="Bidang 5: Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa">5. Bencana, Darurat & Mendesak</option>
-                    </select>
-                </div>
-                <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Sub-Bidang Kegiatan <span style="color:red;">*</span></label>
-                    <select name="sub_bidang" id="modalSubBidangSelect" required onchange="handleSubBidangChange(this.value)" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-size:12px; font-weight:600;">
-                        <!-- Dinamis via JS -->
-                    </select>
-                </div>
+            <!-- BIDANG APBDES STANDAR SISKEUDES -->
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Bidang Kegiatan (Standar Siskeudes / Permendagri 20/2018) <span style="color:red;">*</span></label>
+                <select name="bidang" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-size:12.5px; font-weight:600;">
+                    <option value="Bidang 1: Penyelenggaraan Pemerintahan Desa">Bidang 1: Penyelenggaraan Pemerintahan Desa</option>
+                    <option value="Bidang 2: Pelaksanaan Pembangunan Desa">Bidang 2: Pelaksanaan Pembangunan Desa</option>
+                    <option value="Bidang 3: Pembinaan Kemasyarakatan Desa">Bidang 3: Pembinaan Kemasyarakatan Desa</option>
+                    <option value="Bidang 4: Pemberdayaan Masyarakat Desa">Bidang 4: Pemberdayaan Masyarakat Desa</option>
+                    <option value="Bidang 5: Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa">Bidang 5: Penanggulangan Bencana, Keadaan Darurat & Mendesak</option>
+                </select>
             </div>
 
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Sumber Dana (APBDes) <span style="color:red;">*</span></label>
-                    <select name="sumber_dana" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-weight:600; font-size:12px;">
-                        <option value="DDS (Dana Desa)">DDS (Dana Desa - APBN)</option>
-                        <option value="ADD (Alokasi Dana Desa)">ADD (Alokasi Dana Desa - APBD Kab)</option>
-                        <option value="PBH (Bagi Hasil Pajak & Retribusi)">PBH (Bagi Hasil Pajak & Retribusi)</option>
-                        <option value="PADes (Pendapatan Asli Desa)">PADes (Pendapatan Asli Desa)</option>
-                        <option value="BKK (Bantuan Keuangan Khusus)">BKK (Bantuan Keuangan Khusus Provinsi)</option>
-                        <option value="DLL (Pendapatan Lain-lain)">DLL (Pendapatan Lain-lain Sah)</option>
-                    </select>
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Kode Rekening Kegiatan</label>
+                    <input type="text" name="kode_rekening" placeholder="Cth: 2.01.01" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; font-family:monospace;">
                 </div>
-                <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Jenis Belanja (Permendagri 20/2018) <span style="color:red;">*</span></label>
-                    <select name="jenis_belanja" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-weight:600; font-size:12px;">
-                        <option value="barang_jasa">Pengadaan Barang & Jasa / Operasional</option>
-                        <option value="modal_fisik">Belanja Modal / Pembangunan Fisik</option>
-                        <option value="pegawai_honor">Belanja Pegawai / Honorarium / Siltap</option>
-                        <option value="bantuan_sosial">Belanja Tak Terduga / Bantuan Sosial (BLT)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- PRIORITAS PERMENDES & KODE REKENING -->
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1.2;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Prioritas Permendes PDTT</label>
-                    <select name="prioritas_permendes" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-size:12px; font-weight:600;">
-                        <option value="non_prioritas">Reguler / Non-Prioritas Khusus</option>
-                        <option value="ketahanan_pangan">🌾 Ketahanan Pangan (Min 20% DD)</option>
-                        <option value="stunting">👶 Penanganan Stunting & Posyandu</option>
-                        <option value="blt_desa">🤝 BLT Dana Desa (Maks 25% DD)</option>
-                        <option value="pktd">🛠️ Padat Karya Tunai Desa (PKTD)</option>
-                        <option value="bumdes">🏢 BUMDes / Ekonomi Produktif</option>
-                    </select>
-                </div>
-                <div style="flex:0.8;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Kode Rekening APBDes</label>
-                    <input type="text" name="kode_rekening" id="modalKodeRekening" placeholder="Cth: 2.03.01" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; font-family:monospace; font-weight:bold;">
-                </div>
-            </div>
-
-            <!-- ANGGARAN & REALISASI -->
-            <div style="display:flex; gap:10px;">
                 <div style="flex:1;">
                     <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Pagu Anggaran (Rp) <span style="color:red;">*</span></label>
-                    <input type="number" name="pagu" placeholder="Cth: 75000000" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; font-weight:bold;">
-                </div>
-                <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Realisasi Belanja (Rp) <small style="color:#64748b;">(SPTJB/LPJ)</small></label>
-                    <input type="number" name="realisasi_anggaran" placeholder="Cth: 74500000" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                    <input type="number" name="pagu" placeholder="Cth: 75000000" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
                 </div>
             </div>
 
-            <!-- TAHUN & TAHAP -->
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;">
                     <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahun Anggaran</label>
@@ -636,25 +570,13 @@ function exportPajakToExcel() {
                     <div id="noticeTahunSPJ" style="margin-top: 5px; font-size: 11.5px; border-radius: 6px; padding: 6px 10px; display: none;"></div>
                 </div>
                 <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahap / Pencairan</label>
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Tahap / Semester</label>
                     <select name="tahap" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-weight:600;">
                         <option value="Tahap 1">Tahap 1</option>
                         <option value="Tahap 2">Tahap 2</option>
                         <option value="Semester 1">Semester 1</option>
                         <option value="Semester 2">Semester 2</option>
                     </select>
-                </div>
-            </div>
-
-            <!-- PELAKSANA KEGIATAN ANGGARAN (PKA / TPK / KAUR) -->
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Nama Pelaksana Kegiatan (PKA / TPK)</label>
-                    <input type="text" name="nama_pelaksana" placeholder="Cth: Budi Santoso, S.Sos" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
-                </div>
-                <div style="flex:1;">
-                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Jabatan Pelaksana</label>
-                    <input type="text" name="jabatan_pelaksana" placeholder="Cth: Kaur Keuangan / Kasi Kesejahteraan / Ketua TPK" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
                 </div>
             </div>
 
@@ -698,77 +620,6 @@ function exportPajakToExcel() {
 </div>
 
 <script>
-const SUB_BIDANG_MAP = {
-    'Bidang 1: Penyelenggaraan Pemerintahan Desa': [
-        { kode: '1.01', nama: '1.01 Penyelenggaraan Belanja Penghasilan Tetap, Tunjangan dan Operasional Desa' },
-        { kode: '1.02', nama: '1.02 Sarana dan Prasarana Pemerintahan Desa' },
-        { kode: '1.03', nama: '1.03 Administrasi Kependudukan, Pencatatan Sipil, Statistik dan Kearsipan' },
-        { kode: '1.04', nama: '1.04 Tata Praja Pemerintahan, Perencanaan, Keuangan dan Pelaporan' },
-        { kode: '1.05', nama: '1.05 Pertanahan' }
-    ],
-    'Bidang 2: Pelaksanaan Pembangunan Desa': [
-        { kode: '2.01', nama: '2.01 Pendidikan (PAUD / TK / TPA / Perpustakaan Desa)' },
-        { kode: '2.02', nama: '2.02 Kesehatan (Posyandu, Pencegahan Stunting, Sanitasi)' },
-        { kode: '2.03', nama: '2.03 Pekerjaan Umum dan Penataan Ruang (Semenisasi, Drainase, Box Culvert)' },
-        { kode: '2.04', nama: '2.04 Kawasan Pemukiman dan Air Bersih' },
-        { kode: '2.05', nama: '2.05 Kehutanan dan Lingkungan Hidup' },
-        { kode: '2.06', nama: '2.06 Perhubungan, Komunikasi dan Informatika' },
-        { kode: '2.07', nama: '2.07 Energi dan Sumber Daya Mineral' },
-        { kode: '2.08', nama: '2.08 Pariwisata' }
-    ],
-    'Bidang 3: Pembinaan Kemasyarakatan Desa': [
-        { kode: '3.01', nama: '3.01 Ketenteraman, Ketertiban Umum dan Perlindungan Masyarakat (Linmas)' },
-        { kode: '3.02', nama: '3.02 Kebudayaan dan Keagamaan (MTQ, Hari Besar Islam)' },
-        { kode: '3.03', nama: '3.03 Kepemudaan dan Olahraga' },
-        { kode: '3.04', nama: '3.04 Kelembagaan Masyarakat (LPM, PKK, Karang Taruna)' }
-    ],
-    'Bidang 4: Pemberdayaan Masyarakat Desa': [
-        { kode: '4.01', nama: '4.01 Kelautan dan Perikanan (Budidaya / Nelayan)' },
-        { kode: '4.02', nama: '4.02 Pertanian dan Peternakan (Ketahanan Pangan Hewani/Nabati)' },
-        { kode: '4.03', nama: '4.03 Peningkatan Kapasitas Aparatur Desa' },
-        { kode: '4.04', nama: '4.04 Pemberdayaan Perempuan, Perlindungan Anak dan Keluarga' },
-        { kode: '4.05', nama: '4.05 Koperasi, Usaha Mikro Kecil dan Menengah (UMKM)' },
-        { kode: '4.06', nama: '4.06 Dukungan Penanaman Modal / BUMDes' },
-        { kode: '4.07', nama: '4.07 Perdagangan dan Perindustrian' }
-    ],
-    'Bidang 5: Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa': [
-        { kode: '5.01', nama: '5.01 Penanggulangan Bencana (Karhutla, Banjir)' },
-        { kode: '5.02', nama: '5.02 Keadaan Darurat' },
-        { kode: '5.03', nama: '5.03 Keadaan Mendesak (Bantuan Langsung Tunai / BLT-DD)' }
-    ]
-};
-
-function handleBidangChange(bidangVal, selectedSubBidang) {
-    const subSelect = document.getElementById('modalSubBidangSelect');
-    if (!subSelect) return;
-    subSelect.innerHTML = '';
-    const list = SUB_BIDANG_MAP[bidangVal] || [];
-    list.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.nama;
-        opt.textContent = item.nama;
-        opt.dataset.kode = item.kode;
-        if (selectedSubBidang && (selectedSubBidang === item.nama || selectedSubBidang === item.kode || selectedSubBidang.startsWith(item.kode))) {
-            opt.selected = true;
-        }
-        subSelect.appendChild(opt);
-    });
-
-    if (!selectedSubBidang && list.length > 0) {
-        handleSubBidangChange(list[0].nama);
-    }
-}
-
-function handleSubBidangChange(subBidangVal) {
-    const subSelect = document.getElementById('modalSubBidangSelect');
-    const kodeInput = document.getElementById('modalKodeRekening');
-    if (!subSelect || !kodeInput) return;
-    const opt = subSelect.options[subSelect.selectedIndex];
-    if (opt && opt.dataset.kode && (!kodeInput.value || kodeInput.value.trim().length <= 4)) {
-        kodeInput.value = opt.dataset.kode + '.01';
-    }
-}
-
 function bukaModalFilterRekap() {
     document.getElementById('modalFilterRekap').style.display = 'flex';
 }
@@ -810,14 +661,11 @@ function bukaModalSPJ() {
     form.action = '/spj/tambah';
     let idIn = document.getElementById('edit-spj-id');
     if(idIn) idIn.remove();
-    const defaultBidang = 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
-    if (form.querySelector('[name="bidang"]')) form.querySelector('[name="bidang"]').value = defaultBidang;
-    handleBidangChange(defaultBidang);
     document.getElementById('modalSPJ').style.display = 'flex';
     updateTahunNotice();
 }
 
-function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek, subBidang, sumberDana, jenisBelanja, prioritasPermendes, realisasi, namaPelaksana, jabatanPelaksana) {
+function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek) {
     document.getElementById('modalTitleSPJ').textContent = 'Edit Kegiatan SPJ';
     const form = document.getElementById('formSPJ');
     form.action = '/spj/edit';
@@ -835,19 +683,8 @@ function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, 
     form.querySelector('[name="nama"]').value = nama;
     form.querySelector('[name="tahun"]').value = tahun;
     if(form.querySelector('[name="tahap"]')) form.querySelector('[name="tahap"]').value = tahap || 'Tahap 1';
-    
-    const bdg = bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
-    if(form.querySelector('[name="bidang"]')) form.querySelector('[name="bidang"]').value = bdg;
-    handleBidangChange(bdg, subBidang);
-
+    if(form.querySelector('[name="bidang"]')) form.querySelector('[name="bidang"]').value = bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
     if(form.querySelector('[name="kode_rekening"]')) form.querySelector('[name="kode_rekening"]').value = kodeRek || '';
-    if(form.querySelector('[name="sumber_dana"]')) form.querySelector('[name="sumber_dana"]').value = sumberDana || 'DDS (Dana Desa)';
-    if(form.querySelector('[name="jenis_belanja"]')) form.querySelector('[name="jenis_belanja"]').value = jenisBelanja || 'barang_jasa';
-    if(form.querySelector('[name="prioritas_permendes"]')) form.querySelector('[name="prioritas_permendes"]').value = prioritasPermendes || 'non_prioritas';
-    if(form.querySelector('[name="realisasi_anggaran"]')) form.querySelector('[name="realisasi_anggaran"]').value = realisasi || '';
-    if(form.querySelector('[name="nama_pelaksana"]')) form.querySelector('[name="nama_pelaksana"]').value = namaPelaksana || '';
-    if(form.querySelector('[name="jabatan_pelaksana"]')) form.querySelector('[name="jabatan_pelaksana"]').value = jabatanPelaksana || '';
-
     form.querySelector('[name="pagu"]').value = pagu;
     form.querySelector('[name="lokasi"]').value = lokasi;
     form.querySelector('[name="tgl_mulai"]').value = tgl_mulai;

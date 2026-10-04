@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { uploadToDrive } = require('../config/drive');
+const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 
 const bumdesController = {
@@ -241,6 +241,16 @@ const bumdesController = {
             const did = ac.getDesaId(req);
             const { id } = req.body;
             if (!id) return res.redirect('/bumdes?tab=pengurus');
+
+            // 1. Bersihkan file SK di Google Drive jika ada
+            try {
+                const pCheck = await db.query('SELECT file_sk_url FROM bumdes_pengurus WHERE id = $1', [id]);
+                if (pCheck.rows.length > 0 && pCheck.rows[0].file_sk_url) {
+                    await deleteFromDrive(pCheck.rows[0].file_sk_url);
+                }
+            } catch (errDrive) {
+                console.warn('[BUMDes:deletePengurus] Gagal hapus di Drive:', errDrive.message);
+            }
 
             if (ac.isSuperAdmin(req)) {
                 await db.query('DELETE FROM bumdes_pengurus WHERE id = $1', [id]);
