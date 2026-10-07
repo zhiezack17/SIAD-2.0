@@ -235,18 +235,18 @@ const pengaturanController = {
             }
             const { username, nama_lengkap, role, kepenghuluan_id, password } = req.body;
             if (!username || !nama_lengkap || !role) {
-                return res.redirect('/pengaturan?status=error_param');
+                return res.redirect('/pengaturan?status=error_param&msg=' + encodeURIComponent('Username, nama lengkap, dan role wajib diisi.'));
             }
 
+            const cleanUsername = username.trim().toLowerCase();
             const did = ac.getDesaId(req);
-            const targetKepId = did || (ac.isSuperAdmin(req) && kepenghuluan_id ? Number(kepenghuluan_id) : (req.session.active_kepenghuluan_id ? Number(req.session.active_kepenghuluan_id) : null));
+            const isSuper = ac.isSuperAdmin(req);
 
-            let passHash;
-            if (password && password.trim()) {
-                passHash = await bcrypt.hash(password.trim(), 10);
-            } else {
-                const adminRes = await db.query("SELECT password FROM pengguna WHERE username = 'admin_rohil' LIMIT 1");
-                passHash = adminRes.rows[0].password;
+            // Jika bukan superadmin, desa target HARUS desa milik admin tersebut
+            const targetKepId = isSuper ? (kepenghuluan_id ? Number(kepenghuluan_id) : (req.session.active_kepenghuluan_id ? Number(req.session.active_kepenghuluan_id) : null)) : did;
+
+            if (!targetKepId && !isSuper) {
+                return res.redirect('/pengaturan?status=error_user&msg=' + encodeURIComponent('Desa target tidak valid.'));
             }
 
             let peran = role;
@@ -256,12 +256,46 @@ const pengaturanController = {
             else if (role === 'kaur') peran = 'operator';
             else if (role === 'pengelola_aset') peran = 'pengelola_aset';
 
+            // P0-02 & P1-03: Cek apakah username sudah ada
+            const existingUser = await db.query('SELECT id, username, kepenghuluan_id FROM pengguna WHERE LOWER(username) = $1 LIMIT 1', [cleanUsername]);
+            
+            if (existingUser.rows.length > 0) {
+                const exist = existingUser.rows[0];
+                // Jika username terdaftar di desa lain atau superadmin, TOLAK KERAS (Cegah pembajakan akun lintas desa)
+                if (!isSuper && exist.kepenghuluan_id !== targetKepId) {
+                    return res.redirect('/pengaturan?status=error_user&msg=' + encodeURIComponent(`Username '${cleanUsername}' sudah digunakan oleh instansi/kepenghuluan lain. Harap gunakan username unik.`));
+                }
+                
+                // Jika user berada di desa yang sama, lakukan update profil yang aman
+                let updateSql = 'UPDATE pengguna SET nama_lengkap = $1, peran = $2, role = $3, aktif = true';
+                let updateParams = [nama_lengkap.trim(), peran, role];
+                
+                if (password && password.trim()) {
+                    const newHash = await bcrypt.hash(password.trim(), 10);
+                    updateParams.push(newHash);
+                    updateSql += `, password = $${updateParams.length}`;
+                }
+                
+                updateParams.push(exist.id);
+                updateSql += ` WHERE id = $${updateParams.length}`;
+                await db.query(updateSql, updateParams);
+                
+                return res.redirect('/pengaturan?status=user_saved&msg=' + encodeURIComponent(`Data pengguna '${cleanUsername}' berhasil diperbarui.`));
+            }
+
+            // Akun Baru: Wajibkan kata sandi atau buat kata sandi awal yang aman (bukan menyalin admin_rohil)
+            let passHash;
+            if (password && password.trim()) {
+                passHash = await bcrypt.hash(password.trim(), 10);
+            } else {
+                const defaultPass = 'Siad2026!' + cleanUsername.slice(0, 4);
+                passHash = await bcrypt.hash(defaultPass, 10);
+            }
+
             await db.query(`
                 INSERT INTO pengguna (username, password, nama_lengkap, peran, role, kepenghuluan_id, aktif, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, true, NOW())
-                ON CONFLICT (username) DO UPDATE 
-                SET nama_lengkap = EXCLUDED.nama_lengkap, peran = EXCLUDED.peran, role = EXCLUDED.role, kepenghuluan_id = EXCLUDED.kepenghuluan_id, aktif = true
-            `, [username.trim().toLowerCase(), passHash, nama_lengkap.trim(), peran, role, targetKepId]);
+            `, [cleanUsername, passHash, nama_lengkap.trim(), peran, role, targetKepId]);
 
             res.redirect('/pengaturan?status=user_saved');
         } catch (error) {

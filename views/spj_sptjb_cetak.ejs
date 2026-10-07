@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            color: #000;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: relative;
+        }
+        .kop-surat {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .kop-surat h4 {
+            margin: 0;
+            font-size: 13pt;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+        .kop-surat h3 {
+            margin: 0;
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .kop-surat h2 {
+            margin: 0;
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .kop-surat p {
+            margin: 4px 0 0 0;
+            font-size: 10pt;
+            font-style: italic;
+        }
+        .judul-dokumen {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .judul-dokumen h3 {
+            margin: 0;
+            font-size: 13pt;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .judul-dokumen p {
+            margin: 4px 0 0 0;
+            font-size: 11pt;
+        }
+        .intro-text {
+            text-align: justify;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        table.identitas {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        table.identitas td {
+            padding: 4px 6px;
+            vertical-align: top;
+            font-size: 11pt;
+        }
+        table.identitas td.label {
+            width: 28%;
+            font-weight: bold;
+        }
+        table.identitas td.sep {
+            width: 3%;
+        }
+        table.rincian {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0 20px 0;
+        }
+        table.rincian th, table.rincian td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            font-size: 11pt;
+        }
+        table.rincian th {
+            background-color: #f8fafc;
+            text-align: center;
+            font-weight: bold;
+        }
+        .pernyataan-box {
+            text-align: justify;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            font-size: 11pt;
+        }
+        .ttd-container {
+            width: 100%;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .ttd-box {
+            width: 45%;
+            text-align: center;
+            font-size: 11pt;
+        }
+        .ttd-space {
+            height: 70px;
+        }
+        .ttd-name {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 2px;
+        }
+        .ttd-jabatan {
+            font-size: 10.5pt;
+        }
+        .qr-section {
+            display: flex;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #94a3b8;
+            font-size: 9pt;
+            color: #475569;
+        }
+        .qr-section img {
+            width: 75px;
+            height: 75px;
+            margin-right: 15px;
+        }
+        .no-print {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-print {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-print:hover {
+            background: #0369a1;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                min-height: auto;
+                padding: 15mm;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">🖨️ Cetak / Simpan PDF SPTJB</button>
+    </div>
+
+    <div class="page">
+        <!-- KOP SURAT RESMI -->
+        <div class="kop-surat">
+            <h4>PEMERINTAH KABUPATEN ROKAN HILIR</h4>
+            <h3>KECAMATAN <%= (desa.kecamatan_nama || kegiatan.kecamatan_nama || 'KECAMATAN').toUpperCase() %></h3>
+            <h2>KEPENGHULUAN <%= (desa.nama || kegiatan.kepenghuluan_nama || 'KEPENGHULUAN').toUpperCase() %></h2>
+            <p><%= desa.alamat || 'Alamat Kantor Kepenghuluan Kabupaten Rokan Hilir - Riau' %></p>
+        </div>
+
+        <!-- JUDUL SPTJB PERMENDAGRI 20/2018 -->
+        <div class="judul-dokumen">
+            <h3>SURAT PERNYATAAN TANGGUNG JAWAB BELANJA (SPTJB)</h3>
+            <p>Nomor: SPTJB/<%= kegiatan.tahun %>/<%= String(kegiatan.id).padStart(4, '0') %></p>
+        </div>
+
+        <div class="intro-text">
+            Yang bertanda tangan di bawah ini Pelaksana Kegiatan Anggaran (PKA) Kepenghuluan <%= desa.nama || kegiatan.kepenghuluan_nama %>, menyatakan bahwa saya bertanggung jawab penuh atas pelaksanaan belanja kegiatan berikut ini:
+        </div>
+
+        <!-- TABEL IDENTITAS KEGIATAN -->
+        <table class="identitas">
+            <tr>
+                <td class="label">1. Bidang</td>
+                <td class="sep">:</td>
+                <td><%= kegiatan.bidang || 'Penyelenggaraan Pemerintahan Desa' %></td>
+            </tr>
+            <tr>
+                <td class="label">2. Sub Bidang</td>
+                <td class="sep">:</td>
+                <td><%= kegiatan.sub_bidang || 'Reguler / Umum' %></td>
+            </tr>
+            <tr>
+                <td class="label">3. Kegiatan</td>
+                <td class="sep">:</td>
+                <td><strong><%= kegiatan.nama_kegiatan %></strong></td>
+            </tr>
+            <tr>
+                <td class="label">4. Kode Rekening</td>
+                <td class="sep">:</td>
+                <td><%= kegiatan.kode_rekening || '-' %></td>
+            </tr>
+            <tr>
+                <td class="label">5. Sumber Dana</td>
+                <td class="sep">:</td>
+                <td><%= kegiatan.sumber_dana || 'DDS (Dana Desa)' %> (<%= kegiatan.tahap || 'Tahap 1' %>)</td>
+            </tr>
+            <tr>
+                <td class="label">6. Tahun Anggaran</td>
+                <td class="sep">:</td>
+                <td><%= kegiatan.tahun %></td>
+            </tr>
+            <tr>
+                <td class="label">7. Lokasi Kegiatan</td>
+                <td class="sep">:</td>
+                <td><%= kegiatan.lokasi || desa.nama || '-' %></td>
+            </tr>
+        </table>
+
+        <!-- RINCIAN BELANJA -->
+        <table class="rincian">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">No</th>
+                    <th>Uraian Rekening Belanja</th>
+                    <th style="width: 25%;">Pagu Anggaran</th>
+                    <th style="width: 25%;">Realisasi Belanja</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: center;">1</td>
+                    <td>
+                        <strong><%= kegiatan.nama_kegiatan %></strong><br>
+                        <small style="color: #475569;">Jenis Belanja: <%= (kegiatan.jenis_belanja || 'Barang/Jasa').replace('_', ' ').toUpperCase() %></small>
+                    </td>
+                    <td style="text-align: right; font-weight: bold;">
+                        Rp <%= Number(kegiatan.pagu_anggaran || 0).toLocaleString('id-ID') %>
+                    </td>
+                    <td style="text-align: right; font-weight: bold; color: #047857;">
+                        Rp <%= Number(kegiatan.realisasi_anggaran || kegiatan.pagu_anggaran || 0).toLocaleString('id-ID') %>
+                    </td>
+                </tr>
+                <tr style="background-color: #f8fafc; font-weight: bold;">
+                    <td colspan="2" style="text-align: right;">TOTAL BELANJA :</td>
+                    <td style="text-align: right;">
+                        Rp <%= Number(kegiatan.pagu_anggaran || 0).toLocaleString('id-ID') %>
+                    </td>
+                    <td style="text-align: right; color: #047857;">
+                        Rp <%= Number(kegiatan.realisasi_anggaran || kegiatan.pagu_anggaran || 0).toLocaleString('id-ID') %>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="font-size: 11pt; margin-bottom: 15px;">
+            <strong>Terbilang:</strong> <em><%= paguTerbilang %></em>
+        </div>
+
+        <div class="pernyataan-box">
+            Bukti-bukti pengeluaran anggaran dan kelengkapan dokumen pendukung sebagaimana tersebut di atas telah diverifikasi dan disimpan sesuai dengan ketentuan perundang-undangan yang berlaku pada arsip Kepenghuluan <%= desa.nama || kegiatan.kepenghuluan_nama %> untuk kelengkapan administrasi dan keperluan pemeriksaan Aparat Pengawas Internal Pemerintah (APIP) maupun Badan Pemeriksa Keuangan (BPK).
+            <br><br>
+            Demikian Surat Pernyataan Tanggung Jawab Belanja (SPTJB) ini dibuat dengan sebenarnya dan penuh rasa tanggung jawab.
+        </div>
+
+        <!-- TANDA TANGAN (PERMENDAGRI 20/2018) -->
+        <div class="ttd-container">
+            <div class="ttd-box">
+                <div>Mengetahui,</div>
+                <div class="ttd-jabatan">Penghulu <%= desa.nama || kegiatan.kepenghuluan_nama %></div>
+                <div class="ttd-space"></div>
+                <div class="ttd-name"><%= desa.nama_kepala_desa || 'Penghulu ' + (desa.nama || '') %></div>
+                <div style="font-size: 10pt; color: #475569;">Pimpinan Pemerintah Kepenghuluan</div>
+            </div>
+
+            <div class="ttd-box">
+                <div><%= desa.nama || kegiatan.kepenghuluan_nama %>, <%= tanggalCetak %></div>
+                <div class="ttd-jabatan"><%= kegiatan.jabatan_pelaksana || 'Pelaksana Kegiatan Anggaran (PKA)' %></div>
+                <div class="ttd-space"></div>
+                <div class="ttd-name"><%= kegiatan.nama_pelaksana || desa.nama_kepala_desa || 'Pelaksana Kegiatan' %></div>
+                <div style="font-size: 10pt; color: #475569;">Pelaksana Teknis Kegiatan</div>
+            </div>
+        </div>
+
+        <!-- QR CODE KEABSAHAN SIAD 2.0 -->
+        <div class="qr-section">
+            <% if (qrDataUri) { %>
+                <img src="<%= qrDataUri %>" alt="QR Code Verifikasi">
+            <% } %>
+            <div>
+                <strong>DIVERIFIKASI SISTEM SIAD 2.0 KABUPATEN ROKAN HILIR</strong><br>
+                <span>Dokumen ini telah teregistrasi dalam pangkalan data digital Kepenghuluan. Scan QR Code untuk memeriksa rekam jejak pengesahan dan keabsahan dokumen belanja atau akses: <br><code><%= verifyUrl %></code></span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

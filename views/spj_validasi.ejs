@@ -326,58 +326,83 @@
                 </div>
 
                 <!-- JEJAK AUDIT PENGESAHAN DIGITAL -->
-                <div class="section-title">
-                    <i class="fa-solid fa-signature"></i> Jejak Digital Pengesahan Berjenjang
-                </div>
-                <div class="sign-timeline">
-                    <!-- BENDAHARA -->
-                    <div class="sign-step <%= kegiatan.verifikasi_bendahara_oleh ? 'completed' : '' %>">
-                        <div class="sign-icon">
-                            <i class="fa-solid <%= kegiatan.verifikasi_bendahara_oleh ? 'fa-check' : 'fa-hourglass' %>"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <div class="sign-role">Verifikasi Keuangan & Pajak (Bendahara)</div>
-                            <div class="sign-name"><%= kegiatan.verifikasi_bendahara_oleh || 'Menunggu Verifikasi' %></div>
-                            <% if (kegiatan.verifikasi_bendahara_at) { %>
-                            <div class="sign-time">
-                                <i class="fa-solid fa-circle-check"></i> Diverifikasi pada <%= new Date(kegiatan.verifikasi_bendahara_at).toLocaleString('id-ID') %>
+                <% if (Number(kegiatan.tahun) <= 2025) { %>
+                    <div class="section-title">
+                        <i class="fa-solid fa-box-archive"></i> Pengesahan Arsip Digital Historis (TA <%= kegiatan.tahun %>)
+                    </div>
+                    <div class="sign-timeline">
+                        <div class="sign-step completed">
+                            <div class="sign-icon">
+                                <i class="fa-solid fa-check"></i>
                             </div>
-                            <% } %>
+                            <div style="flex: 1;">
+                                <div class="sign-role">Pencatatan & Pengesahan Arsip Digital (Bendahara Desa)</div>
+                                <div class="sign-name"><%= kegiatan.verifikasi_bendahara_oleh || 'Bendahara Desa' %></div>
+                                <% if (kegiatan.verifikasi_bendahara_at) { %>
+                                <div class="sign-time">
+                                    <i class="fa-solid fa-circle-check"></i> Diarsipkan secara sah pada <%= new Date(kegiatan.verifikasi_bendahara_at).toLocaleString('id-ID') %>
+                                </div>
+                                <% } %>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 5px;">
+                                    <em>* Sesuai ketentuan, dokumen Tahun Anggaran <%= kegiatan.tahun %> diarsipkan langsung oleh Bendahara Desa ke dalam pangkalan data SIAD 2.0 tanpa memerlukan verifikasi berjenjang.</em>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                <% } else { %>
+                    <div class="section-title">
+                        <i class="fa-solid fa-signature"></i> Jejak Digital Pengesahan Berjenjang (TA <%= kegiatan.tahun %>)
+                    </div>
+                    <div class="sign-timeline">
+                        <!-- BENDAHARA -->
+                        <div class="sign-step <%= kegiatan.verifikasi_bendahara_oleh ? 'completed' : '' %>">
+                            <div class="sign-icon">
+                                <i class="fa-solid <%= kegiatan.verifikasi_bendahara_oleh ? 'fa-check' : 'fa-hourglass' %>"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="sign-role">Verifikasi Keuangan & Pajak (Bendahara)</div>
+                                <div class="sign-name"><%= kegiatan.verifikasi_bendahara_oleh || 'Menunggu Verifikasi' %></div>
+                                <% if (kegiatan.verifikasi_bendahara_at) { %>
+                                <div class="sign-time">
+                                    <i class="fa-solid fa-circle-check"></i> Diverifikasi pada <%= new Date(kegiatan.verifikasi_bendahara_at).toLocaleString('id-ID') %>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
 
-                    <!-- SEKDES -->
-                    <div class="sign-step <%= kegiatan.verifikasi_sekdes_oleh ? 'completed' : '' %>">
-                        <div class="sign-icon">
-                            <i class="fa-solid <%= kegiatan.verifikasi_sekdes_oleh ? 'fa-check' : 'fa-hourglass' %>"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <div class="sign-role">Verifikasi Kelengkapan Administrasi (Sekdes)</div>
-                            <div class="sign-name"><%= kegiatan.verifikasi_sekdes_oleh || 'Menunggu Verifikasi' %></div>
-                            <% if (kegiatan.verifikasi_sekdes_at) { %>
-                            <div class="sign-time">
-                                <i class="fa-solid fa-circle-check"></i> Diverifikasi pada <%= new Date(kegiatan.verifikasi_sekdes_at).toLocaleString('id-ID') %>
+                        <!-- SEKDES -->
+                        <div class="sign-step <%= kegiatan.verifikasi_sekdes_oleh ? 'completed' : '' %>">
+                            <div class="sign-icon">
+                                <i class="fa-solid <%= kegiatan.verifikasi_sekdes_oleh ? 'fa-check' : 'fa-hourglass' %>"></i>
                             </div>
-                            <% } %>
+                            <div style="flex: 1;">
+                                <div class="sign-role">Verifikasi Kelengkapan Administrasi (Sekdes)</div>
+                                <div class="sign-name"><%= kegiatan.verifikasi_sekdes_oleh || 'Menunggu Verifikasi' %></div>
+                                <% if (kegiatan.verifikasi_sekdes_at) { %>
+                                <div class="sign-time">
+                                    <i class="fa-solid fa-circle-check"></i> Diverifikasi pada <%= new Date(kegiatan.verifikasi_sekdes_at).toLocaleString('id-ID') %>
+                                </div>
+                                <% } %>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- PENGHULU -->
-                    <div class="sign-step <%= kegiatan.persetujuan_penghulu_oleh ? 'completed' : '' %>">
-                        <div class="sign-icon">
-                            <i class="fa-solid <%= kegiatan.persetujuan_penghulu_oleh ? 'fa-award' : 'fa-hourglass' %>"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <div class="sign-role">Persetujuan & Pengesahan Akhir (Penghulu / Kepala Desa)</div>
-                            <div class="sign-name"><%= kegiatan.persetujuan_penghulu_oleh || 'Menunggu Pengesahan' %></div>
-                            <% if (kegiatan.persetujuan_penghulu_at) { %>
-                            <div class="sign-time" style="color: #1d4ed8;">
-                                <i class="fa-solid fa-stamp"></i> Disahkan secara sah pada <%= new Date(kegiatan.persetujuan_penghulu_at).toLocaleString('id-ID') %>
+                        <!-- PENGHULU -->
+                        <div class="sign-step <%= kegiatan.persetujuan_penghulu_oleh ? 'completed' : '' %>">
+                            <div class="sign-icon">
+                                <i class="fa-solid <%= kegiatan.persetujuan_penghulu_oleh ? 'fa-award' : 'fa-hourglass' %>"></i>
                             </div>
-                            <% } %>
+                            <div style="flex: 1;">
+                                <div class="sign-role">Persetujuan & Pengesahan Akhir (Penghulu / Kepala Desa)</div>
+                                <div class="sign-name"><%= kegiatan.persetujuan_penghulu_oleh || 'Menunggu Pengesahan' %></div>
+                                <% if (kegiatan.persetujuan_penghulu_at) { %>
+                                <div class="sign-time" style="color: #1d4ed8;">
+                                    <i class="fa-solid fa-stamp"></i> Disahkan secara sah pada <%= new Date(kegiatan.persetujuan_penghulu_at).toLocaleString('id-ID') %>
+                                </div>
+                                <% } %>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <% } %>
 
             <% } %>
         </div>

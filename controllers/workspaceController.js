@@ -80,13 +80,13 @@ const workspaceController = {
     postDelete: async (req, res) => {
         try {
             const { id } = req.body;
-            const admin = ac.isAdmin(req);
+            const isSuper = ac.isSuperAdmin(req);
             const did = ac.getDesaId(req);
 
             let checkSql = 'SELECT * FROM workspace WHERE id = $1';
             let checkParams = [id];
-            if (!admin && did) {
-                checkSql += ' AND (kepenghuluan_id = $2 OR kepenghuluan_id IS NULL)';
+            if (!isSuper && did) {
+                checkSql += ' AND kepenghuluan_id = $2';
                 checkParams.push(did);
             }
             const check = await db.query(checkSql, checkParams);
@@ -108,7 +108,8 @@ const workspaceController = {
     getDetail: async (req, res) => {
         const workspaceId = req.params.id;
         try {
-            const admin = ac.isAdmin(req); const did = ac.getDesaId(req);
+            const isSuper = ac.isSuperAdmin(req);
+            const did = ac.getDesaId(req);
             let wsSql = `
                 SELECT w.*, wt.nama as type_nama, mk.nama as kepenghuluan_nama
                 FROM workspace w
@@ -116,21 +117,13 @@ const workspaceController = {
                 LEFT JOIN kepenghuluan mk ON w.kepenghuluan_id = mk.id
                 WHERE w.id = $1`;
             let wsP = [workspaceId];
-            if (!admin && did) { wsSql += ` AND (w.kepenghuluan_id = $2 OR w.kepenghuluan_id IS NULL)`; wsP.push(did); }
-            let wsResult;
-            try { wsResult = await db.query(wsSql, wsP); }
-            catch (e) {
-                if (/column "kepenghuluan_id".*does not exist/i.test(e.message)) {
-                    wsResult = await db.query(`
-                        SELECT w.*, wt.nama as type_nama, mk.nama as kepenghuluan_nama
-                        FROM workspace w
-                        LEFT JOIN workspace_type wt ON w.workspace_type_id = wt.id
-                        LEFT JOIN kepenghuluan mk ON w.kepenghuluan_id = mk.id
-                        WHERE w.id = $1`, [workspaceId]);
-                } else throw e;
+            if (!isSuper && did) {
+                wsSql += ` AND w.kepenghuluan_id = $2`;
+                wsP.push(did);
             }
+            const wsResult = await db.query(wsSql, wsP);
             const workspace = wsResult.rows[0];
-            if (!workspace) return res.status(404).render('404', { title: 'Not Found' });
+            if (!workspace) return res.status(404).render('404', { title: 'Workspace Tidak Ditemukan' });
             const docResult = await db.query(`SELECT wd.* FROM workspace_document wd WHERE wd.workspace_id = $1 ORDER BY wd.created_at DESC`, [workspaceId]);
             res.render('workspace_detail', { title: workspace.nama + ' - SIAD 2.0', workspace: workspace, documents: docResult.rows });
         } catch (error) { res.redirect('/workspace'); }
@@ -141,31 +134,30 @@ const workspaceController = {
         if (!file) return res.redirect('/workspace/' + workspaceId + '?status=error&msg=File tidak terdeteksi');
         try {
             const { uploadToDrive } = require('../config/drive');
-            const wsResult = await db.query('SELECT nama FROM workspace WHERE id = $1', [workspaceId]);
-            const wsName = wsResult.rows[0] ? wsResult.rows[0].nama : 'Workspace';
-            const userDesa = ac.getDesaNama(req, 'Air Hitam');
+            const isSuper = ac.isSuperAdmin(req);
             const did = ac.getDesaId(req);
-            const driveData = await uploadToDrive(file, userDesa, wsName, 'Workspace');
-            if (did) {
-                try {
-                    await db.query(
-                        'INSERT INTO workspace_document (workspace_id, jenis_dokumen, nama_file_asli, drive_url, path_lokal, versi, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, 1, $6)',
-                        [workspaceId, req.body.jenis_dokumen || 'Dokumen', file.originalname, driveData.webViewLink, driveData.webViewLink, did]
-                    );
-                } catch (e) {
-                    if (/column "kepenghuluan_id".*does not exist/i.test(e.message)) {
-                        await db.query(
-                            'INSERT INTO workspace_document (workspace_id, jenis_dokumen, nama_file_asli, drive_url, path_lokal, versi) VALUES ($1, $2, $3, $4, $5, 1)',
-                            [workspaceId, req.body.jenis_dokumen || 'Dokumen', file.originalname, driveData.webViewLink, driveData.webViewLink]
-                        );
-                    } else throw e;
-                }
-            } else {
-                await db.query(
-                    'INSERT INTO workspace_document (workspace_id, jenis_dokumen, nama_file_asli, drive_url, path_lokal, versi) VALUES ($1, $2, $3, $4, $5, 1)',
-                    [workspaceId, req.body.jenis_dokumen || 'Dokumen', file.originalname, driveData.webViewLink, driveData.webViewLink]
-                );
+
+            // 1. Verifikasi kepemilikan workspace SEBELUM upload ke Google Drive
+            let checkWsSql = 'SELECT nama, kepenghuluan_id FROM workspace WHERE id = $1';
+            let checkWsParams = [workspaceId];
+            if (!isSuper && did) {
+                checkWsSql += ' AND kepenghuluan_id = $2';
+                checkWsParams.push(did);
             }
+            const wsResult = await db.query(checkWsSql, checkWsParams);
+            if (wsResult.rows.length === 0) {
+                return res.redirect('/workspace?status=error&msg=' + encodeURIComponent('Akses Ditolak: Anda tidak berhak mengunggah ke workspace kepenghuluan lain.'));
+            }
+
+            const wsName = wsResult.rows[0].nama || 'Workspace';
+            const userDesa = ac.getDesaNama(req, 'Desa');
+            const driveData = await uploadToDrive(file, userDesa, wsName, 'Workspace');
+
+            await db.query(
+                'INSERT INTO workspace_document (workspace_id, jenis_dokumen, nama_file_asli, drive_url, path_lokal, versi, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, 1, $6)',
+                [workspaceId, req.body.jenis_dokumen || 'Dokumen', file.originalname, driveData.webViewLink, driveData.webViewLink, did || null]
+            );
+
             res.redirect('/workspace/' + workspaceId + '?status=success&msg=File berhasil diunggah');
         } catch (error) {
             console.error('❌ GAGAL UPLOAD DRIVE/DB:', error);

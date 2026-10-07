@@ -73,7 +73,7 @@ const appendWhereOrAnd = (baseWhere, filterSql) => {
 };
 
 const forceDesaIdInsert = (req, obj = {}) => {
-    if (isAdmin(req)) return obj;
+    if (isSuperAdmin(req)) return obj;
     const did = getDesaId(req);
     if (did !== null && did !== undefined) {
         obj.kepenghuluan_id = did;
@@ -81,9 +81,46 @@ const forceDesaIdInsert = (req, obj = {}) => {
     return obj;
 };
 
+const canAccessDesa = (req, targetDesaId) => {
+    if (!req || !req.session || !req.session.user) return false;
+    if (isSuperAdmin(req)) return true;
+    const did = req.session.user.kepenghuluan_id;
+    if (!did) return false;
+    if (targetDesaId === null || targetDesaId === undefined) return false;
+    return Number(did) === Number(targetDesaId);
+};
+
+const buildTenantFilter = (req, columnName = 'kepenghuluan_id', paramIndex = 1) => {
+    const isSuper = isSuperAdmin(req);
+    const did = getDesaId(req);
+    if (isSuper) {
+        if (did) {
+            return {
+                sql: ` AND ${columnName} = $${paramIndex}`,
+                params: [did],
+                nextIndex: paramIndex + 1
+            };
+        }
+        return { sql: '', params: [], nextIndex: paramIndex };
+    }
+    // Non-superadmin (Admin Desa & Perangkat) SELALU dikunci ke desa miliknya
+    if (did) {
+        return {
+            sql: ` AND ${columnName} = $${paramIndex}`,
+            params: [did],
+            nextIndex: paramIndex + 1
+        };
+    }
+    return {
+        sql: ` AND ${columnName} IS NULL`,
+        params: [],
+        nextIndex: paramIndex
+    };
+};
+
 const listKepForSelect = async (req) => {
     try {
-        if (isAdmin(req)) {
+        if (isSuperAdmin(req)) {
             const r = await db.query(
                 `SELECT k.id, k.nama, kec.nama AS kecamatan_nama
                  FROM kepenghuluan k 
@@ -139,5 +176,7 @@ module.exports = {
     appendFilter,
     appendWhereOrAnd,
     forceDesaIdInsert,
+    canAccessDesa,
+    buildTenantFilter,
     listKepForSelect
 };

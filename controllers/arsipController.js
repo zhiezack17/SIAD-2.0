@@ -6,7 +6,8 @@ const arsipController = {
         try {
             const search = req.query.search || '';
             const kategori = req.query.kategori || '';
-            const admin = ac.isAdmin(req); const did = ac.getDesaId(req);
+            const isSuper = ac.isSuperAdmin(req);
+            const did = ac.getDesaId(req);
 
             let query = 'SELECT * FROM arsip_desa WHERE 1=1';
             let params = [];
@@ -22,12 +23,14 @@ const arsipController = {
                 params.push(kategori);
                 paramIndex++;
             }
-            if (!admin && did) {
+            if (!isSuper && did) {
                 query += ' AND kepenghuluan_id = $' + paramIndex;
                 params.push(did);
                 paramIndex++;
-            } else if (!admin && !did) {
-                query += ' AND kepenghuluan_id IS NULL';
+            } else if (isSuper && did) {
+                query += ' AND kepenghuluan_id = $' + paramIndex;
+                params.push(did);
+                paramIndex++;
             }
             query += ' ORDER BY created_at DESC LIMIT 100';
 

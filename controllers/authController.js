@@ -186,18 +186,30 @@ const authController = {
         }
     },
 
-    requireAuth: (req, res, next) => {
+    requireAuth: async (req, res, next) => {
         if (req.session && req.session.userId && req.session.user) {
+            try {
+                const userCheck = await db.query(
+                    'SELECT id, aktif, status, kepenghuluan_id, role, peran FROM pengguna WHERE id = $1 LIMIT 1',
+                    [req.session.userId]
+                );
+                if (userCheck.rows.length === 0 || userCheck.rows[0].aktif === false || (userCheck.rows[0].status && String(userCheck.rows[0].status).toUpperCase() === 'NONAKTIF')) {
+                    req.session.destroy(() => {});
+                    return res.redirect('/login?error=' + encodeURIComponent('Sesi berakhir: Akun Anda sedang dinonaktifkan atau telah dihapus.'));
+                }
+                const liveUser = userCheck.rows[0];
+                req.session.user.kepenghuluan_id = liveUser.kepenghuluan_id;
+                req.session.user.role = liveUser.role;
+                req.session.user.peran = liveUser.peran;
+            } catch (errDb) {
+                console.warn('[AUTH:requireAuth DB check warning]', errDb.message);
+            }
+
             const u = req.session.user;
-            if (typeof u.is_admin === 'undefined') { 
-                u.is_admin = isAdmin(u); 
-            }
-            if (typeof u.is_super_admin === 'undefined') {
-                u.is_super_admin = u.is_admin && (u.kepenghuluan_id === null || u.kepenghuluan_id === undefined);
-            }
-            if (typeof u.is_admin_desa === 'undefined') {
-                u.is_admin_desa = u.is_admin && (u.kepenghuluan_id !== null && u.kepenghuluan_id !== undefined);
-            }
+            u.is_admin = isAdmin(u); 
+            u.is_super_admin = u.is_admin && (u.kepenghuluan_id === null || u.kepenghuluan_id === undefined);
+            u.is_admin_desa = u.is_admin && (u.kepenghuluan_id !== null && u.kepenghuluan_id !== undefined);
+
             res.locals.user = req.session.user;
             res.locals.activeDesaId = req.session.active_kepenghuluan_id || u.kepenghuluan_id;
             return next();

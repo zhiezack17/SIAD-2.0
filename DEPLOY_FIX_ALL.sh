@@ -38,7 +38,5 @@ echo "✅ Nginx cache clear & reload done."
 
 echo ""
 echo "🎉🎉🎉 SEMUA PERBAIKAN SELESAI!🎉🎉🎉"
-echo "Silakan test login di https://siad-v2.com dengan:"
-echo "   Username: admin_rohil"
-echo "   Password: Admin_SIAD_Rohil2026!"
+echo "Silakan test login di https://siad-v2.com dengan kredensial administrator terkonfigurasi."
 echo ""

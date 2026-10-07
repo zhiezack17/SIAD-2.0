@@ -210,14 +210,43 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     }
 });
 
-// === ALAT BANTU UPLOAD & FILE SYSTEM ===
+// === ALAT BANTU UPLOAD & FILE SYSTEM (P1-02: Strict Limits & MIME Filter) ===
 const multer = require('multer');
 const path = require('path');
 const fs_module = require('fs');
 
 if (!fs_module.existsSync('./public/uploads/spj')) fs_module.mkdirSync('./public/uploads/spj', { recursive: true });
-const spjStorage = multer.memoryStorage();
-const upload = multer({ storage: spjStorage });
+if (!fs_module.existsSync('./public/uploads/produk_hukum')) fs_module.mkdirSync('./public/uploads/produk_hukum', { recursive: true });
+
+const ALLOWED_MIME_TYPES = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'image/webp',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+];
+
+const fileFilter = (req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Format file tidak diizinkan. Harap unggah berkas PDF, Dokumen Word/Excel, atau Foto JPG/PNG.'), false);
+    }
+};
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { 
+        fileSize: 25 * 1024 * 1024, // Maksimal 25 MB per file
+        files: 10                   // Maksimal 10 file per upload
+    },
+    fileFilter: fileFilter
+});
+const uploadPH = upload;
 
 
 // --- Rute Pencarian Global Lintas Modul ---
@@ -261,9 +290,7 @@ router.get('/spj/pajak/:id', requireAuth, ac.blockKaurUmum, spjController.getPaj
 router.post('/spj/pajak/tambah', requireAuth, ac.blockKaurUmum, upload.single('file_bukti'), spjController.postTambahPajak);
 router.post('/spj/pajak/hapus', requireAuth, ac.blockKaurUmum, spjController.postDeletePajak);
 
-if (!fs_module.existsSync('./public/uploads/produk_hukum')) fs_module.mkdirSync('./public/uploads/produk_hukum', { recursive: true });
-const phStorage = multer.memoryStorage();
-const uploadPH = multer({ storage: phStorage });
+
 
 router.get('/produk-hukum', requireAuth, ac.blockKaurUmum, produkHukumController.getIndex);
 router.post('/produk-hukum/tambah', requireAuth, ac.blockKaurUmum, uploadPH.single('file_pdf'), produkHukumController.postTambah);

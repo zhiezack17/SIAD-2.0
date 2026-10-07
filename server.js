@@ -36,6 +36,17 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Trust Proxy for HTTPS behind Nginx reverse proxy
+app.set('trust proxy', 1);
+
+// Validate Session Secret in Production
+const isProd = process.env.NODE_ENV === 'production';
+const sessionSecret = process.env.SESSION_SECRET;
+if (isProd && !sessionSecret) {
+    console.error('❌ FATAL SECURITY ERROR: Environment variable SESSION_SECRET wajib disetel di mode production!');
+    process.exit(1);
+}
+
 // Session Middleware
 app.use(session({
     store: new pgSession({
@@ -43,11 +54,12 @@ app.use(session({
         tableName: 'user_sessions',
         createTableIfMissing: true
     }),
-    secret: process.env.SESSION_SECRET || 'siad2026_super_secret_rohil_v2_kl7tbdath5r',
+    secret: sessionSecret || 'siad2026_dev_fallback_secret_must_set_env',
     resave: false,
     saveUninitialized: false,
     cookie: { 
         httpOnly: true,
+        secure: isProd || process.env.COOKIE_SECURE === 'true',
         sameSite: 'lax',
         maxAge: (Number(process.env.SESSION_MAX_AGE_DAYS) || 30) * 24 * 60 * 60 * 1000 
     }
