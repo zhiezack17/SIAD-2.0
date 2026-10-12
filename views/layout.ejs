@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/driver.css">
+    <link rel="stylesheet" href="/css/siad-tutorial.css">
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -335,6 +337,14 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
                     <% } %>
                 </div>
             </div>
+            <!-- TOMBOL PANDUAN INTERAKTIF MENU -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 14px;">
+                <button id="btn-panduan-topbar" type="button" onclick="siadStartTour()" class="btn-tour-topbar" title="Panduan Interaktif Langkah demi Langkah Halaman Ini">
+                    <i class="fa-solid fa-circle-question" style="color: #2563eb; font-size: 14px;"></i>
+                    <span class="btn-tour-text">Panduan Menu</span>
+                </button>
+            </div>
+
             <div class="user-profile">
                 <%
                   var namaLengkap = user && (user.nama_lengkap || user.nama) ? (user.nama_lengkap || user.nama) : 'Administrator SIAD Kab. Rokan Hilir';
@@ -728,5 +738,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }); 
 })();
 </script>
+<!-- DRIVER.JS & SIAD TUTORIAL SCRIPT -->
+<script src="/js/driver.js.iife.js"></script>
+<script src="/js/siad-tutorial.js"></script>
 </body>
 </html>

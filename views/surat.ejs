@@ -38,7 +38,7 @@
                 <i class="fa-solid fa-file-circle-plus" style="color: #2563eb;"></i> Tambah <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
             </h3>
             
-            <form action="/surat/<%= tab %>" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 16px;">
+            <form id="form-tambah-surat" action="/surat/<%= tab %>" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 16px;">
                 <div>
                     <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Nomor Surat <span style="color:#ef4444;">*</span></label>
                     <input type="text" name="nomor_surat" required placeholder="Cth: 140/01/Ds-SA/2026" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
@@ -83,10 +83,10 @@
                     <i class="fa-solid fa-list-check" style="color: #2563eb;"></i> Daftar <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
                 </h3>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" onclick="bukaModalAgenda('excel')" style="background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
+                    <button id="btn-excel-surat" type="button" onclick="bukaModalAgenda('excel')" data-siad-tooltip="Unduh seluruh rekap arsip surat ke file Excel" style="background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
                         <i class="fa-solid fa-file-excel"></i> Unduh Excel
                     </button>
-                    <button type="button" onclick="bukaModalAgenda('cetak')" style="background: #0f172a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(15,23,42,0.15);">
+                    <button id="btn-agenda-surat" type="button" onclick="bukaModalAgenda('cetak')" data-siad-tooltip="Cetak Buku Agenda Surat format tata naskah dinas resmi" style="background: #0f172a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(15,23,42,0.15);">
                         <i class="fa-solid fa-print"></i> Cetak Buku Agenda
                     </button>
                 </div>

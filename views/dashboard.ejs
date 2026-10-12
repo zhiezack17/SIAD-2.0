@@ -9,9 +9,9 @@
                 </div>
                 <div>
                     <% if (!_isKaurUmum) { %>
-                    <a href="/workspace" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Workspace Baru</a>
+                    <a href="/workspace" class="btn btn-primary" data-siad-tooltip="Buka ruang kerja baru untuk pengelompokan berkas kegiatan"><i class="fa-solid fa-plus"></i> Workspace Baru</a>
                     <% } else { %>
-                    <a href="/surat?tab=masuk" class="btn btn-primary"><i class="fa-solid fa-envelope"></i> Kelola Persuratan</a>
+                    <a href="/surat?tab=masuk" class="btn btn-primary" data-siad-tooltip="Kelola pencatatan dan disposisi surat masuk"><i class="fa-solid fa-envelope"></i> Kelola Persuratan</a>
                     <% } %>
                 </div>
             </div>
@@ -19,17 +19,17 @@
             <% if (_isKaurUmum) { %>
             <!-- STATS GRID KHUSUS KAUR UMUM (HANYA PERSURATAN) -->
             <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;">
-                <div class="stat-card blue">
+                <div class="stat-card blue" data-siad-tooltip="Total berkas surat dinas masuk yang telah dicatat">
                     <div class="stat-label">Surat Masuk</div>
                     <div class="stat-value"><%= (stats && stats.surat_masuk !== undefined) ? stats.surat_masuk : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
                 </div>
-                <div class="stat-card green">
+                <div class="stat-card green" data-siad-tooltip="Total surat dinas keluar resmi yang telah diregistrasi">
                     <div class="stat-label">Surat Keluar</div>
                     <div class="stat-value"><%= (stats && stats.surat_keluar !== undefined) ? stats.surat_keluar : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
                 </div>
-                <div class="stat-card yellow">
+                <div class="stat-card yellow" data-siad-tooltip="Akumulasi seluruh arsip persuratan kepenghuluan">
                     <div class="stat-label">Total Arsip Surat</div>
                     <div class="stat-value"><%= (stats && stats.total_surat !== undefined) ? stats.total_surat : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
@@ -38,22 +38,22 @@
             <% } else { %>
             <!-- STATS GRID STANDAR DESA / KABUPATEN -->
             <div class="stats-grid">
-                <div class="stat-card red">
+                <div class="stat-card red" data-siad-tooltip="Total ruang kerja aktif per bidang kegiatan desa">
                     <div class="stat-label">Total Workspace</div>
                     <div class="stat-value"><%= stats ? stats.total_workspace : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-briefcase"></i></div>
                 </div>
-                <div class="stat-card blue">
+                <div class="stat-card blue" data-siad-tooltip="Total seluruh berkas dokumen digital tersimpan">
                     <div class="stat-label">Dokumen Terarsip</div>
                     <div class="stat-value"><%= stats ? stats.total_dokumen : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div>
                 </div>
-                <div class="stat-card yellow">
+                <div class="stat-card yellow" data-siad-tooltip="Perhatian: Berkas SPJ yang masih menunggu verifikasi atau perlu revisi">
                     <div class="stat-label">Belum Lengkap (SPJ)</div>
                     <div class="stat-value"><%= stats ? stats.belum_lengkap : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
                 </div>
-                <div class="stat-card green">
+                <div class="stat-card green" data-siad-tooltip="Berkas SPJ yang telah disahkan secara sah dan ber-barcode resmi">
                     <div class="stat-label">Sudah Diverifikasi (SPJ)</div>
                     <div class="stat-value"><%= stats ? stats.sudah_verifikasi : 0 %></div>
                     <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>

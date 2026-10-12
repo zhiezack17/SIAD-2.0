@@ -129,3 +129,4 @@ test('U07: Filter Tipe File Unggahan (MIME Allowlist)', () => {
     assert.equal(isMimeAllowed('application/javascript'), false, 'JS dilarang');
     assert.equal(isMimeAllowed('application/x-sh'), false, 'Shell script dilarang');
 });
+

@@ -67,17 +67,17 @@
                 </div>
 
                 <!-- TOMBOL EKSPOR EXCEL -->
-                <button onclick="exportPajakToExcel()" style="background: #15803d; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                <button id="btn-export-pajak-excel" onclick="exportPajakToExcel()" data-siad-tooltip="Unduh seluruh rekap setoran pajak ke file Excel (.xlsx)" style="background: #15803d; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                     📥 Unduh Excel (.xlsx)
                 </button>
 
                 <!-- TOMBOL CETAK BUKU PEMBANTU PAJAK RESMI -->
-                <a href="/spj/pajak/cetak-buku<%= filterTahun ? '?tahun=' + filterTahun : '' %>" target="_blank" style="text-decoration: none; background: #0f172a; color: white; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                <a id="btn-cetak-buku-pajak" href="/spj/pajak/cetak-buku<%= filterTahun ? '?tahun=' + filterTahun : '' %>" target="_blank" data-siad-tooltip="Cetak Buku Pembantu Pajak format resmi Permendagri No. 20/2018" style="text-decoration: none; background: #0f172a; color: white; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px;">
                     🖨️ Cetak Buku Pajak (PDF)
                 </a>
 
                 <!-- TOMBOL SETOR PAJAK CEPAT -->
-                <button onclick="document.getElementById('modalSetorPajak').style.display='flex'" style="background: #1d4ed8; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <button id="btn-input-setor-pajak" onclick="document.getElementById('modalSetorPajak').style.display='flex'" data-siad-tooltip="Input transaksi setoran pajak baru dengan bukti NTPN" style="background: #1d4ed8; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                     + Input Setoran Pajak
                 </button>
             </div>
@@ -338,17 +338,17 @@ function exportPajakToExcel() {
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <!-- TOMBOL CETAK REKAPITULASI REALISASI SPJ (SISKEUDES) -->
-            <button onclick="bukaModalFilterRekap()" style="background: #0f172a; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+            <button id="btn-rekap-realisasi" onclick="bukaModalFilterRekap()" data-siad-tooltip="Cetak rekapitulasi realisasi SPJ format Siskeudes" style="background: #0f172a; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
                 🖨️ Rekapitulasi Realisasi (Siskeudes)
             </button>
-            <button onclick="bukaModalSPJ()" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(29,78,216,0.3);">
+            <button id="btn-tambah-kegiatan" onclick="bukaModalSPJ()" data-siad-tooltip="Tambah kegiatan baru APBDes & pagu anggaran" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(29,78,216,0.3);">
                 + Tambah Kegiatan
             </button>
         </div>
     </div>
     
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
+        <table id="tabel-spj-kegiatan" style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
             <thead>
                 <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
                     <th style="padding: 12px 10px; width: 35px;">No</th>
