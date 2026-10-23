@@ -190,10 +190,10 @@ const authController = {
         if (req.session && req.session.userId && req.session.user) {
             try {
                 const userCheck = await db.query(
-                    'SELECT id, aktif, status, kepenghuluan_id, role, peran FROM pengguna WHERE id = $1 LIMIT 1',
+                    'SELECT id, aktif, kepenghuluan_id, role, peran FROM pengguna WHERE id = $1 LIMIT 1',
                     [req.session.userId]
                 );
-                if (userCheck.rows.length === 0 || userCheck.rows[0].aktif === false || (userCheck.rows[0].status && String(userCheck.rows[0].status).toUpperCase() === 'NONAKTIF')) {
+                if (userCheck.rows.length === 0 || userCheck.rows[0].aktif === false) {
                     req.session.destroy(() => {});
                     return res.redirect('/login?error=' + encodeURIComponent('Sesi berakhir: Akun Anda sedang dinonaktifkan atau telah dihapus.'));
                 }
@@ -222,13 +222,14 @@ const authController = {
         if (!req.session || !req.session.user || !req.session.user.is_admin) {
             return res.status(403).json({ error: 'Akses ditolak' });
         }
-        const kepId = req.body?.kepenghuluan_id || req.body?.did || req.query?.kepenghuluan_id || req.query?.did;
+        const kepId = req.body?.kepenghuluan_id || req.body?.did || req.body?.id || req.query?.kepenghuluan_id || req.query?.did || req.query?.id;
         if (!kepId || kepId === 'all') {
             req.session.active_kepenghuluan_id = null;
         } else {
             req.session.active_kepenghuluan_id = Number(kepId);
         }
-        res.redirect(req.get('Referrer') || '/dashboard');
+        const redirectUrl = req.query?.redirect || req.body?.redirect || req.get('Referrer') || '/dashboard';
+        res.redirect(redirectUrl);
     },
 
     _isAdmin: isAdmin

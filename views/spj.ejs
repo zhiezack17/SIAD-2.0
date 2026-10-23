@@ -518,7 +518,25 @@ function exportPajakToExcel() {
                                 <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" title="Berkas & Alur Verifikasi" style="background:#10b981; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">📂 Berkas</button>
                                 <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" title="Kelola Pajak" style="background:#3b82f6; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">💸</button>
                                 <a href="/spj/cetak/<%= item.id %>" target="_blank" title="Cetak Lembar Pengesahan" style="text-decoration:none; background:#0f172a; color:white; padding:6px 9px; border-radius:4px; font-size:11.5px; font-weight:bold;">🖨️</a>
-                                <button onclick="editSPJ('<%= item.id %>', '<%= (item.nama_kegiatan || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tahun %>', '<%= item.pagu_anggaran %>', '<%= (item.lokasi || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', '<%= (item.keterangan || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tahap || 'Tahap 1' %>', '<%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>', '<%= item.kode_rekening || '' %>', '<%= (item.sumber_dana || 'DDS (Dana Desa)').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.realisasi_anggaran || 0 %>')" title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
+                                <% 
+                                    const spjEditData = JSON.stringify({
+                                        id: item.id,
+                                        nama: item.nama_kegiatan || '',
+                                        tahun: item.tahun,
+                                        pagu: item.pagu_anggaran,
+                                        lokasi: item.lokasi || '',
+                                        tgl_mulai: item.tanggal_mulai ? (typeof item.tanggal_mulai === 'string' ? item.tanggal_mulai.substring(0, 10) : item.tanggal_mulai.toISOString().split('T')[0]) : '',
+                                        tgl_selesai: item.tanggal_selesai ? (typeof item.tanggal_selesai === 'string' ? item.tanggal_selesai.substring(0, 10) : item.tanggal_selesai.toISOString().split('T')[0]) : '',
+                                        status: item.status,
+                                        ket: item.keterangan || '',
+                                        tahap: item.tahap || 'Tahap 1',
+                                        bidang: item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa',
+                                        kode_rekening: item.kode_rekening || '',
+                                        sumber_dana: item.sumber_dana || 'DDS (Dana Desa)',
+                                        realisasi_anggaran: item.realisasi_anggaran || 0
+                                    }).replace(/'/g, '&#39;');
+                                %>
+                                <button type="button" onclick='bukaEditSPJJson(<%- spjEditData %>)' title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
                                 <form action="/spj/delete" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Hapus kegiatan ini?')">
                                     <input type="hidden" name="id" value="<%= item.id %>">
                                     <button type="submit" title="Hapus Kegiatan" style="background:#ef4444; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">🗑️</button>
@@ -783,6 +801,11 @@ function bukaModalSPJ() {
     if(idIn) idIn.remove();
     document.getElementById('modalSPJ').style.display = 'flex';
     updateTahunNotice();
+}
+
+function bukaEditSPJJson(d) {
+    if (!d) return;
+    editSPJ(d.id, d.nama, d.tahun, d.pagu, d.lokasi, d.tgl_mulai, d.tgl_selesai, d.status, d.ket, d.tahap, d.bidang, d.kode_rekening, d.sumber_dana, d.realisasi_anggaran);
 }
 
 function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek, sumberDana, realisasiAnggaran) {

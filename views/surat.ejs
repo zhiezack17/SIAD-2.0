@@ -145,15 +145,27 @@
                                         <% } %>
 
                                         <% if (tab === 'masuk') { %>
+                                            <% 
+                                                const dispData = JSON.stringify({
+                                                    id: item.id,
+                                                    nomor_surat: item.nomor_surat || '',
+                                                    pengirim: item.pengirim || '',
+                                                    perihal: item.perihal || '',
+                                                    sifat: item.disposisi_sifat || 'Biasa',
+                                                    ke_jabatan: item.disposisi_ke_jabatan || (item.disposisi_id ? '' : 'Sekretaris Kepenghuluan'),
+                                                    instruksi: item.disposisi_instruksi || '',
+                                                    catatan: item.disposisi_catatan || ''
+                                                }).replace(/'/g, '&#39;');
+                                            %>
                                             <% if (item.disposisi_id) { %>
                                                 <a href="/surat/disposisi/cetak/<%= item.id %>" target="_blank" style="background: #0f172a; color: white; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                                                     🖨️ Lembar Disposisi
                                                 </a>
-                                                <button type="button" onclick="bukaModalDisposisi('<%= item.id %>', '<%= (item.nomor_surat || '').replace(/'/g, \"\\'\") %>', '<%= (item.pengirim || '').replace(/'/g, \"\\'\") %>', '<%= (item.perihal || '').replace(/'/g, \"\\'\") %>', '<%= item.disposisi_sifat || 'Biasa' %>', '<%= (item.disposisi_ke_jabatan || '').replace(/'/g, \"\\'\") %>', '<%= (item.disposisi_instruksi || '').replace(/'/g, \"\\'\") %>', '<%= (item.disposisi_catatan || '').replace(/'/g, \"\\'\") %>')" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                                                <button type="button" onclick='bukaModalDisposisiJson(<%- dispData %>)' style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
                                                     ✏️ Edit Disposisi
                                                 </button>
                                             <% } else { %>
-                                                <button type="button" onclick="bukaModalDisposisi('<%= item.id %>', '<%= (item.nomor_surat || '').replace(/'/g, \"\\'\") %>', '<%= (item.pengirim || '').replace(/'/g, \"\\'\") %>', '<%= (item.perihal || '').replace(/'/g, \"\\'\") %>', 'Biasa', 'Sekretaris Kepenghuluan', '', '')" style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
+                                                <button type="button" onclick='bukaModalDisposisiJson(<%- dispData %>)' style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
                                                     ✍️ Isi Disposisi
                                                 </button>
                                             <% } %>
@@ -619,6 +631,11 @@ function submitModalAgenda(e) {
 }
 
 // Modal Disposisi
+function bukaModalDisposisiJson(d) {
+    if (!d) return;
+    bukaModalDisposisi(d.id, d.nomor_surat, d.pengirim, d.perihal, d.sifat, d.ke_jabatan, d.instruksi, d.catatan);
+}
+
 function bukaModalDisposisi(suratId, noSurat, pengirim, perihal, sifat, keJabatan, instruksi, catatan) {
     document.getElementById('disp_surat_id').value = suratId;
     document.getElementById('disp_info_no').innerText = noSurat || '-';

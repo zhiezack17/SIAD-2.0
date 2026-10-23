@@ -122,8 +122,18 @@
                                     <% 
                                         const tglFmt = item.tanggal_ditetapkan ? new Date(item.tanggal_ditetapkan).toISOString().substring(0, 10) : '';
                                         const hasFile = Boolean(item.drive_file_url || item.file_url);
+                                        const phEditData = JSON.stringify({
+                                            id: item.id,
+                                            jenis: item.jenis,
+                                            nomor: item.nomor || '',
+                                            tahun: item.tahun,
+                                            judul: item.judul || '',
+                                            status: item.status,
+                                            tanggal_ditetapkan: tglFmt,
+                                            hasFile: hasFile
+                                        }).replace(/'/g, '&#39;');
                                     %>
-                                    <button onclick="editModal('<%= item.id %>', '<%= item.jenis %>', '<%= (item.nomor || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tahun %>', '<%= (item.judul || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.status %>', '<%= tglFmt %>', <%= hasFile %>)" style="background: #f59e0b; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 700;">Edit</button>
+                                    <button type="button" onclick='bukaEditProdukHukumJson(<%- phEditData %>)' style="background: #f59e0b; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 700;">Edit</button>
                                     <form action="/produk-hukum/hapus" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Hapus data ini secara permanen?')">
                                         <input type="hidden" name="id" value="<%= item.id %>">
                                         <button type="submit" style="background: #ef4444; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 700;">Hapus</button>
@@ -284,6 +294,11 @@ function bukaModal() {
     document.getElementById('fileHelp').innerText = 'Maksimal 10MB. Hanya format PDF resmi.';
     toggleStatusValidation();
     document.getElementById('modalPH').style.display = 'flex';
+}
+
+function bukaEditProdukHukumJson(d) {
+    if (!d) return;
+    editModal(d.id, d.jenis, d.nomor, d.tahun, d.judul, d.status, d.tanggal_ditetapkan, d.hasFile);
 }
 
 function editModal(id, jenis, nomor, tahun, judul, status, tglDitetapkan, hasFile) {

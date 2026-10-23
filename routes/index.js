@@ -55,6 +55,7 @@ router.get('/login', authController.getLogin);
 router.post('/login', loginRateLimiter, authController.postLogin);
 router.get('/logout', authController.logout);
 router.all('/switch-desa', requireAuth, authController.switchDesa);
+router.all('/set-kepenghuluan', requireAuth, authController.switchDesa);
 router.post('/ganti-password', requireAuth, authController.postGantiPassword);
 
 // --- Rute Utama ---
@@ -122,7 +123,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
         if (!isKaurUmumUser) {
             try {
                 let baseWs = `
-                    SELECT w.*, wt.nama as type_nama, wt.warna as type_warna, wt.icon as type_icon, mk.nama as kepenghuluan_nama
+                    SELECT w.*, wt.nama as type_nama, wt.type_warna as type_warna, wt.type_icon as type_icon, mk.nama as kepenghuluan_nama
                     FROM workspace w
                     LEFT JOIN workspace_type wt ON w.workspace_type_id = wt.id
                     LEFT JOIN kepenghuluan mk ON w.kepenghuluan_id = mk.id
