@@ -128,13 +128,6 @@ const produkHukumController = {
         }
     },
 
-            await db.query(query, params);
-            res.redirect('/produk-hukum?status=success_edit');
-        } catch (error) {
-            res.redirect('/produk-hukum?status=error&msg=' + encodeURIComponent(error.message));
-        }
-    },
-
     postDelete: async (req, res) => {
         try {
             const isSuper = ac.isSuperAdmin(req);
