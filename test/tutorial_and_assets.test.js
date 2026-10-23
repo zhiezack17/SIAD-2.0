@@ -42,3 +42,4 @@ test('U08: Verifikasi Aset & Integrasi Modul Tutorial Interaktif SIAD 2.0', () =
     assert.ok(tutorialJsContent.includes('surat_keluar:'), 'siad-tutorial.js harus memiliki tour surat keluar');
     assert.ok(tutorialJsContent.includes('pengaturan:'), 'siad-tutorial.js harus memiliki tour pengaturan');
 });
+

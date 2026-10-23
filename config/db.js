@@ -24,6 +24,14 @@ async function initSchema() {
             
             ALTER TABLE spj_dokumen ADD COLUMN IF NOT EXISTS kepenghuluan_id INTEGER;
             ALTER TABLE spj_pajak ADD COLUMN IF NOT EXISTS kepenghuluan_id INTEGER;
+
+            ALTER TABLE workspace ADD COLUMN IF NOT EXISTS tahun_anggaran INTEGER;
+            ALTER TABLE workspace ADD COLUMN IF NOT EXISTS sumber_dana VARCHAR(100);
+            ALTER TABLE workspace ADD COLUMN IF NOT EXISTS template_proyek VARCHAR(100);
+
+            ALTER TABLE surat_masuk ADD COLUMN IF NOT EXISTS tanggal_terima DATE;
+            ALTER TABLE produk_hukum ADD COLUMN IF NOT EXISTS tanggal_ditetapkan DATE;
+            ALTER TABLE aset ADD COLUMN IF NOT EXISTS penanggung_jawab VARCHAR(150);
         `);
         console.log('✅ Skema verifikasi bertingkat SPJ berhasil disinkronkan.');
     } catch (e) {

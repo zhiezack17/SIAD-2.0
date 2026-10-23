@@ -1,29 +1,144 @@
-<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 30px;">
+<div class="content-wrapper" style="background-color: #f8fafc; min-height: 100vh; padding: 25px 30px;">
 
-<div style="padding: 0 0 20px 0;">
-    <a href="/dashboard" style="display: inline-block; text-decoration: none; background: #f8fafc; color: #0f172a; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1;">
-        ⬅️ Kembali ke Dashboard
-    </a>
-</div>
+    <!-- Tombol Kembali -->
+    <div style="margin-bottom: 20px;">
+        <a href="/dashboard" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: white; color: #0f172a; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #cbd5e1; transition: all 0.2s;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+        </a>
+    </div>
 
-<div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px;">
-    <h2 style="margin:0 0 5px 0; color: #1e293b; font-size: 24px;">🗄️ Brankas Arsip Digital Desa</h2>
-    <p style="margin:0; color: #64748b;">Simpan & arsipkan dokumen desa langsung ke Google Drive</p>
-</div>
-
-<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px;">
-    <!-- Form Upload -->
-    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-        <h3 style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px;">📤 Unggah Arsip Baru</h3>
-        <form action="/arsip/upload" method="POST" enctype="multipart/form-data">
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 6px;">Nama Arsip</label>
-                <input type="text" name="nama_arsip" placeholder="Contoh: SK Kepala Desa 2026" required
-                    style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+    <!-- Header Banner -->
+    <div style="background: white; border-radius: 14px; padding: 24px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); margin-bottom: 25px; border-left: 5px solid #2563eb;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0 0 6px 0; color: #0f172a; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <span>🗄️</span> Brankas Arsip Digital Desa
+                </h2>
+                <p style="margin: 0; color: #64748b; font-size: 14px;">Pengarsipan terpusat dokumen resmi, SK, peta desa, dan berkas penting langsung tersinkronisasi ke Google Drive.</p>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 6px;">Kategori</label>
-                <select name="kategori" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; box-sizing: border-box;">
+            <div>
+                <button type="button" onclick="bukaModalArsip()" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> + Unggah Arsip Baru
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Area Tabel Full-Width -->
+    <div style="background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-folder-open" style="color: #2563eb;"></i> Berkas Arsip Tersimpan
+                </h3>
+                <span style="background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #bfdbfe;">
+                    <%= arsipList ? arsipList.length : 0 %> Dokumen
+                </span>
+            </div>
+
+            <!-- Toolbar: Filter Kategori & Pencarian -->
+            <form method="GET" action="/arsip" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <select name="kategori" onchange="this.form.submit()" style="padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; font-size: 13px; font-weight: 600; color: #334155; outline: none;">
+                    <option value="">Semua Kategori</option>
+                    <option value="Surat Menyurat" <%= kategori === 'Surat Menyurat' ? 'selected' : '' %>>Surat Menyurat</option>
+                    <option value="Dokumen SPJ" <%= kategori === 'Dokumen SPJ' ? 'selected' : '' %>>Dokumen SPJ</option>
+                    <option value="Produk Hukum" <%= kategori === 'Produk Hukum' ? 'selected' : '' %>>Produk Hukum</option>
+                    <option value="Kependudukan" <%= kategori === 'Kependudukan' ? 'selected' : '' %>>Kependudukan</option>
+                    <option value="Keuangan" <%= kategori === 'Keuangan' ? 'selected' : '' %>>Keuangan</option>
+                    <option value="Umum" <%= kategori === 'Umum' ? 'selected' : '' %>>Umum / Lainnya</option>
+                </select>
+                <div style="position: relative;">
+                    <input type="text" name="search" value="<%= search %>" placeholder="Cari nama arsip..." style="padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; width: 220px; outline: none;">
+                </div>
+                <button type="submit" style="background: #0f172a; color: white; padding: 9px 16px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-magnifying-glass"></i> Cari
+                </button>
+            </form>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px;">
+                <thead>
+                    <tr style="background: #f8fafc; color: #64748b; text-align: left;">
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; width: 45px; text-align: center;">No</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0;">Nama Arsip & Dokumen</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; width: 170px;">Kategori</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0;">Keterangan</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; width: 130px;">Tgl Arsip</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; width: 140px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (arsipList && arsipList.length > 0) { %>
+                        <% arsipList.forEach(function(arsip, idx) { %>
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #94a3b8; font-weight: 700;">
+                                <%= idx + 1 %>
+                            </td>
+                            <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #0f172a;">
+                                <%= arsip.nama_arsip %>
+                            </td>
+                            <td style="padding: 14px; border-bottom: 1px solid #f1f5f9;">
+                                <span style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block;">
+                                    <%= arsip.kategori || 'Umum' %>
+                                </span>
+                            </td>
+                            <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">
+                                <%= arsip.keterangan || '-' %>
+                            </td>
+                            <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; color: #475569; font-size: 12.5px;">
+                                <i class="fa-regular fa-calendar" style="color: #94a3b8; margin-right: 4px;"></i><%= arsip.created_at ? new Date(arsip.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-' %>
+                            </td>
+                            <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                                <% if (arsip.drive_url) { %>
+                                    <a href="<%= arsip.drive_url %>" target="_blank" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Drive
+                                    </a>
+                                <% } else { %>
+                                    <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Penyimpanan Lokal</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 45px 20px; color: #94a3b8;">
+                            <div style="font-size: 44px; margin-bottom: 10px;">📭</div>
+                            <div style="font-weight: 700; font-size: 15px; color: #475569;">Belum ada arsip yang tersimpan</div>
+                            <div style="font-size: 13px; margin-top: 4px;">Klik tombol "+ Unggah Arsip Baru" untuk mencadangkan berkas ke Google Drive.</div>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL UNGGAH ARSIP KE GOOGLE DRIVE         -->
+<!-- ========================================== -->
+<div id="modalUploadArsip" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; background: #eff6ff; color: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">Unggah Arsip Digital Baru</h3>
+            </div>
+            <button onclick="tutupModalArsip()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 4px;">&times;</button>
+        </div>
+
+        <form action="/arsip/upload" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Nama / Judul Arsip <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="nama_arsip" placeholder="Cth: SK Tim Pelaksana Kegiatan 2026" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Kategori Arsip <span style="color:#ef4444;">*</span></label>
+                <select name="kategori" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; background: white; box-sizing: border-box; outline: none;">
                     <option value="Surat Menyurat">Surat Menyurat</option>
                     <option value="Dokumen SPJ">Dokumen SPJ</option>
                     <option value="Produk Hukum">Produk Hukum</option>
@@ -32,84 +147,35 @@
                     <option value="Umum">Umum / Lainnya</option>
                 </select>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 6px;">Keterangan</label>
-                <textarea name="keterangan" rows="3" placeholder="Keterangan singkat..."
-                    style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;"></textarea>
+
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Keterangan Dokumen</label>
+                <textarea name="keterangan" rows="2" placeholder="Ringkasan atau catatan isi berkas..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; resize: vertical; box-sizing: border-box; outline: none;"></textarea>
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 6px;">File Dokumen</label>
-                <input type="file" name="file" required style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Pilih File Berkas (PDF / Scan / Gambar) <span style="color:#ef4444;">*</span></label>
+                <input type="file" name="file" required style="width: 100%; padding: 9px; border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc; font-size: 13px; box-sizing: border-box;">
+                <small style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">*Otomatis dicadangkan langsung ke folder Google Drive Kepenghuluan</small>
             </div>
-            <button type="submit" style="width: 100%; background: #2563eb; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
-                ☁️ Unggah ke Google Drive
-            </button>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="tutupModalArsip()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="submit" style="background: #2563eb; color: white; padding: 10px 22px; border: none; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
+                    ☁️ Simpan & Unggah
+                </button>
+            </div>
         </form>
     </div>
-
-    <!-- Daftar Arsip -->
-    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-        <h3 style="margin: 0 0 15px 0; color: #1e293b; font-size: 18px;">📂 Daftar Arsip Tersimpan</h3>
-        <form method="GET" action="/arsip" style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <select name="kategori" style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white;">
-                <option value="">Semua Kategori</option>
-                <option value="Surat Menyurat" <%= kategori === 'Surat Menyurat' ? 'selected' : '' %>>Surat</option>
-                <option value="Dokumen SPJ" <%= kategori === 'Dokumen SPJ' ? 'selected' : '' %>>SPJ</option>
-                <option value="Produk Hukum" <%= kategori === 'Produk Hukum' ? 'selected' : '' %>>Hukum</option>
-                <option value="Kependudukan" <%= kategori === 'Kependudukan' ? 'selected' : '' %>>Kependudukan</option>
-                <option value="Keuangan" <%= kategori === 'Keuangan' ? 'selected' : '' %>>Keuangan</option>
-                <option value="Umum" <%= kategori === 'Umum' ? 'selected' : '' %>>Umum</option>
-            </select>
-            <input type="text" name="search" value="<%= search %>" placeholder="Cari nama arsip..."
-                style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
-            <button type="submit" style="background: #0f172a; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                🔍 Cari
-            </button>
-        </form>
-
-        <% if (arsipList && arsipList.length > 0) { %>
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                    <th style="padding: 12px; text-align: left; color: #64748b; font-size: 13px;">Nama Arsip</th>
-                    <th style="padding: 12px; text-align: left; color: #64748b; font-size: 13px;">Kategori</th>
-                    <th style="padding: 12px; text-align: left; color: #64748b; font-size: 13px;">Tanggal</th>
-                    <th style="padding: 12px; text-align: center; color: #64748b; font-size: 13px;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% arsipList.forEach(function(arsip) { %>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 12px; font-weight: 500; color: #1e293b;"><%= arsip.nama_arsip %></td>
-                    <td style="padding: 12px;"><span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;"><%= arsip.kategori || 'Umum' %></span></td>
-                    <td style="padding: 12px; color: #64748b; font-size: 13px;"><%= arsip.created_at ? new Date(arsip.created_at).toLocaleDateString('id-ID') : '-' %></td>
-                    <td style="padding: 12px; text-align: center;">
-                        <% if (arsip.drive_url) { %>
-                            <a href="<%= arsip.drive_url %>" target="_blank" style="background: #2563eb; color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600;">📄 Lihat di Drive</a>
-                        <% } else { %>
-                            <span style="color: #94a3b8; font-size: 13px;">Lokal</span>
-                        <% } %>
-                    </td>
-                </tr>
-                <% }); %>
-            </tbody>
-        </table>
-        <% } else { %>
-        <div style="text-align: center; padding: 40px; color: #94a3b8;">
-            <p style="font-size: 48px; margin-bottom: 10px;">📭</p>
-            <p>Belum ada arsip tersimpan. Mulai unggah dokumen pertama Anda di sebelah kiri.</p>
-        </div>
-        <% } %>
-    </div>
-</div>
 </div>
 
 <script>
-    var urlParams = new URLSearchParams(window.location.search);
-    var status = urlParams.get('status');
-    var msg = urlParams.get('msg');
-    if (status && msg) {
-        alert(msg);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
+function bukaModalArsip() {
+    document.getElementById('modalUploadArsip').style.display = 'flex';
+}
+function tutupModalArsip() {
+    document.getElementById('modalUploadArsip').style.display = 'none';
+}
 </script>

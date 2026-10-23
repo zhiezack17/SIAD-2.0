@@ -49,7 +49,7 @@ const workspaceController = {
     },
     postTambah: async (req, res) => {
         try {
-            const { nama, workspace_type_id, deskripsi, kepenghuluan_id } = req.body;
+            const { nama, workspace_type_id, deskripsi, kepenghuluan_id, tahun_anggaran, sumber_dana, template_proyek } = req.body;
             if (!nama || !nama.trim()) {
                 return res.redirect('/workspace?status=error&msg=' + encodeURIComponent('Nama workspace wajib diisi'));
             }
@@ -60,18 +60,60 @@ const workspaceController = {
             }
 
             const insertSql = `
-                INSERT INTO workspace (nama, workspace_type_id, deskripsi, kepenghuluan_id, status, created_at)
-                VALUES ($1, $2, $3, $4, 'Aktif', NOW())
+                INSERT INTO workspace (nama, workspace_type_id, deskripsi, kepenghuluan_id, status, tahun_anggaran, sumber_dana, template_proyek, created_at)
+                VALUES ($1, $2, $3, $4, 'Aktif', $5, $6, $7, NOW())
                 RETURNING id
             `;
-            await db.query(insertSql, [
+            const result = await db.query(insertSql, [
                 nama.trim(),
                 workspace_type_id ? Number(workspace_type_id) : 1,
                 deskripsi ? deskripsi.trim() : null,
-                did || null
+                did || null,
+                tahun_anggaran ? Number(tahun_anggaran) : (new Date().getFullYear()),
+                sumber_dana ? sumber_dana.trim() : 'Dana Desa (DDS)',
+                template_proyek ? template_proyek.trim() : null
             ]);
 
-            res.redirect('/workspace?status=success&msg=' + encodeURIComponent('Workspace baru berhasil dibuat!'));
+            const newId = result.rows[0].id;
+
+            // Template Checklist Otomatis
+            const templates = {
+                fisik: [
+                    'RAB & Gambar Teknis / Desain',
+                    'Dokumen Pengadaan & SPK Rekanan',
+                    'Dokumentasi Foto Fisik (0%, 50%, 100%)',
+                    'Berita Acara Pembayaran & Kwitansi',
+                    'Berita Acara Serah Terima (BAST)'
+                ],
+                non_fisik: [
+                    'Kerangka Acuan Kerja (KAK / TOR)',
+                    'Daftar Hadir Peserta & Notulensi',
+                    'Kwitansi & Tanda Terima Honorarium',
+                    'Foto Dokumentasi Kegiatan & Materi',
+                    'Laporan Pertanggungjawaban Pelaksanaan'
+                ],
+                barang: [
+                    'Surat Permintaan / Pesanan Barang',
+                    'Faktur / Nota Pembelian Resmi & Kwitansi',
+                    'Berita Acara Pemeriksaan Barang',
+                    'Berita Acara Penerimaan / BAST Barang',
+                    'Foto Bukti Fisik Barang Inventaris'
+                ]
+            };
+
+            if (template_proyek && templates[template_proyek]) {
+                for (const item of templates[template_proyek]) {
+                    try {
+                        await db.query(
+                            `INSERT INTO workspace_document (workspace_id, jenis_dokumen, nama_file_asli, versi, kepenghuluan_id)
+                             VALUES ($1, $2, $3, 1, $4)`,
+                            [newId, item, '[Menunggu Berkas Diunggah]', did || null]
+                        );
+                    } catch (e) { /* ignore individual checklist seed error */ }
+                }
+            }
+
+            res.redirect('/workspace?status=success&msg=' + encodeURIComponent('Workspace baru berhasil dibuat dengan template checklist!'));
         } catch (error) {
             console.error('Error creating workspace:', error);
             res.redirect('/workspace?status=error&msg=' + encodeURIComponent('Gagal membuat workspace: ' + error.message));

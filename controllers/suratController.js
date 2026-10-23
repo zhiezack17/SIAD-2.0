@@ -14,6 +14,7 @@ const suratController = {
             if (tab === 'masuk') {
                 let sql = `
                     SELECT sm.*, 
+                           mk.nama AS kepenghuluan_nama,
                            ds.id AS disposisi_id,
                            ds.dari_nama AS disposisi_dari_nama,
                            ds.dari_jabatan AS disposisi_dari_jabatan,
@@ -25,6 +26,7 @@ const suratController = {
                            ds.status AS disposisi_status,
                            ds.created_at AS disposisi_tanggal
                     FROM surat_masuk sm
+                    LEFT JOIN kepenghuluan mk ON sm.kepenghuluan_id = mk.id
                     LEFT JOIN (
                         SELECT DISTINCT ON (surat_id) *
                         FROM disposisi_surat
@@ -44,16 +46,21 @@ const suratController = {
                 const result = await db.query(sql, p);
                 data = result.rows;
             } else if (tab === 'keluar') {
-                let sql = 'SELECT * FROM surat_keluar WHERE 1=1';
+                let sql = `
+                    SELECT sk.*, mk.nama AS kepenghuluan_nama 
+                    FROM surat_keluar sk
+                    LEFT JOIN kepenghuluan mk ON sk.kepenghuluan_id = mk.id
+                    WHERE 1=1
+                `;
                 let p = []; let idx = 1;
                 if (did) {
-                    sql += ` AND (kepenghuluan_id = $${idx} OR kepenghuluan_id IS NULL)`;
+                    sql += ` AND (sk.kepenghuluan_id = $${idx} OR sk.kepenghuluan_id IS NULL)`;
                     p.push(did);
                     idx++;
                 } else if (!admin && !did) {
-                    sql += ` AND kepenghuluan_id IS NULL`;
+                    sql += ` AND sk.kepenghuluan_id IS NULL`;
                 }
-                sql += ' ORDER BY id DESC';
+                sql += ' ORDER BY sk.id DESC';
                 const result = await db.query(sql, p);
                 data = result.rows;
             }
@@ -65,7 +72,7 @@ const suratController = {
     },
     postSuratMasuk: async (req, res) => {
         try {
-            const { nomor_surat, tanggal_surat, pengirim, perihal } = req.body;
+            const { nomor_surat, tanggal_surat, tanggal_terima, pengirim, perihal } = req.body;
             const userDesa = ac.getDesaNama(req, 'Desa');
             const did = ac.getDesaId(req);
             let driveUrl = '';
@@ -73,16 +80,75 @@ const suratController = {
                 const driveData = await uploadToDrive(req.file, userDesa, 'Surat', 'Surat Masuk');
                 if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
             }
+            const tglTerima = tanggal_terima || tanggal_surat;
             const insertSql = did
-                ? 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, pengirim, perihal, file_url, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, $6)'
-                : 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, pengirim, perihal, file_url) VALUES ($1, $2, $3, $4, $5)';
+                ? 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, tanggal_terima, pengirim, perihal, file_url, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, $6, $7)'
+                : 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, tanggal_terima, pengirim, perihal, file_url) VALUES ($1, $2, $3, $4, $5, $6)';
             const params = did
-                ? [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl, did]
-                : [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl];
-            await db.query(insertSql, params);
+                ? [nomor_surat, tanggal_surat, tglTerima, pengirim, perihal, driveUrl, did]
+                : [nomor_surat, tanggal_surat, tglTerima, pengirim, perihal, driveUrl];
+            try {
+                await db.query(insertSql, params);
+            } catch (errCol) {
+                const fbSql = did
+                    ? 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, pengirim, perihal, file_url, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, $6)'
+                    : 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, pengirim, perihal, file_url) VALUES ($1, $2, $3, $4, $5)';
+                await db.query(fbSql, did ? [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl, did] : [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl]);
+            }
             res.redirect('/surat?tab=masuk&status=success');
         } catch (error) {
             res.send('<div style="padding:40px;font-family:sans-serif;"><h2>💥 Oops! Gagal Upload Surat Masuk:</h2><p style="color:red;">' + error.message + '</p></div>');
+        }
+    },
+    postEditSurat: async (req, res) => {
+        try {
+            const { id, type, nomor_surat, tanggal_surat, tanggal_terima, pengirim, tujuan, perihal } = req.body;
+            const did = ac.getDesaId(req);
+            const isSuper = ac.isSuperAdmin(req);
+            const tabType = type === 'keluar' ? 'keluar' : 'masuk';
+            const tbl = tabType === 'masuk' ? 'surat_masuk' : 'surat_keluar';
+
+            let checkSql = `SELECT * FROM ${tbl} WHERE id = $1`;
+            let checkParams = [id];
+            if (!isSuper && did) {
+                checkSql += ' AND (kepenghuluan_id = $2 OR kepenghuluan_id IS NULL)';
+                checkParams.push(did);
+            }
+            const check = await db.query(checkSql, checkParams);
+            if (check.rows.length === 0) {
+                return res.redirect(`/surat?tab=${tabType}&status=error&msg=` + encodeURIComponent('Akses ditolak atau data surat tidak ditemukan.'));
+            }
+
+            let driveUrl = check.rows[0].file_url;
+            if (req.file) {
+                const userDesa = ac.getDesaNama(req, 'Desa');
+                const driveData = await uploadToDrive(req.file, userDesa, 'Surat', tabType === 'masuk' ? 'Surat Masuk' : 'Surat Keluar');
+                if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
+            }
+
+            if (tabType === 'masuk') {
+                try {
+                    await db.query(
+                        `UPDATE surat_masuk SET nomor_surat = $1, tanggal_surat = $2, tanggal_terima = $3, pengirim = $4, perihal = $5, file_url = $6 WHERE id = $7`,
+                        [nomor_surat, tanggal_surat, tanggal_terima || tanggal_surat, pengirim, perihal, driveUrl, id]
+                    );
+                } catch (e) {
+                    await db.query(
+                        `UPDATE surat_masuk SET nomor_surat = $1, tanggal_surat = $2, pengirim = $3, perihal = $4, file_url = $5 WHERE id = $6`,
+                        [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl, id]
+                    );
+                }
+            } else {
+                await db.query(
+                    `UPDATE surat_keluar SET nomor_surat = $1, tanggal_surat = $2, tujuan = $3, perihal = $4, file_url = $5 WHERE id = $6`,
+                    [nomor_surat, tanggal_surat, tujuan, perihal, driveUrl, id]
+                );
+            }
+
+            res.redirect(`/surat?tab=${tabType}&status=success_edit`);
+        } catch (error) {
+            console.error('Error editing surat:', error);
+            res.redirect('/surat?tab=' + (req.body.type || 'masuk') + '&status=error&msg=' + encodeURIComponent(error.message));
         }
     },
     postSuratKeluar: async (req, res) => {
@@ -147,7 +213,7 @@ const suratController = {
             res.send('<div style="padding:40px;font-family:sans-serif;"><h2>💥 Oops! Gagal Hapus:</h2><p style="color:red;">' + error.message + '</p></div>');
         }
     },
-    editSurat: async (req, res) => { res.redirect('/surat'); },
+    editSurat: async (req, res) => { return suratController.postEditSurat(req, res); },
 
     // === MODUL DISPOSISI SURAT MASUK ===
     postDisposisi: async (req, res) => {

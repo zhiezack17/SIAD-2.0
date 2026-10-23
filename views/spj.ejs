@@ -22,27 +22,58 @@
 <!-- TAB REKAPITULASI PAJAK (BUKU PEMBANTU PAJAK) -->
 <!-- ========================================== -->
 <div style="margin-bottom: 25px;">
-    <!-- 4 KARTU KPI RINGKASAN PAJAK -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
-        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #10b981;">
-            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">💰 Total Pajak Disetor</div>
-            <div style="font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 5px;">Rp <%= Number(summary.totalSemua || 0).toLocaleString('id-ID') %></div>
-            <div style="font-size: 11px; color: #10b981; margin-top: 4px; font-weight: 600;">Semua Jenis Pajak</div>
+    <!-- REKONSILIASI PEMOTONGAN VS PENYETORAN PAJAK (PERMENDAGRI 20/2018) -->
+    <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; border-left: 5px solid #2563eb;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    ⚖️ Rekonsiliasi Kas Pajak Kepenghuluan
+                </h3>
+                <p style="margin: 3px 0 0 0; font-size: 12.5px; color: #64748b;">Perbandingan pemotongan belanja vs penyetoran kas negara/daerah (Buku Pembantu Pajak).</p>
+            </div>
+            <% if ((summary.sisaHutangPajak || 0) > 0) { %>
+                <span style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 5px;">
+                    ⚠️ Perhatian: Ada Hutang Pajak Belum Disetor!
+                </span>
+            <% } else { %>
+                <span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 5px;">
+                    ✅ Lunas & Nihil (Pajak Telah Disetor Seluruhnya)
+                </span>
+            <% } %>
         </div>
-        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #3b82f6;">
-            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">🟦 Total PPN (11% / 12%)</div>
-            <div style="font-size: 22px; font-weight: 800; color: #1d4ed8; margin-top: 5px;">Rp <%= Number(summary.totalPPN || 0).toLocaleString('id-ID') %></div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Pajak Pertambahan Nilai</div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+            <div style="background: #f8fafc; border-radius: 10px; padding: 15px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">📥 Total Potongan Pajak</div>
+                <div style="font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 5px;">Rp <%= Number(summary.totalPotongan || summary.totalSemua || 0).toLocaleString('id-ID') %></div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Dipungut dari Belanja SPJ</div>
+            </div>
+
+            <div style="background: #f0fdf4; border-radius: 10px; padding: 15px; border: 1px solid #bbf7d0;">
+                <div style="font-size: 12px; font-weight: bold; color: #166534; text-transform: uppercase;">📤 Total Telah Disetor</div>
+                <div style="font-size: 22px; font-weight: 800; color: #15803d; margin-top: 5px;">Rp <%= Number(summary.totalDisetor || summary.totalSemua || 0).toLocaleString('id-ID') %></div>
+                <div style="font-size: 11px; color: #16a34a; margin-top: 4px; font-weight: 600;">Valid NTPN / SSPD Bank</div>
+            </div>
+
+            <div style="background: <%= (summary.sisaHutangPajak || 0) > 0 ? '#fff7ed' : '#f8fafc' %>; border-radius: 10px; padding: 15px; border: 1px solid <%= (summary.sisaHutangPajak || 0) > 0 ? '#fed7aa' : '#e2e8f0' %>;">
+                <div style="font-size: 12px; font-weight: bold; color: <%= (summary.sisaHutangPajak || 0) > 0 ? '#c2410c' : '#64748b' %>; text-transform: uppercase;">⏳ Sisa Belum Disetor (Hutang)</div>
+                <div style="font-size: 22px; font-weight: 800; color: <%= (summary.sisaHutangPajak || 0) > 0 ? '#ea580c' : '#10b981' %>; margin-top: 5px;">Rp <%= Number(summary.sisaHutangPajak || 0).toLocaleString('id-ID') %></div>
+                <div style="font-size: 11px; color: <%= (summary.sisaHutangPajak || 0) > 0 ? '#ea580c' : '#059669' %>; margin-top: 4px; font-weight: 600;">
+                    <%= (summary.sisaHutangPajak || 0) > 0 ? 'Wajib segera disetor ke kas negara/daerah' : 'Saldo Kas Pajak Bersih' %>
+                </div>
+            </div>
         </div>
-        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #f59e0b;">
-            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">🟧 Total PPh (21, 22, 23)</div>
-            <div style="font-size: 22px; font-weight: 800; color: #d97706; margin-top: 5px;">Rp <%= Number((summary.totalPPh21 || 0) + (summary.totalPPh22 || 0) + (summary.totalPPh23 || 0)).toLocaleString('id-ID') %></div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Honor, Material & Jasa</div>
-        </div>
-        <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid #8b5cf6;">
-            <div style="font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase;">🟪 Pajak Daerah / Galian C</div>
-            <div style="font-size: 22px; font-weight: 800; color: #7c3aed; margin-top: 5px;">Rp <%= Number(summary.totalPajakDaerah || 0).toLocaleString('id-ID') %></div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Restoran & Mineral Batuan</div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+            <div style="font-size: 12px; color: #475569;">
+                🟦 PPN (11%/12%): <strong>Rp <%= Number(summary.totalPPN || 0).toLocaleString('id-ID') %></strong>
+            </div>
+            <div style="font-size: 12px; color: #475569;">
+                🟧 PPh (21, 22, 23): <strong>Rp <%= Number((summary.totalPPh21 || 0) + (summary.totalPPh22 || 0) + (summary.totalPPh23 || 0)).toLocaleString('id-ID') %></strong>
+            </div>
+            <div style="font-size: 12px; color: #475569;">
+                🟪 Pajak Daerah / Galian C: <strong>Rp <%= Number(summary.totalPajakDaerah || 0).toLocaleString('id-ID') %></strong>
+            </div>
         </div>
     </div>
 
@@ -207,7 +238,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Jenis Pajak <span style="color:red;">*</span></label>
-                    <select name="jenis_pajak" required style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-size: 13px;">
+                    <select name="jenis_pajak" id="modalSetorJenisPajak" onchange="handleJenisPajakChange()" required style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-size: 13px;">
                         <option value="PPN">PPN (Pajak Pertambahan Nilai)</option>
                         <option value="PPh 21">PPh Pasal 21 (Upah/Honor)</option>
                         <option value="PPh 22">PPh Pasal 22 (Barang/Material)</option>
@@ -223,12 +254,12 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">NTPN (Bukti Setor Bank)</label>
-                    <input type="text" name="ntpn" placeholder="16 Digit NTPN" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                    <label id="labelNTPN" style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">NTPN (Bukti Setor Kas Negara)</label>
+                    <input type="text" name="ntpn" id="inputNTPN" placeholder="16 Digit NTPN" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
                 </div>
                 <div>
-                    <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Kode Billing DJP</label>
-                    <input type="text" name="kode_billing" placeholder="15 Digit Kode Billing" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
+                    <label id="labelBilling" style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px;">Kode Billing DJP / SSPD</label>
+                    <input type="text" name="kode_billing" id="inputBilling" placeholder="15 Digit Kode Billing" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;">
                 </div>
             </div>
 
@@ -353,10 +384,12 @@ function exportPajakToExcel() {
                 <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
                     <th style="padding: 12px 10px; width: 35px;">No</th>
                     <th style="padding: 12px 10px;">Nama Kegiatan & Bidang APBDes</th>
-                    <th style="padding: 12px 10px; width: 140px;">Pagu Anggaran</th>
-                    <th style="padding: 12px 10px; width: 130px;">Lokasi</th>
-                    <th style="padding: 12px 10px; width: 130px;">Status Verifikasi</th>
-                    <th style="padding: 12px 10px; width: 110px; text-align: center;">Notifikasi</th>
+                    <th style="padding: 12px 10px; width: 100px;">Sumber Dana</th>
+                    <th style="padding: 12px 10px; width: 130px;">Pagu Anggaran</th>
+                    <th style="padding: 12px 10px; width: 150px;">Realisasi (Rp & %)</th>
+                    <th style="padding: 12px 10px; width: 110px;">Lokasi</th>
+                    <th style="padding: 12px 10px; width: 125px;">Status Verifikasi</th>
+                    <th style="padding: 12px 10px; width: 105px; text-align: center;">Notifikasi</th>
                     <th style="padding: 12px 10px; width: 160px; text-align: right;">Aksi</th>
                 </tr>
             </thead>
@@ -381,7 +414,38 @@ function exportPajakToExcel() {
                                 <% } %>
                             </div>
                         </td>
-                        <td style="padding: 12px 10px; font-weight: bold; color: #1e293b;">Rp <%= Number(item.pagu_anggaran).toLocaleString('id-ID') %></td>
+                        <td style="padding: 12px 10px; vertical-align: middle;">
+                            <% 
+                                const sDana = item.sumber_dana || 'DDS (Dana Desa)';
+                                let sDanaCode = 'DDS';
+                                if (sDana.includes('ADD')) sDanaCode = 'ADD';
+                                else if (sDana.includes('PBH')) sDanaCode = 'PBH';
+                                else if (sDana.includes('PAD')) sDanaCode = 'PAD';
+                                else if (sDana.includes('BKK')) sDanaCode = 'BKK';
+                                else if (sDana.includes('DLL')) sDanaCode = 'DLL';
+                            %>
+                            <span style="background: #eef2ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; border: 1px solid #c7d2fe; display: inline-block;">
+                                <%= sDanaCode %>
+                            </span>
+                        </td>
+                        <td style="padding: 12px 10px; font-weight: bold; color: #1e293b; vertical-align: middle;">Rp <%= Number(item.pagu_anggaran).toLocaleString('id-ID') %></td>
+                        <td style="padding: 12px 10px; vertical-align: middle;">
+                            <%
+                                const pVal = Number(item.pagu_anggaran) || 0;
+                                const rVal = (item.realisasi_anggaran !== null && typeof item.realisasi_anggaran !== 'undefined') ? Number(item.realisasi_anggaran) : (item.status === 'SELESAI' || (item.tahap_verifikasi === 'SELESAI_FINAL') ? pVal : 0);
+                                const pctVal = pVal > 0 ? Math.min(100, Math.round((rVal / pVal) * 100)) : 0;
+                                let barCol = '#10b981';
+                                if (pctVal < 50) barCol = '#f59e0b';
+                                if (pctVal === 0) barCol = '#94a3b8';
+                            %>
+                            <div style="font-weight: 800; color: #0f172a; font-size: 12.5px;">Rp <%= rVal.toLocaleString('id-ID') %></div>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px;">
+                                <div style="flex: 1; height: 5px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                    <div style="width: <%= pctVal %>%; height: 100%; background: <%= barCol %>; border-radius: 4px;"></div>
+                                </div>
+                                <span style="font-size: 10.5px; font-weight: 700; color: #475569;"><%= pctVal %>%</span>
+                            </div>
+                        </td>
                         <td style="padding: 12px 10px; color: #475569;"><%= item.lokasi || '-' %></td>
                         <td style="padding: 12px 10px;">
                             <% 
@@ -454,7 +518,7 @@ function exportPajakToExcel() {
                                 <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" title="Berkas & Alur Verifikasi" style="background:#10b981; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">📂 Berkas</button>
                                 <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" title="Kelola Pajak" style="background:#3b82f6; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">💸</button>
                                 <a href="/spj/cetak/<%= item.id %>" target="_blank" title="Cetak Lembar Pengesahan" style="text-decoration:none; background:#0f172a; color:white; padding:6px 9px; border-radius:4px; font-size:11.5px; font-weight:bold;">🖨️</a>
-                                <button onclick="editSPJ('<%= item.id %>', '<%= item.nama_kegiatan %>', '<%= item.tahun %>', '<%= item.pagu_anggaran %>', '<%= item.lokasi %>', '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', '<%= item.keterangan %>', '<%= item.tahap || 'Tahap 1' %>', '<%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>', '<%= item.kode_rekening || '' %>')" title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
+                                <button onclick="editSPJ('<%= item.id %>', '<%= (item.nama_kegiatan || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tahun %>', '<%= item.pagu_anggaran %>', '<%= (item.lokasi || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tanggal_mulai ? item.tanggal_mulai.toISOString().split('T')[0] : '' %>', '<%= item.tanggal_selesai ? item.tanggal_selesai.toISOString().split('T')[0] : '' %>', '<%= item.status %>', '<%= (item.keterangan || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tahap || 'Tahap 1' %>', '<%= item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa' %>', '<%= item.kode_rekening || '' %>', '<%= (item.sumber_dana || 'DDS (Dana Desa)').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.realisasi_anggaran || 0 %>')" title="Edit Data" style="background:#eab308; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">✏️</button>
                                 <form action="/spj/delete" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Hapus kegiatan ini?')">
                                     <input type="hidden" name="id" value="<%= item.id %>">
                                     <button type="submit" title="Hapus Kegiatan" style="background:#ef4444; color:white; border:none; padding:6px 8px; border-radius:4px; cursor:pointer;">🗑️</button>
@@ -465,7 +529,7 @@ function exportPajakToExcel() {
                     <% }) %>
                 <% } else { %>
                     <tr>
-                        <td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8;">
+                        <td colspan="9" style="padding: 40px; text-align: center; color: #94a3b8;">
                             <div style="font-size: 32px; margin-bottom: 10px;">📁</div>
                             Belum ada kegiatan SPJ. Klik tombol <b>"+ Tambah Kegiatan"</b> di atas untuk menambahkan kegiatan baru.
                         </td>
@@ -529,7 +593,7 @@ function exportPajakToExcel() {
 
 <!-- MODAL TAMBAH / EDIT SPJ -->
 <div id="modalSPJ" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50;">
-    <div style="background: white; padding: 24px; border-radius: 10px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+    <div style="background: white; padding: 24px; border-radius: 10px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
             <h3 id="modalTitleSPJ" style="margin:0; color:#0f172a;">Tambah Kegiatan SPJ</h3>
             <button onclick="document.getElementById('modalSPJ').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
@@ -552,14 +616,32 @@ function exportPajakToExcel() {
                 </select>
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Sumber Dana APBDes <span style="color:red;">*</span></label>
+                    <select name="sumber_dana" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white; font-size:12.5px; font-weight:600;">
+                        <option value="DDS (Dana Desa)">DDS (Dana Desa)</option>
+                        <option value="ADD (Alokasi Dana Desa)">ADD (Alokasi Dana Desa)</option>
+                        <option value="PBH (Bagi Hasil Pajak & Retribusi)">PBH (Bagi Hasil Pajak & Retribusi)</option>
+                        <option value="PAD (Pendapatan Asli Desa)">PAD (Pendapatan Asli Desa)</option>
+                        <option value="BKK (Bantuan Keuangan Khusus/Kab/Prov)">BKK (Bantuan Keuangan Khusus)</option>
+                        <option value="DLL (Lain-lain Pendapatan Sah)">DLL (Lain-lain Pendapatan Sah)</option>
+                    </select>
+                </div>
+                <div>
                     <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Kode Rekening Kegiatan</label>
                     <input type="text" name="kode_rekening" placeholder="Cth: 2.01.01" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; font-family:monospace;">
                 </div>
-                <div style="flex:1;">
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
                     <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Pagu Anggaran (Rp) <span style="color:red;">*</span></label>
                     <input type="number" name="pagu" placeholder="Cth: 75000000" required style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Realisasi Anggaran (Rp)</label>
+                    <input type="number" name="realisasi_anggaran" placeholder="Cth: 75000000" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;">
                 </div>
             </div>
 
@@ -596,14 +678,15 @@ function exportPajakToExcel() {
                 </div>
             </div>
 
-            <div>
+            <div id="statusContainerSPJ">
                 <label style="display:block; font-size:11px; font-weight:700; color:#475569; margin-bottom:3px;">Status Kegiatan</label>
-                <select name="status" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white;">
-                    <option value="draft">Draft</option>
+                <select name="status" id="selectStatusSPJ" style="padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box; background:white;">
+                    <option value="draft">Draft (Pelaksana)</option>
                     <option value="diajukan">Diajukan</option>
                     <option value="disetujui">Disetujui</option>
-                    <option value="selesai">Selesai</option>
+                    <option value="selesai">Selesai / Lunas</option>
                 </select>
+                <div id="noticeStatusSPJ" style="margin-top: 5px; font-size: 11px; color: #1e40af; background: #eff6ff; padding: 6px 10px; border-radius: 6px; border: 1px solid #bfdbfe; display: none;"></div>
             </div>
 
             <div>
@@ -620,6 +703,26 @@ function exportPajakToExcel() {
 </div>
 
 <script>
+function handleJenisPajakChange() {
+    const sel = document.getElementById('modalSetorJenisPajak');
+    const lblNTPN = document.getElementById('labelNTPN');
+    const inpNTPN = document.getElementById('inputNTPN');
+    const lblBill = document.getElementById('labelBilling');
+    const inpBill = document.getElementById('inputBilling');
+    if (!sel || !lblNTPN) return;
+    if (sel.value === 'Pajak Daerah') {
+        lblNTPN.innerHTML = 'No. SSPD / Resi Bank Daerah <small style="color:#64748b; font-weight:normal;">(Opsional)</small>';
+        inpNTPN.placeholder = 'Cth: No. SSPD Bank Riau Kepri';
+        lblBill.innerHTML = 'Kode Setor Daerah <small style="color:#64748b; font-weight:normal;">(Opsional)</small>';
+        inpBill.placeholder = 'Kode Bayar / Referensi';
+    } else {
+        lblNTPN.innerHTML = 'NTPN (Bukti Setor Kas Negara) <small style="color:#64748b; font-weight:normal;">(Opsional jika belum setor)</small>';
+        inpNTPN.placeholder = '16 Digit NTPN';
+        lblBill.innerHTML = 'Kode Billing DJP';
+        inpBill.placeholder = '15 Digit Kode Billing';
+    }
+}
+
 function bukaModalFilterRekap() {
     document.getElementById('modalFilterRekap').style.display = 'flex';
 }
@@ -635,22 +738,39 @@ function bukaLembarRekap(e) {
 function updateTahunNotice() {
     const thnInput = document.querySelector('#formSPJ [name="tahun"]');
     const noticeEl = document.getElementById('noticeTahunSPJ');
+    const statusSel = document.getElementById('selectStatusSPJ');
+    const noticeStatus = document.getElementById('noticeStatusSPJ');
     if (!thnInput || !noticeEl) return;
     const val = parseInt(thnInput.value, 10);
+    
     if (val && val <= 2025) {
         noticeEl.style.display = 'block';
         noticeEl.style.background = '#f0fdf4';
         noticeEl.style.color = '#166534';
         noticeEl.style.border = '1px solid #86efac';
         noticeEl.innerHTML = '⚡ <b>Mode Arsip Historis (&le; 2025):</b> Otomatis langsung disahkan (Final) dari akun Bendahara tanpa perlu verifikasi 4 akun berjenjang.';
+        if (statusSel) {
+            statusSel.removeAttribute('disabled');
+        }
+        if (noticeStatus) noticeStatus.style.display = 'none';
     } else if (val && val >= 2026) {
         noticeEl.style.display = 'block';
         noticeEl.style.background = '#eff6ff';
         noticeEl.style.color = '#1e40af';
         noticeEl.style.border = '1px solid #bfdbfe';
         noticeEl.innerHTML = '🏛️ <b>Mode Berjalan (&ge; 2026):</b> Menggunakan alur verifikasi bertingkat 4 tahap (Kaur ➔ Bendahara ➔ Sekdes ➔ Penghulu).';
+        if (statusSel) {
+            statusSel.value = 'draft';
+            statusSel.setAttribute('disabled', 'disabled');
+        }
+        if (noticeStatus) {
+            noticeStatus.style.display = 'block';
+            noticeStatus.innerHTML = '🔒 <b>Status Terkunci ke Draft:</b> Kegiatan TA 2026 ke atas wajib diajukan melalui alur verifikasi 4 tahap bertingkat.';
+        }
     } else {
         noticeEl.style.display = 'none';
+        if (statusSel) statusSel.removeAttribute('disabled');
+        if (noticeStatus) noticeStatus.style.display = 'none';
     }
 }
 
@@ -665,7 +785,7 @@ function bukaModalSPJ() {
     updateTahunNotice();
 }
 
-function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek) {
+function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, ket, tahap, bidang, kodeRek, sumberDana, realisasiAnggaran) {
     document.getElementById('modalTitleSPJ').textContent = 'Edit Kegiatan SPJ';
     const form = document.getElementById('formSPJ');
     form.action = '/spj/edit';
@@ -684,12 +804,18 @@ function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, 
     form.querySelector('[name="tahun"]').value = tahun;
     if(form.querySelector('[name="tahap"]')) form.querySelector('[name="tahap"]').value = tahap || 'Tahap 1';
     if(form.querySelector('[name="bidang"]')) form.querySelector('[name="bidang"]').value = bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
+    if(form.querySelector('[name="sumber_dana"]')) form.querySelector('[name="sumber_dana"]').value = sumberDana || 'DDS (Dana Desa)';
     if(form.querySelector('[name="kode_rekening"]')) form.querySelector('[name="kode_rekening"]').value = kodeRek || '';
     form.querySelector('[name="pagu"]').value = pagu;
+    if(form.querySelector('[name="realisasi_anggaran"]')) form.querySelector('[name="realisasi_anggaran"]').value = realisasiAnggaran || pagu;
     form.querySelector('[name="lokasi"]').value = lokasi;
     form.querySelector('[name="tgl_mulai"]').value = tgl_mulai;
     form.querySelector('[name="tgl_selesai"]').value = tgl_selesai;
-    form.querySelector('[name="status"]').value = status;
+    
+    const statusSel = document.getElementById('selectStatusSPJ');
+    if (statusSel) {
+        statusSel.value = status ? status.toLowerCase() : 'draft';
+    }
     form.querySelector('[name="ket"]').value = ket;
     
     document.getElementById('modalSPJ').style.display = 'flex';

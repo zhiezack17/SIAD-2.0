@@ -1,89 +1,143 @@
-
-
 <div class="kembali-btn-wrapper" style="margin-bottom: 20px;">
     <a href="/dashboard" style="display: inline-block; text-decoration: none; background: #e2e8f0; color: #334155; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #cbd5e1; transition: background 0.2s;">
         ⬅️ Kembali ke Dashboard
     </a>
 </div>
-<div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+
+<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h2 style="margin:0; color: #1e293b;">Modul Produk Hukum</h2>
-            <p style="margin:5px 0 0 0; color: #64748b;">Manajemen Data Produk Hukum & Peraturan</p>
+            <h2 style="margin:0; color: #0f172a; font-size: 20px; font-weight: 800;">⚖️ Modul Produk Hukum</h2>
+            <p style="margin:4px 0 0 0; color: #64748b; font-size: 13.5px;">Manajemen Data Produk Hukum, Lembaran Desa & Keputusan Resmi</p>
         </div>
-        <button onclick="bukaModal()" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Tambah Data</button>
+        <button onclick="bukaModal()" style="background: #2563eb; color: white; padding: 10px 18px; border: none; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.25);">
+            <i class="fa-solid fa-plus"></i> + Tambah Regulasi
+        </button>
     </div>
 
     <% if(typeof status !== 'undefined' && status === 'success_add') { %>
-      <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bbf7d0;"><strong>Sukses!</strong> Data Produk Hukum berhasil ditambahkan.</div>
+      <div style="background: #dcfce7; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight: 600; font-size: 13.5px;">✅ <strong>Sukses!</strong> Data Produk Hukum berhasil ditambahkan ke brankas digital.</div>
     <% } %>
     <% if(typeof status !== 'undefined' && status === 'success_edit') { %>
-      <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bbf7d0;"><strong>Sukses!</strong> Data berhasil diubah.</div>
+      <div style="background: #dcfce7; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight: 600; font-size: 13.5px;">✅ <strong>Sukses!</strong> Data Produk Hukum berhasil diperbarui.</div>
     <% } %>
     <% if(typeof status !== 'undefined' && status === 'success_delete') { %>
-      <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #bbf7d0;"><strong>Terhapus!</strong> Data dan file PDF berhasil dihapus.</div>
+      <div style="background: #dcfce7; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight: 600; font-size: 13.5px;">🗑️ <strong>Terhapus!</strong> Data dan file PDF berhasil dihapus permanen.</div>
     <% } %>
     <% if(typeof status !== 'undefined' && status === 'error') { %>
-      <div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #fecaca;"><strong>Gagal!</strong> <%= msg %></div>
+      <div style="background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-weight: 600; font-size: 13.5px;">❌ <strong>Gagal!</strong> <%= msg %></div>
     <% } %>
     
+    <!-- TOOLBAR: FILTER JENIS & SEARCH -->
+    <div style="display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
+        <div style="flex: 1; min-width: 220px; position: relative;">
+            <input type="text" id="searchPH" onkeyup="filterProdukHukum()" placeholder="🔍 Cari nomor, judul, atau tentang..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box; background: white;">
+        </div>
+        <div style="min-width: 200px;">
+            <select id="filterJenisPH" onchange="filterProdukHukum()" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white; font-weight: 600; color: #334155;">
+                <option value="">Semua Jenis Regulasi</option>
+                <option value="peraturan_kepenghuluan">Peraturan Kepenghuluan (Perdes)</option>
+                <option value="peraturan_bersama_penghulu">Peraturan Bersama Penghulu</option>
+                <option value="peraturan_penghulu">Peraturan Penghulu (Perkades)</option>
+                <option value="keputusan_penghulu">Keputusan Penghulu (SK)</option>
+                <option value="instruksi_penghulu">Instruksi Penghulu</option>
+                <option value="peraturan_bupati">Peraturan Bupati (Perbup)</option>
+                <option value="peraturan_menteri_desa">Peraturan Menteri Desa (Permendes)</option>
+            </select>
+        </div>
+        <div style="min-width: 150px;">
+            <select id="filterStatusPH" onchange="filterProdukHukum()" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white; font-weight: 600; color: #334155;">
+                <option value="">Semua Status</option>
+                <option value="draft">Draft (Konsep)</option>
+                <option value="ditetapkan">Ditetapkan</option>
+                <option value="diundangkan">Diundangkan</option>
+                <option value="dicabut">Dicabut</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- TABEL DATA (TANPA OVERFLOW HORIZONTAL BERLEBIHAN) -->
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 800px;">
+        <table id="tabelPH" style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <thead>
-                <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left;">
-                    <th style="padding: 12px;">No</th>
-                    <th style="padding: 12px;">Jenis & Nomor</th>
-                    <th style="padding: 12px;">Judul & Tentang</th>
-                    <th style="padding: 12px;">Status</th>
-                    <th style="padding: 12px;">File PDF</th>
-                    <th style="padding: 12px; text-align: center;">Aksi</th>
+                <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
+                    <th style="padding: 12px 10px; width: 35px; text-align: center;">No</th>
+                    <th style="padding: 12px 10px; width: 170px;">Jenis & Nomor</th>
+                    <th style="padding: 12px 10px;">Judul & Tentang</th>
+                    <th style="padding: 12px 10px; width: 130px;">Penetapan</th>
+                    <th style="padding: 12px 10px; width: 110px;">Status</th>
+                    <th style="padding: 12px 10px; width: 100px; text-align: center;">Berkas PDF</th>
+                    <th style="padding: 12px 10px; width: 110px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 <% if(data && data.length > 0) { %>
                     <% data.forEach((item, index) => { %>
-                        <tr style="border-bottom: 1px solid #e2e8f0; vertical-align: top;">
-                            <td style="padding: 12px;"><%= index + 1 %></td>
-                            <td style="padding: 12px;">
-                                <strong style="color: #0f172a;"><%= item.jenis.replace(/_/g, ' ').toUpperCase() %></strong><br>
-                                <span style="color: #64748b;">No: <%= item.nomor %> / <%= item.tahun %></span>
+                        <tr class="row-ph" data-jenis="<%= item.jenis %>" data-status="<%= item.status %>" style="border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                            <td style="padding: 12px 10px; text-align: center; color: #94a3b8; font-weight: 700;"><%= index + 1 %></td>
+                            <td style="padding: 12px 10px;">
+                                <div style="font-weight: 800; color: #0f172a; font-size: 12.5px;"><%= item.jenis.replace(/_/g, ' ').toUpperCase() %></div>
+                                <div style="color: #64748b; font-size: 12px; margin-top: 3px;">
+                                    No: <strong><%= item.nomor %></strong> / <%= item.tahun %>
+                                </div>
                             </td>
-                            <td style="padding: 12px;">
-                                <strong style="color: #0f172a;"><%= item.judul %></strong><br>
-                                <span style="color: #64748b; font-size: 13px;"><%= item.tentang && item.tentang !== '-' && item.tentang.length > 50 ? item.tentang.substring(0,50)+'...' : item.tentang %></span>
-                            </td>
-                            <td style="padding: 12px;">
-                                <% if (item.status === 'ditetapkan') { %>
-                                    <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Ditetapkan</span>
-                                <% } else if (item.status === 'diundangkan') { %>
-                                    <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Diundangkan</span>
-                                <% } else if (item.status === 'dicabut') { %>
-                                    <span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Dicabut</span>
-                                <% } else { %>
-                                    <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Draft</span>
+                            <td style="padding: 12px 10px;">
+                                <div style="font-weight: 700; color: #0f172a; line-height: 1.4;"><%= item.judul %></div>
+                                <% if (item.tentang && item.tentang !== '-') { %>
+                                    <div style="color: #64748b; font-size: 12px; margin-top: 3px;"><%= item.tentang %></div>
                                 <% } %>
                             </td>
-                            <td style="padding: 12px;">
-                                <% if (item.drive_file_url) { %>
-                                    <a href="<%- item.drive_file_url && item.drive_file_url.includes('http') ? item.drive_file_url : '/uploads/produk_hukum/' + item.drive_file_url %>" target="_blank" target="_blank" style="color: #2563eb; text-decoration: none; display: inline-block; padding: 4px 8px; background: #eff6ff; border-radius: 4px; font-weight: 500;">
-                                        📄 Buka PDF
+                            <td style="padding: 12px 10px;">
+                                <% if (item.tanggal_ditetapkan) { %>
+                                    <div style="font-size: 12px; color: #334155; font-weight: 600;">
+                                        <i class="fa-regular fa-calendar-check" style="color: #10b981;"></i> <%= new Date(item.tanggal_ditetapkan).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %>
+                                    </div>
+                                <% } else { %>
+                                    <span style="color: #94a3b8; font-size: 11.5px; font-style: italic;">Belum diisi</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 12px 10px;">
+                                <% if (item.status === 'ditetapkan') { %>
+                                    <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: bold; display: inline-block;">Ditetapkan</span>
+                                <% } else if (item.status === 'diundangkan') { %>
+                                    <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: bold; display: inline-block;">Diundangkan</span>
+                                <% } else if (item.status === 'dicabut') { %>
+                                    <span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: bold; display: inline-block;">Dicabut</span>
+                                <% } else { %>
+                                    <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; font-weight: bold; display: inline-block;">Draft</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 12px 10px; text-align: center;">
+                                <% if (item.drive_file_url || item.file_url) { %>
+                                    <% const fileLink = item.drive_file_url || item.file_url; %>
+                                    <a href="<%- fileLink.includes('http') ? fileLink : '/uploads/produk_hukum/' + fileLink %>" target="_blank" style="color: #2563eb; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-weight: 700; font-size: 11.5px;">
+                                        📄 Unduh PDF
                                     </a>
                                 <% } else { %>
-                                    <span style="color: #94a3b8; font-style: italic;">Tidak ada</span>
+                                    <span style="color: #94a3b8; font-style: italic; font-size: 11.5px;">Tidak ada</span>
                                 <% } %>
                             </td>
-                            <td style="padding: 12px; display: flex; gap: 8px; justify-content: center;">
-                                <button onclick="editModal('<%= item.id %>', '<%= item.jenis %>', '<%= item.nomor %>', '<%= item.tahun %>', '<%= item.judul %>', '<%= item.status %>')" style="background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Edit</button>
-                                <form action="/produk-hukum/hapus" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data ini secara permanen? File PDF juga akan ikut terhapus dari server.')">
-                                    <input type="hidden" name="id" value="<%= item.id %>">
-                                    <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Hapus</button>
-                                </form>
+                            <td style="padding: 12px 10px; text-align: center;">
+                                <div style="display: flex; gap: 6px; justify-content: center;">
+                                    <% 
+                                        const tglFmt = item.tanggal_ditetapkan ? new Date(item.tanggal_ditetapkan).toISOString().substring(0, 10) : '';
+                                        const hasFile = Boolean(item.drive_file_url || item.file_url);
+                                    %>
+                                    <button onclick="editModal('<%= item.id %>', '<%= item.jenis %>', '<%= (item.nomor || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.tahun %>', '<%= (item.judul || '').replace(/'/g, &quot;\\'&quot;) %>', '<%= item.status %>', '<%= tglFmt %>', <%= hasFile %>)" style="background: #f59e0b; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 700;">Edit</button>
+                                    <form action="/produk-hukum/hapus" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Hapus data ini secara permanen?')">
+                                        <input type="hidden" name="id" value="<%= item.id %>">
+                                        <button type="submit" style="background: #ef4444; color: white; border: none; padding: 5px 9px; border-radius: 4px; cursor: pointer; font-size: 11.5px; font-weight: 700;">Hapus</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <% }) %>
                 <% } else { %>
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data produk hukum.</td>
+                        <td colspan="7" style="text-align: center; padding: 35px; color: #64748b;">
+                            <div style="font-size: 30px; margin-bottom: 8px;">⚖️</div>
+                            Belum ada data produk hukum yang terdaftar.
+                        </td>
                     </tr>
                 <% } %>
             </tbody>
@@ -91,78 +145,148 @@
     </div>
 </div>
 
-<!-- Modal Tambah/Edit -->
-<div id="modalPH" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 8px; width: 550px; max-width: 90%; max-height: 90vh; overflow-y: auto;">
-        <div style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-            <h3 id="modalTitle" style="margin: 0; color: #1e293b;">Tambah Produk Hukum</h3>
+<!-- Modal Tambah/Edit Produk Hukum -->
+<div id="modalPH" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 12px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);">
+        <div style="padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0; color: #0f172a; font-size: 17px; font-weight: 800;">Tambah Produk Hukum</h3>
             <button type="button" onclick="tutupModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
         </div>
-        <form id="formPH" action="/produk-hukum/tambah" method="POST" enctype="multipart/form-data">
+        <form id="formPH" action="/produk-hukum/tambah" method="POST" enctype="multipart/form-data" onsubmit="return validasiFormPH(event)">
             <input type="hidden" id="ph_id" name="id">
-            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <input type="hidden" id="ph_has_file" value="false">
+
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Jenis Regulasi</label>
-                    <select name="jenis" id="ph_jenis" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white;">
-                        <option value="peraturan_kepenghuluan">Peraturan Kepenghuluan</option>
+                    <label style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Jenis Regulasi <span style="color:red;">*</span></label>
+                    <select name="jenis" id="ph_jenis" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; font-size: 13px;">
+                        <option value="peraturan_kepenghuluan">Peraturan Kepenghuluan (Perdes)</option>
                         <option value="peraturan_bersama_penghulu">Peraturan Bersama Penghulu</option>
-                        <option value="peraturan_penghulu">Peraturan Penghulu</option>
-                        <option value="keputusan_penghulu">Keputusan Penghulu</option>
-                        
+                        <option value="peraturan_penghulu">Peraturan Penghulu (Perkades)</option>
+                        <option value="keputusan_penghulu">Keputusan Penghulu (SK)</option>
                         <option value="instruksi_penghulu">Instruksi Penghulu</option>
                         <option value="peraturan_bupati">Peraturan Bupati (Perbup)</option>
                         <option value="peraturan_menteri_desa">Peraturan Menteri Desa (Permendes)</option>
                         <option value="peraturan_kepala_dinas">Peraturan Kepala Dinas</option>
                     </select>
                 </div>
+
                 <div style="display: flex; gap: 10px;">
                     <div style="flex: 1;">
-                        <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Nomor</label>
-                        <input type="text" name="nomor" id="ph_nomor" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                        <label style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Nomor Regulasi <span style="color:red;">*</span></label>
+                        <input type="text" name="nomor" id="ph_nomor" required placeholder="Cth: 01 / DS-SA" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 13px;">
                     </div>
                     <div style="flex: 1;">
-                        <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Tahun</label>
-                        <input type="number" name="tahun" id="ph_tahun" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                        <label style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Tahun <span style="color:red;">*</span></label>
+                        <input type="number" name="tahun" id="ph_tahun" value="<%= new Date().getFullYear() %>" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 13px;">
                     </div>
                 </div>
+
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Judul</label>
-                    <input type="text" name="judul" id="ph_judul" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                    <label style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Judul / Pokok Regulasi <span style="color:red;">*</span></label>
+                    <input type="text" name="judul" id="ph_judul" required placeholder="Cth: Anggaran Pendapatan dan Belanja Kepenghuluan TA 2026" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 13px;">
                 </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">Status</label>
-                    <select name="status" id="ph_status" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white;">
-                        <option value="draft">Draft (Konsep)</option>
-                        <option value="ditetapkan">Ditetapkan</option>
-                        <option value="diundangkan">Diundangkan</option>
-                        <option value="dicabut">Dicabut</option>
-                    </select>
+
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Status Regulasi <span style="color:red;">*</span></label>
+                        <select name="status" id="ph_status" onchange="toggleStatusValidation()" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; font-size: 13px;">
+                            <option value="draft">Draft (Konsep)</option>
+                            <option value="ditetapkan">Ditetapkan</option>
+                            <option value="diundangkan">Diundangkan</option>
+                            <option value="dicabut">Dicabut</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label id="ph_lbl_tanggal" style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Tanggal Pengesahan</label>
+                        <input type="date" name="tanggal_ditetapkan" id="ph_tanggal_ditetapkan" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 13px; background: white;">
+                    </div>
                 </div>
+
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #475569; font-weight: bold; font-size: 14px;">File PDF (Opsional)</label>
-                    <input type="file" name="file_pdf" id="ph_file" accept=".pdf" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc;">
-                    <small id="fileHelp" style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">Maksimal 5MB. Hanya format PDF.</small>
+                    <label id="ph_lbl_file" style="display: block; margin-bottom: 5px; color: #334155; font-weight: 700; font-size: 13px;">Berkas Lembaran Desa (PDF)</label>
+                    <input type="file" name="file_pdf" id="ph_file" accept=".pdf" style="width: 100%; padding: 8px; border: 1px dashed #94a3b8; border-radius: 6px; background: #f8fafc; font-size: 12.5px; box-sizing: border-box;">
+                    <small id="fileHelp" style="color: #64748b; font-size: 11.5px; margin-top: 4px; display: block;">Maksimal 10MB. Hanya format PDF resmi berstempel/ttd.</small>
                 </div>
             </div>
-            <div style="padding: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="tutupModal()" style="background: #f1f5f9; color: #475569; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">Batal</button>
-                <button type="submit" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Simpan Data</button>
+
+            <div style="padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="tutupModal()" style="background: #f1f5f9; color: #475569; padding: 9px 18px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer;">Batal</button>
+                <button type="submit" style="background: #2563eb; color: white; padding: 9px 20px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(37,99,235,0.25);">Simpan Data</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+// Filter tabel client-side instan
+function filterProdukHukum() {
+    const q = (document.getElementById('searchPH').value || '').toLowerCase();
+    const j = document.getElementById('filterJenisPH').value;
+    const s = document.getElementById('filterStatusPH').value;
+    const rows = document.querySelectorAll('#tabelPH tbody tr.row-ph');
+
+    rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const rJenis = r.getAttribute('data-jenis');
+        const rStatus = r.getAttribute('data-status');
+
+        const matchQ = text.includes(q);
+        const matchJ = !j || rJenis === j;
+        const matchS = !s || rStatus === s;
+
+        r.style.display = (matchQ && matchJ && matchS) ? '' : 'none';
+    });
+}
+
+function toggleStatusValidation() {
+    const st = document.getElementById('ph_status').value;
+    const lblTgl = document.getElementById('ph_lbl_tanggal');
+    const inpTgl = document.getElementById('ph_tanggal_ditetapkan');
+    const lblFile = document.getElementById('ph_lbl_file');
+
+    if (st === 'ditetapkan' || st === 'diundangkan') {
+        lblTgl.innerHTML = 'Tanggal Penetapan <span style="color:red;">*</span>';
+        inpTgl.setAttribute('required', 'required');
+        lblFile.innerHTML = 'Berkas Lembaran Desa (PDF) <span style="color:red;">*</span>';
+    } else {
+        lblTgl.innerHTML = 'Tanggal Pengesahan';
+        inpTgl.removeAttribute('required');
+        lblFile.innerHTML = 'Berkas Lembaran Desa (PDF)';
+    }
+}
+
+function validasiFormPH(e) {
+    const st = document.getElementById('ph_status').value;
+    const fileInp = document.getElementById('ph_file');
+    const hasFile = document.getElementById('ph_has_file').value === 'true';
+    const tgl = document.getElementById('ph_tanggal_ditetapkan').value;
+
+    if (st === 'ditetapkan' || st === 'diundangkan') {
+        if (!tgl) {
+            alert('Tanggal Penetapan / Pengesahan wajib diisi untuk regulasi yang berstatus Ditetapkan atau Diundangkan!');
+            return false;
+        }
+        if (!hasFile && (!fileInp.files || fileInp.files.length === 0)) {
+            alert('Berkas lembaran desa (PDF) wajib dilampirkan bila status regulasi Ditetapkan atau Diundangkan!');
+            return false;
+        }
+    }
+    return true;
+}
+
 function bukaModal() {
     document.getElementById('modalTitle').innerText = 'Tambah Produk Hukum';
     document.getElementById('formPH').action = '/produk-hukum/tambah';
     document.getElementById('formPH').reset();
     document.getElementById('ph_id').value = '';
-    document.getElementById('fileHelp').innerText = 'Maksimal 5MB. Hanya format PDF.';
+    document.getElementById('ph_has_file').value = 'false';
+    document.getElementById('fileHelp').innerText = 'Maksimal 10MB. Hanya format PDF resmi.';
+    toggleStatusValidation();
     document.getElementById('modalPH').style.display = 'flex';
 }
 
-function editModal(id, jenis, nomor, tahun, judul, status) {
+function editModal(id, jenis, nomor, tahun, judul, status, tglDitetapkan, hasFile) {
     document.getElementById('modalTitle').innerText = 'Edit Produk Hukum';
     document.getElementById('formPH').action = '/produk-hukum/edit';
     document.getElementById('ph_id').value = id;
@@ -171,7 +295,16 @@ function editModal(id, jenis, nomor, tahun, judul, status) {
     document.getElementById('ph_tahun').value = tahun;
     document.getElementById('ph_judul').value = judul;
     document.getElementById('ph_status').value = status;
-    document.getElementById('fileHelp').innerText = 'Biarkan kosong jika tidak ingin mengubah/menghapus file lama.';
+    document.getElementById('ph_tanggal_ditetapkan').value = tglDitetapkan || '';
+    document.getElementById('ph_has_file').value = hasFile ? 'true' : 'false';
+
+    if (hasFile) {
+        document.getElementById('fileHelp').innerHTML = '📁 Berkas PDF aktif sudah ada. Unggah file baru jika ingin mengganti berkas lembaran desa.';
+    } else {
+        document.getElementById('fileHelp').innerText = 'Belum ada berkas PDF tersimpan.';
+    }
+
+    toggleStatusValidation();
     document.getElementById('modalPH').style.display = 'flex';
 }
 

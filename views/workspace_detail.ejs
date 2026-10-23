@@ -39,13 +39,31 @@
                     </thead>
                     <tbody>
                         <% if (typeof documents !== 'undefined' && documents && documents.length > 0) { %>
-                            <% documents.forEach(doc => { %>
+                            <% documents.forEach(doc => { 
+                                const isChecklistPending = doc.nama_file_asli === '[Menunggu Berkas Diunggah]' || !doc.drive_url;
+                            %>
                                 <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;"><%= doc.nama_file_asli %></td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;"><%= doc.jenis_dokumen %></td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
+                                        <% if (isChecklistPending) { %>
+                                            <span style="background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 6px;">Checklist Wajib</span>
+                                            <strong style="color: #64748b;"><%= doc.nama_file_asli %></strong>
+                                        <% } else { %>
+                                            <i class="fa-solid fa-file-pdf" style="color: #ef4444; margin-right: 6px;"></i>
+                                            <strong><%= doc.nama_file_asli %></strong>
+                                        <% } %>
+                                    </td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
+                                        <span style="background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;"><%= doc.jenis_dokumen %></span>
+                                    </td>
                                     <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
                                         <% if (doc.drive_url || doc.path_lokal) { %>
-                                            <a href="<%= doc.drive_url || doc.path_lokal %>" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: bold;">Lihat di Drive</a>
+                                            <a href="<%= doc.drive_url || doc.path_lokal %>" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">
+                                                <i class="fa-solid fa-cloud-arrow-down"></i> Buka File
+                                            </a>
+                                        <% } else { %>
+                                            <button type="button" onclick="document.querySelector('input[name=jenis_dokumen]').value='<%= doc.jenis_dokumen %>'; document.querySelector('input[name=file]').click();" style="background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer;">
+                                                + Unggah Sekarang
+                                            </button>
                                         <% } %>
                                     </td>
                                 </tr>

@@ -36,63 +36,93 @@ const bumdesController = {
                     };
                 }
 
+                // DEDUP QUERY: ambil data pengurus unik desa
                 const pengRes = await db.query(
-                    'SELECT * FROM bumdes_pengurus WHERE kepenghuluan_id = $1 ORDER BY id ASC',
+                    'SELECT DISTINCT ON (id) * FROM bumdes_pengurus WHERE kepenghuluan_id = $1 ORDER BY id ASC',
                     [did]
                 );
                 pengurusList = pengRes.rows;
 
+                // DEDUP QUERY: ambil data unit usaha unik desa
                 const uRes = await db.query(
-                    'SELECT * FROM bumdes_unit_usaha WHERE kepenghuluan_id = $1 ORDER BY id DESC',
+                    'SELECT DISTINCT ON (id) * FROM bumdes_unit_usaha WHERE kepenghuluan_id = $1 ORDER BY id DESC',
                     [did]
                 );
                 unitUsahaList = uRes.rows;
-            } else {
-                // Jika Super Admin tanpa filter desa tertentu
-                const pRes = await db.query('SELECT * FROM bumdes_profil ORDER BY id ASC LIMIT 1');
-                profil = pRes.rows[0] || {
-                    nama_bumdes: 'BUMDes Bersama Rokan Hilir',
-                    no_badan_hukum: '',
-                    nib: '',
-                    npwp: '',
-                    no_perdes_pendirian: '',
-                    tgl_perdes_pendirian: null,
-                    no_rekening: '',
-                    nama_bank: '',
-                    modal_awal: 0,
-                    modal_tambahan: 0,
-                    file_ad_art_url: null
+
+                // Hitung statistik ringkasan
+                const totalPengurus = pengurusList.length;
+                const unitAktif = unitUsahaList.filter(u => u.status === 'Aktif').length;
+                const totalModal = Number(profil.modal_awal || 0) + Number(profil.modal_tambahan || 0);
+                const totalPADes = unitUsahaList.reduce((acc, curr) => acc + Number(curr.kontribusi_pades || 0), 0);
+
+                const stats = {
+                    totalPengurus,
+                    unitAktif,
+                    totalModal,
+                    totalPADes
                 };
 
-                const pengRes = await db.query('SELECT * FROM bumdes_pengurus ORDER BY id DESC LIMIT 50');
-                pengurusList = pengRes.rows;
+                return res.render('bumdes', {
+                    title: 'BUMDes - Badan Usaha Milik Desa - SIAD 2.0',
+                    isKabupatenMode: false,
+                    tab: tab,
+                    profil: profil,
+                    pengurusList: pengurusList,
+                    unitUsahaList: unitUsahaList,
+                    stats: stats,
+                    query: req.query
+                });
+            } else {
+                // TAMPILAN MODE KABUPATEN (REKAPITULASI SELURUH BUMDES SE-KABUPATEN)
+                const rekapSql = `
+                    SELECT 
+                        k.id AS kepenghuluan_id,
+                        k.nama AS nama_kepenghuluan,
+                        bp.id AS bumdes_id,
+                        COALESCE(bp.nama_bumdes, 'BUMDes ' || k.nama) AS nama_bumdes,
+                        bp.no_badan_hukum,
+                        bp.nib,
+                        COALESCE(bp.modal_awal, 0) + COALESCE(bp.modal_tambahan, 0) AS total_modal,
+                        COUNT(DISTINCT bg.id) AS jumlah_pengurus,
+                        COUNT(DISTINCT bu.id) AS jumlah_unit_usaha,
+                        COUNT(DISTINCT CASE WHEN bu.status = 'Aktif' THEN bu.id END) AS unit_aktif,
+                        COALESCE(SUM(DISTINCT bu.omzet_tahunan), 0) AS total_omzet,
+                        COALESCE(SUM(DISTINCT bu.kontribusi_pades), 0) AS total_pades
+                    FROM kepenghuluan k
+                    LEFT JOIN bumdes_profil bp ON k.id = bp.kepenghuluan_id
+                    LEFT JOIN bumdes_pengurus bg ON k.id = bg.kepenghuluan_id
+                    LEFT JOIN bumdes_unit_usaha bu ON k.id = bu.kepenghuluan_id
+                    GROUP BY k.id, k.nama, bp.id, bp.nama_bumdes, bp.no_badan_hukum, bp.nib, bp.modal_awal, bp.modal_tambahan
+                    ORDER BY k.nama ASC
+                `;
+                const rekapRes = await db.query(rekapSql);
+                const rekapBumdes = rekapRes.rows;
 
-                const uRes = await db.query('SELECT * FROM bumdes_unit_usaha ORDER BY id DESC LIMIT 50');
-                unitUsahaList = uRes.rows;
+                const totalBumdes = rekapBumdes.length;
+                const totalBerbadanHukum = rekapBumdes.filter(b => b.no_badan_hukum && b.no_badan_hukum.trim()).length;
+                const totalUnitAktifKab = rekapBumdes.reduce((acc, curr) => acc + Number(curr.unit_aktif || 0), 0);
+                const grandTotalPADes = rekapBumdes.reduce((acc, curr) => acc + Number(curr.total_pades || 0), 0);
+
+                return res.render('bumdes', {
+                    title: 'Rekapitulasi BUMDes Se-Kabupaten - SIAD 2.0',
+                    isKabupatenMode: true,
+                    rekapBumdes: rekapBumdes,
+                    stats: {
+                        totalPengurus: 0,
+                        totalBumdes: totalBumdes,
+                        totalBerbadanHukum: totalBerbadanHukum,
+                        unitAktif: totalUnitAktifKab,
+                        totalModal: 0,
+                        totalPADes: grandTotalPADes
+                    },
+                    tab: 'rekap',
+                    profil: null,
+                    pengurusList: [],
+                    unitUsahaList: [],
+                    query: req.query
+                });
             }
-
-            // Hitung statistik ringkasan
-            const totalPengurus = pengurusList.length;
-            const unitAktif = unitUsahaList.filter(u => u.status === 'Aktif').length;
-            const totalModal = Number(profil.modal_awal || 0) + Number(profil.modal_tambahan || 0);
-            const totalPADes = unitUsahaList.reduce((acc, curr) => acc + Number(curr.kontribusi_pades || 0), 0);
-
-            const stats = {
-                totalPengurus,
-                unitAktif,
-                totalModal,
-                totalPADes
-            };
-
-            res.render('bumdes', {
-                title: 'BUMDes - Badan Usaha Milik Desa - SIAD 2.0',
-                tab: tab,
-                profil: profil,
-                pengurusList: pengurusList,
-                unitUsahaList: unitUsahaList,
-                stats: stats,
-                query: req.query
-            });
         } catch (error) {
             console.error('Error BUMDes getIndex:', error);
             res.redirect('/dashboard');

@@ -15,7 +15,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
             <div>
                 <h2 style="margin: 0 0 6px 0; color: #0f172a; font-size: 24px; font-weight: 800;">📧 Tata Kelola Persuratan Desa</h2>
-                <p style="margin: 0; color: #64748b; font-size: 14px;">Pengarsipan surat masuk, disposisi pimpinan, dan surat keluar resmi.</p>
+                <p style="margin: 0; color: #64748b; font-size: 14px;">Pengarsipan surat masuk, lembar disposisi pimpinan, dan surat keluar resmi dengan brankas digital.</p>
             </div>
         </div>
         
@@ -29,95 +29,86 @@
         </div>
     </div>
 
-    <!-- Area Konten Utama -->
-    <div style="display: grid; grid-template-columns: 340px 1fr; gap: 25px; align-items: start;">
-        
-        <!-- Kolom Kiri: Form Tambah Data -->
-        <div style="background: white; border-radius: 14px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;">
-            <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; font-weight: 800; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-file-circle-plus" style="color: #2563eb;"></i> Tambah <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
-            </h3>
-            
-            <form id="form-tambah-surat" action="/surat/<%= tab %>" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 16px;">
-                <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Nomor Surat <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="nomor_surat" required placeholder="Cth: 140/01/Ds-SA/2026" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
-                </div>
-                <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tanggal Surat <span style="color:#ef4444;">*</span></label>
-                    <input type="date" name="tanggal_surat" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; background: white;">
-                </div>
-                
-                <% if (tab === 'masuk') { %>
-                <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Asal / Pengirim <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="pengirim" required placeholder="Cth: Kantor Camat / Dinas..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
-                </div>
-                <% } else { %>
-                <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tujuan / Penerima <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="tujuan" required placeholder="Cth: Bapak Bupati / Camat..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
-                </div>
-                <% } %>
-
-                <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Perihal <span style="color:#ef4444;">*</span></label>
-                    <textarea name="perihal" rows="2" required placeholder="Ringkasan isi surat..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
-                </div>
-                
-                <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Upload File Surat (Scan/PDF) <span style="color:#ef4444;">*</span></label>
-                    <input type="file" name="file_surat" required style="width: 100%; padding: 10px; border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc; font-size: 13px; box-sizing: border-box;">
-                    <small style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">*Dicadangkan ke Google Drive otomatis</small>
-                </div>
-                <button type="submit" style="background: #2563eb; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.2); transition: all 0.2s;">
-                    💾 Simpan & Upload
-                </button>
-            </form>
-        </div>
-
-        <!-- Kolom Kanan: Tabel Data Tersimpan -->
-        <div style="background: white; border-radius: 14px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; overflow-x: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+    <!-- Area Tabel Utama (Full-Width) -->
+    <div style="background: white; border-radius: 14px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
                 <h3 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-list-check" style="color: #2563eb;"></i> Daftar <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
                 </h3>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button id="btn-excel-surat" type="button" onclick="bukaModalAgenda('excel')" data-siad-tooltip="Unduh seluruh rekap arsip surat ke file Excel" style="background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
-                        <i class="fa-solid fa-file-excel"></i> Unduh Excel
-                    </button>
-                    <button id="btn-agenda-surat" type="button" onclick="bukaModalAgenda('cetak')" data-siad-tooltip="Cetak Buku Agenda Surat format tata naskah dinas resmi" style="background: #0f172a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(15,23,42,0.15);">
-                        <i class="fa-solid fa-print"></i> Cetak Buku Agenda
-                    </button>
-                </div>
+                <span style="background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid #bfdbfe;">
+                    <%= typeof data !== 'undefined' ? data.length : 0 %> Berkas
+                </span>
             </div>
-            
-            <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px;">
+
+            <!-- Toolbar: Search & Action Buttons -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <div style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px;"></i>
+                    <input type="text" id="searchSurat" onkeyup="filterSuratTable()" placeholder="Cari nomor, perihal, pihak..." style="padding: 9px 14px 9px 34px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; width: 230px; outline: none; background: #f8fafc; transition: all 0.2s;" onfocus="this.style.background='#fff'; this.style.borderColor='#2563eb';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1';">
+                </div>
+
+                <button type="button" onclick="bukaModalTambahSurat()" style="background: #2563eb; color: white; border: none; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(37,99,235,0.25);">
+                    <i class="fa-solid fa-file-circle-plus"></i> + Catat <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %>
+                </button>
+
+                <button id="btn-excel-surat" type="button" onclick="bukaModalAgenda('excel')" data-siad-tooltip="Unduh seluruh rekap arsip surat ke file Excel" style="background: #10b981; color: white; border: none; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
+                    <i class="fa-solid fa-file-excel"></i> Unduh Excel
+                </button>
+
+                <button id="btn-agenda-surat" type="button" onclick="bukaModalAgenda('cetak')" data-siad-tooltip="Cetak Buku Agenda Surat format tata naskah dinas resmi" style="background: #0f172a; color: white; border: none; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(15,23,42,0.15);">
+                    <i class="fa-solid fa-print"></i> Cetak Agenda
+                </button>
+            </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table id="tabelSurat" style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px;">
                 <thead>
                     <tr style="background: #f8fafc; color: #64748b; text-align: left;">
-                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; border-top-left-radius: 8px;">No. Surat & Tanggal</th>
-                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0;"><%= tab === 'masuk' ? 'Pengirim' : 'Tujuan' %></th>
-                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0;">Perihal</th>
-                        <% if (tab === 'masuk') { %>
-                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0;">Status Disposisi</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; width: 40px; text-align: center;">No</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; min-width: 220px;">No. Surat & Tanggal</th>
+                        <% if (!activeDesaId) { %>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; min-width: 150px;">Kepenghuluan</th>
                         <% } %>
-                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; border-top-right-radius: 8px; width: 140px;">Aksi</th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; min-width: 170px;"><%= tab === 'masuk' ? 'Asal / Pengirim' : 'Tujuan / Penerima' %></th>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; min-width: 220px;">Perihal</th>
+                        <% if (tab === 'masuk') { %>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; min-width: 180px;">Status Disposisi</th>
+                        <% } %>
+                        <th style="padding: 12px 14px; border-bottom: 2px solid #e2e8f0; text-align: center; width: 150px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (typeof data !== 'undefined' && data.length > 0) { %>
-                        <% data.forEach(function(item) { %>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <% data.forEach(function(item, idx) { %>
+                            <tr class="baris-surat" style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top; text-align: center; color: #94a3b8; font-weight: 700;">
+                                    <%= idx + 1 %>
+                                </td>
                                 <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
                                     <div style="font-weight: 800; color: #0f172a;"><%= item.nomor_surat %></div>
-                                    <div style="color: #64748b; font-size: 12px; margin-top: 3px;">
-                                        <i class="fa-regular fa-calendar"></i> <%= new Date(item.tanggal_surat).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %>
+                                    <div style="color: #64748b; font-size: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+                                        <span><i class="fa-regular fa-calendar" style="width: 14px;"></i> Tgl Surat: <strong><%= new Date(item.tanggal_surat).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></strong></span>
+                                        <% if (tab === 'masuk') { %>
+                                            <% const tglTrm = item.tanggal_terima ? new Date(item.tanggal_terima) : new Date(item.tanggal_surat); %>
+                                            <span style="color: #2563eb;"><i class="fa-solid fa-inbox" style="width: 14px;"></i> Diterima: <strong><%= tglTrm.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></strong></span>
+                                        <% } %>
                                     </div>
                                 </td>
+
+                                <% if (!activeDesaId) { %>
+                                <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
+                                    <span style="background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block;">
+                                        <i class="fa-solid fa-landmark" style="margin-right: 4px; color: #64748b;"></i><%= item.kepenghuluan_nama || 'Kabupaten' %>
+                                    </span>
+                                </td>
+                                <% } %>
+
                                 <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 600; vertical-align: top;">
                                     <%= tab === 'masuk' ? item.pengirim : item.tujuan %>
                                 </td>
-                                <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; color: #475569; vertical-align: top; max-width: 240px;">
+                                <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; color: #475569; vertical-align: top; max-width: 260px; line-height: 1.45;">
                                     <%= item.perihal %>
                                 </td>
                                 
@@ -148,8 +139,8 @@
                                 <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
                                     <div style="display: flex; gap: 6px; flex-direction: column;">
                                         <% if (item.file_url || item.file_pdf_url) { %>
-                                            <a href="<%= item.file_url || item.file_pdf_url %>" target="_blank" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Surat
+                                            <a href="<%= item.file_url || item.file_pdf_url %>" target="_blank" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Berkas
                                             </a>
                                         <% } %>
 
@@ -158,20 +149,39 @@
                                                 <a href="/surat/disposisi/cetak/<%= item.id %>" target="_blank" style="background: #0f172a; color: white; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                                                     🖨️ Lembar Disposisi
                                                 </a>
-                                                <button type="button" onclick="bukaModalDisposisi('<%= item.id %>', '<%= item.nomor_surat.replace(/'/g, "\\'") %>', '<%= (item.pengirim || '').replace(/'/g, "\\'") %>', '<%= (item.perihal || '').replace(/'/g, "\\'") %>', '<%= item.disposisi_sifat || 'Biasa' %>', '<%= (item.disposisi_ke_jabatan || '').replace(/'/g, "\\'") %>', '<%= (item.disposisi_instruksi || '').replace(/'/g, "\\'") %>', '<%= (item.disposisi_catatan || '').replace(/'/g, "\\'") %>')" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                                                <button type="button" onclick="bukaModalDisposisi('<%= item.id %>', '<%= (item.nomor_surat || '').replace(/'/g, \"\\'\") %>', '<%= (item.pengirim || '').replace(/'/g, \"\\'\") %>', '<%= (item.perihal || '').replace(/'/g, \"\\'\") %>', '<%= item.disposisi_sifat || 'Biasa' %>', '<%= (item.disposisi_ke_jabatan || '').replace(/'/g, \"\\'\") %>', '<%= (item.disposisi_instruksi || '').replace(/'/g, \"\\'\") %>', '<%= (item.disposisi_catatan || '').replace(/'/g, \"\\'\") %>')" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
                                                     ✏️ Edit Disposisi
                                                 </button>
                                             <% } else { %>
-                                                <button type="button" onclick="bukaModalDisposisi('<%= item.id %>', '<%= item.nomor_surat.replace(/'/g, "\\'") %>', '<%= (item.pengirim || '').replace(/'/g, "\\'") %>', '<%= (item.perihal || '').replace(/'/g, "\\'") %>', 'Biasa', 'Sekretaris Kepenghuluan', '', '')" style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
+                                                <button type="button" onclick="bukaModalDisposisi('<%= item.id %>', '<%= (item.nomor_surat || '').replace(/'/g, \"\\'\") %>', '<%= (item.pengirim || '').replace(/'/g, \"\\'\") %>', '<%= (item.perihal || '').replace(/'/g, \"\\'\") %>', 'Biasa', 'Sekretaris Kepenghuluan', '', '')" style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 4px rgba(16,185,129,0.2);">
                                                     ✍️ Isi Disposisi
                                                 </button>
                                             <% } %>
                                         <% } %>
 
+                                        <!-- Tombol Edit Data Surat -->
+                                        <% 
+                                            const itemJson = JSON.stringify({
+                                                id: item.id,
+                                                nomor_surat: item.nomor_surat,
+                                                tanggal_surat: item.tanggal_surat ? item.tanggal_surat.substring(0, 10) : '',
+                                                tanggal_terima: item.tanggal_terima ? item.tanggal_terima.substring(0, 10) : '',
+                                                pengirim: item.pengirim || '',
+                                                tujuan: item.tujuan || '',
+                                                perihal: item.perihal || '',
+                                                file_url: item.file_url || item.file_pdf_url || ''
+                                            }).replace(/'/g, "&#39;");
+                                        %>
+                                        <button type="button" onclick='bukaModalEditSurat(<%- itemJson %>)' style="background: #f8fafc; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </button>
+
                                         <form action="/surat/delete" method="POST" style="margin:0;" onsubmit="return confirm('Hapus surat ini secara permanen?');">
                                             <input type="hidden" name="id" value="<%= item.id %>">
                                             <input type="hidden" name="type" value="<%= tab %>">
-                                            <button type="submit" style="background: #fff; color: #ef4444; border: 1px solid #fecaca; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 11.5px; font-weight: 700; width: 100%;">Hapus</button>
+                                            <button type="submit" style="background: #fff; color: #ef4444; border: 1px solid #fecaca; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 11.5px; font-weight: 700; width: 100%;">
+                                                <i class="fa-solid fa-trash"></i> Hapus
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
@@ -179,7 +189,7 @@
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="<%= tab === 'masuk' ? 5 : 4 %>" style="padding: 40px 20px; text-align: center; color: #94a3b8;">
+                            <td colspan="<%= (!activeDesaId ? 1 : 0) + (tab === 'masuk' ? 6 : 5) %>" style="padding: 40px 20px; text-align: center; color: #94a3b8;">
                                 <i class="fa-solid fa-inbox" style="font-size: 40px; margin-bottom: 10px; color: #cbd5e1;"></i>
                                 <p style="margin: 0; font-size: 14px; font-weight: 600;">Belum ada surat yang tersimpan di brankas ini.</p>
                             </td>
@@ -191,8 +201,151 @@
     </div>
 </div>
 
-<!-- MODAL FORM DISPOSISI DIGITAL -->
-<div id="modalDisposisi" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+<!-- ========================================== -->
+<!-- MODAL TAMBAH SURAT (BARU)                  -->
+<!-- ========================================== -->
+<div id="modalTambahSurat" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 16px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; background: #eff6ff; color: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px;">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">Catat <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %></h3>
+            </div>
+            <button onclick="tutupModalTambahSurat()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 4px;">&times;</button>
+        </div>
+
+        <form action="/surat/<%= tab %>" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Nomor Surat <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="nomor_surat" required placeholder="Cth: 140/01/Ds-SA/2026" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: <%= tab === 'masuk' ? '1fr 1fr' : '1fr' %>; gap: 12px;">
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tanggal Surat <span style="color:#ef4444;">*</span></label>
+                    <input type="date" name="tanggal_surat" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; background: white;">
+                </div>
+                <% if (tab === 'masuk') { %>
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tanggal Diterima <span style="color:#ef4444;">*</span></label>
+                    <input type="date" name="tanggal_terima" required value="<%= new Date().toISOString().substring(0, 10) %>" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; background: white;">
+                </div>
+                <% } %>
+            </div>
+            
+            <% if (tab === 'masuk') { %>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Asal / Instansi Pengirim <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="pengirim" required placeholder="Cth: Kantor Camat / Dinas PMD / Koramil..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+            <% } else { %>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tujuan / Penerima <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="tujuan" required placeholder="Cth: Bapak Bupati / Camat / Ketua RT..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+            <% } %>
+
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Perihal Ringkas <span style="color:#ef4444;">*</span></label>
+                <textarea name="perihal" rows="2" required placeholder="Ringkasan isi dan pokok surat..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
+            </div>
+            
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Upload Berkas Surat (Scan/PDF) <span style="color:#ef4444;">*</span></label>
+                <input type="file" name="file_surat" required accept=".pdf,image/*" style="width: 100%; padding: 10px; border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc; font-size: 13px; box-sizing: border-box;">
+                <small style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">*Otomatis dicadangkan ke Google Drive Cloud Storage</small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="tutupModalTambahSurat()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="submit" style="background: #2563eb; color: white; padding: 10px 22px; border: none; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.2); transition: all 0.2s;">
+                    💾 Simpan & Cadangkan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL EDIT SURAT                           -->
+<!-- ========================================== -->
+<div id="modalEditSurat" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 16px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; background: #eff6ff; color: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px;">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">Edit <%= tab === 'masuk' ? 'Surat Masuk' : 'Surat Keluar' %></h3>
+            </div>
+            <button onclick="tutupModalEditSurat()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 4px;">&times;</button>
+        </div>
+
+        <form action="/surat/edit" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="hidden" name="id" id="edit_surat_id">
+            <input type="hidden" name="type" value="<%= tab %>">
+
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Nomor Surat <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="nomor_surat" id="edit_nomor_surat" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: <%= tab === 'masuk' ? '1fr 1fr' : '1fr' %>; gap: 12px;">
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tanggal Surat <span style="color:#ef4444;">*</span></label>
+                    <input type="date" name="tanggal_surat" id="edit_tanggal_surat" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; background: white;">
+                </div>
+                <% if (tab === 'masuk') { %>
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tanggal Diterima</label>
+                    <input type="date" name="tanggal_terima" id="edit_tanggal_terima" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; background: white;">
+                </div>
+                <% } %>
+            </div>
+            
+            <% if (tab === 'masuk') { %>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Asal / Instansi Pengirim <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="pengirim" id="edit_pengirim" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+            <% } else { %>
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Tujuan / Penerima <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="tujuan" id="edit_tujuan" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none;">
+            </div>
+            <% } %>
+
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Perihal Ringkas <span style="color:#ef4444;">*</span></label>
+                <textarea name="perihal" id="edit_perihal" rows="2" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
+            </div>
+            
+            <div>
+                <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color:#334155;">Ganti Berkas Scan/PDF (Opsional)</label>
+                <input type="file" name="file_surat" accept=".pdf,image/*" style="width: 100%; padding: 10px; border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc; font-size: 13px; box-sizing: border-box;">
+                <small id="edit_berkas_info" style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">*Kosongkan jika tidak ingin mengubah berkas saat ini</small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="tutupModalEditSurat()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="submit" style="background: #2563eb; color: white; padding: 10px 22px; border: none; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 10px rgba(37,99,235,0.2); transition: all 0.2s;">
+                    💾 Perbarui Surat
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL FORM DISPOSISI DIGITAL               -->
+<!-- ========================================== -->
+<div id="modalDisposisi" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: white; border-radius: 16px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -201,7 +354,7 @@
                 </div>
                 <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">Lembar Disposisi Pimpinan</h3>
             </div>
-            <button onclick="tutupModalDisposisi()" style="background: none; border: none; font-size: 22px; color: #94a3b8; cursor: pointer; padding: 4px;">&times;</button>
+            <button onclick="tutupModalDisposisi()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 4px;">&times;</button>
         </div>
 
         <form action="/surat/disposisi" method="POST">
@@ -304,7 +457,9 @@
     </div>
 </div>
 
-<!-- MODAL BUKU AGENDA PERSURATAN -->
+<!-- ========================================== -->
+<!-- MODAL BUKU AGENDA PERSURATAN               -->
+<!-- ========================================== -->
 <div id="modalAgenda" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: white; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; animation: popInDesa 0.2s ease;">
         <div style="background: #0f172a; color: white; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
@@ -363,6 +518,56 @@
 </div>
 
 <script>
+// Filter tabel pencarian cepat
+function filterSuratTable() {
+    const query = (document.getElementById('searchSurat').value || '').toLowerCase();
+    const rows = document.querySelectorAll('#tabelSurat tbody tr.baris-surat');
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+
+// Modal Tambah Surat
+function bukaModalTambahSurat() {
+    document.getElementById('modalTambahSurat').style.display = 'flex';
+}
+function tutupModalTambahSurat() {
+    document.getElementById('modalTambahSurat').style.display = 'none';
+}
+
+// Modal Edit Surat
+function bukaModalEditSurat(item) {
+    if (!item) return;
+    document.getElementById('edit_surat_id').value = item.id;
+    document.getElementById('edit_nomor_surat').value = item.nomor_surat || '';
+    document.getElementById('edit_tanggal_surat').value = item.tanggal_surat || '';
+    
+    const tglTerimaInput = document.getElementById('edit_tanggal_terima');
+    if (tglTerimaInput) {
+        tglTerimaInput.value = item.tanggal_terima || item.tanggal_surat || '';
+    }
+
+    const pengirimInput = document.getElementById('edit_pengirim');
+    if (pengirimInput) pengirimInput.value = item.pengirim || '';
+
+    const tujuanInput = document.getElementById('edit_tujuan');
+    if (tujuanInput) tujuanInput.value = item.tujuan || '';
+
+    document.getElementById('edit_perihal').value = item.perihal || '';
+    
+    const infoBerkas = document.getElementById('edit_berkas_info');
+    if (infoBerkas && item.file_url) {
+        infoBerkas.innerHTML = '📁 Berkas saat ini: <a href="' + item.file_url + '" target="_blank" style="color: #2563eb; font-weight: 700;">Lihat Berkas Aktif</a>. Pilih file baru hanya jika ingin menggantinya.';
+    }
+
+    document.getElementById('modalEditSurat').style.display = 'flex';
+}
+function tutupModalEditSurat() {
+    document.getElementById('modalEditSurat').style.display = 'none';
+}
+
+// Modal Agenda
 function bukaModalAgenda(mode) {
     const isExcel = mode === 'excel';
     document.getElementById('agenda_mode').value = mode;
@@ -412,6 +617,8 @@ function submitModalAgenda(e) {
         window.open(url, '_blank');
     }
 }
+
+// Modal Disposisi
 function bukaModalDisposisi(suratId, noSurat, pengirim, perihal, sifat, keJabatan, instruksi, catatan) {
     document.getElementById('disp_surat_id').value = suratId;
     document.getElementById('disp_info_no').innerText = noSurat || '-';

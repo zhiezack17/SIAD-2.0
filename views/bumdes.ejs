@@ -6,7 +6,7 @@
                 <span>🏪</span> BUMDes &mdash; Badan Usaha Milik Desa
             </h2>
             <p style="margin: 0; color: #64748b; font-size: 13.5px;">
-                Tata kelola Badan Hukum, Struktur Organisasi Pengurus (PP 11/2021), Unit Usaha, dan Kontribusi PADes.
+                <%= typeof isKabupatenMode !== 'undefined' && isKabupatenMode ? 'Rekapitulasi Badan Usaha Milik Desa Se-Kabupaten Rokan Hilir.' : 'Tata kelola Badan Hukum, Struktur Organisasi Pengurus (PP 11/2021), Unit Usaha, dan Kontribusi PADes.' %>
             </p>
         </div>
         <a href="/dashboard" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: white; color: #0f172a; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #cbd5e1; transition: all 0.2s;">
@@ -43,6 +43,143 @@
             </div>
         <% } %>
     <% } %>
+
+<% if (typeof isKabupatenMode !== 'undefined' && isKabupatenMode) { %>
+    <!-- ============================================================== -->
+    <!-- TAMPILAN MODE KABUPATEN: REKAPITULASI BUMDES SELURUH DESA      -->
+    <!-- ============================================================== -->
+    
+    <!-- 4 Kartu Statistik Kabupaten -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 25px;">
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total BUMDes Terdaftar</div>
+            <div style="font-size: 26px; font-weight: 800; color: #0f172a; margin-top: 4px;"><%= stats.totalBumdes %> BUMDes</div>
+            <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Seluruh Kepenghuluan Se-Rohil</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #10b981;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Badan Hukum Kemenkumham</div>
+            <div style="font-size: 26px; font-weight: 800; color: #10b981; margin-top: 4px;"><%= stats.totalBerbadanHukum %> BUMDes</div>
+            <div style="font-size: 11.5px; color: #10b981; margin-top: 2px; font-weight: 600;">
+                <%= stats.totalBumdes > 0 ? Math.round((stats.totalBerbadanHukum / stats.totalBumdes) * 100) : 0 %>% Telah Berbadan Hukum
+            </div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Unit Usaha Aktif</div>
+            <div style="font-size: 26px; font-weight: 800; color: #d97706; margin-top: 4px;"><%= stats.unitAktif %> Unit</div>
+            <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Operasional di Kepenghuluan</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-left: 4px solid #8b5cf6;">
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total PADes BUMDes</div>
+            <div style="font-size: 22px; font-weight: 800; color: #7c3aed; margin-top: 4px;">Rp <%= Number(stats.totalPADes).toLocaleString('id-ID') %></div>
+            <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">Setoran bagi hasil kas desa</div>
+        </div>
+    </div>
+
+    <!-- Tabel Rekapitulasi BUMDes Se-Kabupaten -->
+    <div style="background: white; border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+            <div>
+                <h3 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-building-columns" style="color: #2563eb;"></i> Rekapitulasi BUMDes Se-Kabupaten
+                </h3>
+                <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">Daftar seluruh BUMDes, status legalitas PP No. 11/2021, unit usaha, dan setoran PADes.</p>
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="searchBumdesKab" onkeyup="filterBumdesKab()" placeholder="🔍 Cari kepenghuluan / nama BUMDes..." style="padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; width: 260px; outline: none; background: #f8fafc;">
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table id="tabelBumdesKab" style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f8fafc; color: #475569; text-align: left;">
+                        <th style="padding: 12px 10px; width: 40px; text-align: center; border-bottom: 2px solid #e2e8f0;">No</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Kepenghuluan</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Nama BUMDes</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0;">Status Badan Hukum</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0; text-align: center;">Unit Usaha</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0; text-align: right;">Total Modal Desa</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0; text-align: right;">Omzet Tahunan</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0; text-align: right;">Kontribusi PADes</th>
+                        <th style="padding: 12px 10px; border-bottom: 2px solid #e2e8f0; text-align: center; width: 100px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof rekapBumdes !== 'undefined' && rekapBumdes && rekapBumdes.length > 0) { %>
+                        <% rekapBumdes.forEach((b, idx) => { %>
+                            <tr class="row-bumdes-kab" style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                <td style="padding: 12px 10px; text-align: center; color: #94a3b8; font-weight: 700;"><%= idx + 1 %></td>
+                                <td style="padding: 12px 10px; font-weight: 700; color: #0f172a;">
+                                    <i class="fa-solid fa-landmark" style="color: #64748b; margin-right: 5px;"></i><%= b.nama_kepenghuluan %>
+                                </td>
+                                <td style="padding: 12px 10px;">
+                                    <div style="font-weight: 700; color: #1d4ed8;"><%= b.nama_bumdes %></div>
+                                    <% if (b.nib) { %>
+                                        <div style="font-size: 11px; color: #64748b;">NIB: <%= b.nib %></div>
+                                    <% } %>
+                                </td>
+                                <td style="padding: 12px 10px;">
+                                    <% if (b.no_badan_hukum && b.no_badan_hukum.trim()) { %>
+                                        <span style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="fa-solid fa-certificate"></i> Badan Hukum
+                                        </span>
+                                        <div style="font-size: 10.5px; color: #64748b; margin-top: 3px; font-family: monospace;"><%= b.no_badan_hukum %></div>
+                                    <% } else { %>
+                                        <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="fa-solid fa-clock"></i> Belum Berbadan Hukum
+                                        </span>
+                                    <% } %>
+                                </td>
+                                <td style="padding: 12px 10px; text-align: center;">
+                                    <span style="background: #eff6ff; color: #1e40af; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11.5px;">
+                                        <%= b.unit_aktif %> Aktif / <%= b.jumlah_unit_usaha %> Unit
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #0f172a;">
+                                    Rp <%= Number(b.total_modal || 0).toLocaleString('id-ID') %>
+                                </td>
+                                <td style="padding: 12px 10px; text-align: right; color: #334155;">
+                                    Rp <%= Number(b.total_omzet || 0).toLocaleString('id-ID') %>
+                                </td>
+                                <td style="padding: 12px 10px; text-align: right; font-weight: 800; color: #15803d;">
+                                    Rp <%= Number(b.total_pades || 0).toLocaleString('id-ID') %>
+                                </td>
+                                <td style="padding: 12px 10px; text-align: center;">
+                                    <a href="/set-kepenghuluan?id=<%= b.kepenghuluan_id %>&redirect=/bumdes" style="background: #2563eb; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(37,99,235,0.2);">
+                                        Buka Desa
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="9" style="padding: 40px; text-align: center; color: #94a3b8;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">🏪</div>
+                                Belum ada data BUMDes yang terdata.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    function filterBumdesKab() {
+        const q = (document.getElementById('searchBumdesKab').value || '').toLowerCase();
+        const rows = document.querySelectorAll('#tabelBumdesKab tbody tr.row-bumdes-kab');
+        rows.forEach(r => {
+            const text = r.innerText.toLowerCase();
+            r.style.display = text.includes(q) ? '' : 'none';
+        });
+    }
+    </script>
+
+<% } else { %>
+    <!-- ============================================================== -->
+    <!-- TAMPILAN MODE DESA: 3 TAB PROFIL, PENGURUS, UNIT USAHA         -->
+    <!-- ============================================================== -->
 
     <!-- 4 Kartu Statistik Ringkasan -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 25px;">
@@ -139,12 +276,12 @@
 
             <div>
                 <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Penyertaan Modal Awal Desa (Rp)</label>
-                <input type="number" step="any" name="modal_awal" value="<%= profil ? (profil.modal_awal || 0) : 0 %>" placeholder="0" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+                <input type="number" step="any" name="modal_awal" class="input-rupiah" value="<%= profil ? (profil.modal_awal || 0) : 0 %>" placeholder="0" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
             </div>
 
             <div>
                 <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #334155; font-size: 13.5px;">Penyertaan Modal Tambahan Desa (Rp)</label>
-                <input type="number" step="any" name="modal_tambahan" value="<%= profil ? (profil.modal_tambahan || 0) : 0 %>" placeholder="0" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
+                <input type="number" step="any" name="modal_tambahan" class="input-rupiah" value="<%= profil ? (profil.modal_tambahan || 0) : 0 %>" placeholder="0" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px;">
             </div>
 
             <div style="grid-column: span 2;">
@@ -356,11 +493,11 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
                         <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Omzet Tahunan (Rp)</label>
-                        <input type="number" step="any" name="omzet_tahunan" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                        <input type="number" step="any" name="omzet_tahunan" class="input-rupiah" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
                     </div>
                     <div>
                         <label style="display: block; font-weight: 700; margin-bottom: 5px; color: #334155; font-size: 13px;">Setoran PADes (Rp)</label>
-                        <input type="number" step="any" name="kontribusi_pades" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
+                        <input type="number" step="any" name="kontribusi_pades" class="input-rupiah" placeholder="0" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13.5px;">
                     </div>
                 </div>
 
@@ -458,4 +595,5 @@
         </div>
     </div>
     <% } %>
+<% } %>
 </div>

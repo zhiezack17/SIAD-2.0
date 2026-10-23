@@ -83,19 +83,28 @@ const spjController = {
                 totalPPh22: 0,
                 totalPPh23: 0,
                 totalPajakDaerah: 0,
-                totalSemua: 0
+                totalSemua: 0,
+                totalPotongan: 0,
+                totalDisetor: 0,
+                sisaHutangPajak: 0
             };
 
             dataPajak.forEach(item => {
                 const nom = Number(item.nominal) || 0;
                 const j = (item.jenis_pajak || '').toUpperCase();
                 summary.totalSemua += nom;
+                summary.totalPotongan += nom;
+                const isDisetor = Boolean((item.ntpn && item.ntpn.trim()) || (item.file_url && item.file_url.trim()));
+                if (isDisetor) {
+                    summary.totalDisetor += nom;
+                }
                 if (j.includes('PPN')) summary.totalPPN += nom;
                 else if (j.includes('21')) summary.totalPPh21 += nom;
                 else if (j.includes('22')) summary.totalPPh22 += nom;
                 else if (j.includes('23')) summary.totalPPh23 += nom;
                 else summary.totalPajakDaerah += nom;
             });
+            summary.sisaHutangPajak = Math.max(0, summary.totalPotongan - summary.totalDisetor);
 
             res.render('spj', { 
                 title: 'Kegiatan SPJ & Rekapitulasi - SIAD 2.0', 

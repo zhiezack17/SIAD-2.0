@@ -41,9 +41,22 @@
                         </h3>
 
                         <!-- Kepenghuluan (jika multi-desa/admin) -->
-                        <% if (ws.kepenghuluan_nama) { %>
+                        <% if (ws.kepenghuluan_nama) { 
+                            const isKel = ws.kepenghuluan_nama.toLowerCase().startsWith('kel.') || ws.kepenghuluan_nama.toLowerCase().startsWith('kelurahan');
+                            const prefix = isKel ? '' : 'Kep. ';
+                        %>
                         <div style="font-size: 12.5px; color: #475569; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-landmark" style="color: #94a3b8; font-size: 11px;"></i> Kep. <%= ws.kepenghuluan_nama %>
+                            <i class="fa-solid fa-landmark" style="color: #94a3b8; font-size: 11px;"></i> <%= prefix %><%= ws.kepenghuluan_nama %>
+                        </div>
+                        <% } %>
+                        <% if (ws.tahun_anggaran || ws.sumber_dana) { %>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                            <% if (ws.tahun_anggaran) { %>
+                                <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">TA <%= ws.tahun_anggaran %></span>
+                            <% } %>
+                            <% if (ws.sumber_dana) { %>
+                                <span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">💰 <%= ws.sumber_dana %></span>
+                            <% } %>
                         </div>
                         <% } %>
 
@@ -139,16 +152,64 @@
                 </select>
             </div>
 
+            <!-- TAHUN ANGGARAN & SUMBER DANA -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Tahun Anggaran <span style="color: #ef4444;">*</span>
+                    </label>
+                    <select name="tahun_anggaran" required style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; background: white; font-family: inherit;">
+                        <option value="2026" selected>2026 (Tahun Berjalan)</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Sumber Dana <span style="color: #ef4444;">*</span>
+                    </label>
+                    <select name="sumber_dana" required style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; background: white; font-family: inherit;">
+                        <option value="Dana Desa (DDS)" selected>Dana Desa (DDS)</option>
+                        <option value="Alokasi Dana Desa (ADD)">Alokasi Dana Desa (ADD)</option>
+                        <option value="Bagi Hasil Pajak & Retribusi (BHPR)">Bagi Hasil Pajak (BHPR)</option>
+                        <option value="Pendapatan Asli Desa (PADes)">Pendapatan Asli Desa (PADes)</option>
+                        <option value="Bantuan Keuangan Provinsi (BKK)">Bantuan Keuangan Provinsi</option>
+                        <option value="SilPA Tahun Sebelumnya">SilPA</option>
+                        <option value="Lain-Lain Pendapatan Sah">Lain-Lain Sah</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TEMPLATE CHECKLIST OTOMATIS -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                    📋 Template Dokumen / Checklist Otomatis
+                </label>
+                <select name="template_proyek" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; background: white; font-family: inherit;">
+                    <option value="fisik" selected>🏗️ Template Pembangunan Fisik (RAB, SPK, Foto 0%-100%, BAST)</option>
+                    <option value="non_fisik">📚 Template Non-Fisik / Pelatihan (KAK/TOR, Absensi, Kwitansi, LPJ)</option>
+                    <option value="barang">📦 Template Pengadaan Barang (Faktur, SPK, Berita Acara Penerimaan)</option>
+                    <option value="">⚙️ Kustom (Tanpa Checklist Otomatis)</option>
+                </select>
+                <small style="color: #64748b; font-size: 12px; display: block; margin-top: 4px;">*Otomatis menyiapkan daftar berkas prasyarat wajib.</small>
+            </div>
+
             <!-- DESA (KHUSUS SUPER ADMIN) -->
             <% if (user && user.is_admin && typeof kepList !== 'undefined' && kepList.length > 0) { %>
             <div style="margin-bottom: 16px;">
                 <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
-                    Kepenghuluan Tujuan
+                    Kepenghuluan Tujuan <span style="color: #ef4444;">*</span>
                 </label>
-                <select name="kepenghuluan_id" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; background: white; font-family: inherit;">
-                    <% kepList.forEach(k => { %>
+                <select name="kepenghuluan_id" required style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; background: white; font-family: inherit;">
+                    <option value="" disabled <%= !activeDesaId ? 'selected' : '' %>>-- Pilih Kepenghuluan / Kelurahan --</option>
+                    <% kepList.forEach(k => { 
+                        const cleanNama = k.nama || '';
+                        const isKel = cleanNama.toLowerCase().startsWith('kel.') || cleanNama.toLowerCase().startsWith('kelurahan');
+                        const prefixWilayah = isKel ? '' : 'Kepenghuluan ';
+                    %>
                         <option value="<%= k.id %>" <%= String(activeDesaId) === String(k.id) ? 'selected' : '' %>>
-                            Kepenghuluan <%= k.nama %> (<%= k.kecamatan_nama || 'Rohil' %>)
+                            <%= prefixWilayah %><%= cleanNama %> (<%= k.kecamatan_nama || 'Rohil' %>)
                         </option>
                     <% }) %>
                 </select>

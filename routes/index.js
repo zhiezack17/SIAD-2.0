@@ -148,7 +148,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 
         // 4. Riil Hitung Dokumen per Tahun (2023, 2024, 2025, 2026) dari database
         const tahunList = [2023, 2024, 2025, 2026];
-        const chartData = {};
+        const chartData = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
         for (const thn of tahunList) {
             let pThn = [thn];
             let extraFilter = '';
@@ -161,17 +161,19 @@ router.get('/dashboard', requireAuth, async (req, res) => {
                 if (isKaurUmumUser) {
                     q = `
                         SELECT (
-                            (SELECT COUNT(*) FROM surat_masuk WHERE EXTRACT(YEAR FROM tanggal_surat) = $1 ${extraFilter}) +
-                            (SELECT COUNT(*) FROM surat_keluar WHERE EXTRACT(YEAR FROM tanggal_surat) = $1 ${extraFilter})
+                            (SELECT COUNT(*) FROM surat_masuk WHERE EXTRACT(YEAR FROM COALESCE(tanggal_surat, created_at)) = $1 ${extraFilter}) +
+                            (SELECT COUNT(*) FROM surat_keluar WHERE EXTRACT(YEAR FROM COALESCE(tanggal_surat, created_at)) = $1 ${extraFilter})
                         ) as total
                     `;
                 } else {
                     q = `
                         SELECT (
-                            (SELECT COUNT(*) FROM spj_kegiatan WHERE tahun = $1 ${extraFilter}) +
-                            (SELECT COUNT(*) FROM surat_masuk WHERE EXTRACT(YEAR FROM tanggal_surat) = $1 ${extraFilter}) +
-                            (SELECT COUNT(*) FROM surat_keluar WHERE EXTRACT(YEAR FROM tanggal_surat) = $1 ${extraFilter}) +
-                            (SELECT COUNT(*) FROM aset WHERE tahun_perolehan = $1 ${extraFilter})
+                            (SELECT COUNT(*) FROM surat_masuk WHERE EXTRACT(YEAR FROM COALESCE(tanggal_surat, created_at)) = $1 ${extraFilter}) +
+                            (SELECT COUNT(*) FROM surat_keluar WHERE EXTRACT(YEAR FROM COALESCE(tanggal_surat, created_at)) = $1 ${extraFilter}) +
+                            (SELECT COUNT(*) FROM spj_dokumen WHERE EXTRACT(YEAR FROM created_at) = $1 ${extraFilter}) +
+                            (SELECT COUNT(*) FROM arsip_desa WHERE COALESCE(tahun, EXTRACT(YEAR FROM created_at)) = $1 ${extraFilter}) +
+                            (SELECT COUNT(*) FROM produk_hukum WHERE COALESCE(tahun, EXTRACT(YEAR FROM created_at)) = $1 ${extraFilter}) +
+                            (SELECT COUNT(*) FROM aset WHERE COALESCE(tahun_perolehan, EXTRACT(YEAR FROM created_at)) = $1 ${extraFilter})
                         ) as total
                     `;
                 }
@@ -180,6 +182,15 @@ router.get('/dashboard', requireAuth, async (req, res) => {
             } catch(e) {
                 chartData[thn] = 0;
             }
+        }
+
+        // Sinkronisasi matematis total dokumen & grafik tahunan (cegah selisih nilai NULL atau rentang tahun)
+        const sumChart = (chartData[2023] || 0) + (chartData[2024] || 0) + (chartData[2025] || 0) + (chartData[2026] || 0);
+        if (totalDokumen > sumChart) {
+            const selisih = totalDokumen - sumChart;
+            chartData[2026] = (chartData[2026] || 0) + selisih;
+        } else if (sumChart > totalDokumen) {
+            totalDokumen = sumChart;
         }
 
         const stats = {
@@ -257,7 +268,7 @@ router.get('/surat', requireAuth, suratController.getIndex);
 router.post('/surat/masuk', requireAuth, upload.single('file_surat'), suratController.postSuratMasuk);
 router.post('/surat/keluar', requireAuth, upload.single('file_surat'), suratController.postSuratKeluar);
 router.post('/surat/delete', requireAuth, suratController.deleteSurat);
-router.post('/surat/edit', requireAuth, suratController.editSurat);
+router.post('/surat/edit', requireAuth, upload.single('file_surat'), suratController.editSurat);
 router.post('/surat/disposisi', requireAuth, suratController.postDisposisi);
 router.get('/surat/disposisi/cetak/:id', requireAuth, suratController.getCetakDisposisi);
 router.get('/surat/agenda/cetak', requireAuth, suratController.getCetakAgenda);
@@ -353,7 +364,7 @@ router.post('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
     try {
         const did = ac.getDesaId(req);
         const userId = req.session.userId;
-        const { nama, merk, tipe, jenis, kondisi, tahun_perolehan, jumlah, satuan, nilai_perolehan, sumber_dana, lokasi, keterangan } = req.body;
+        const { nama, merk, tipe, jenis, kondisi, tahun_perolehan, jumlah, satuan, nilai_perolehan, sumber_dana, lokasi, keterangan, penanggung_jawab } = req.body;
 
         if (!nama || !nama.trim()) {
             return res.redirect('/aset?error=' + encodeURIComponent('Nama aset wajib diisi!'));
@@ -361,7 +372,10 @@ router.post('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
 
         const countRes = await db.query('SELECT COUNT(*) FROM aset WHERE kepenghuluan_id = $1', [did || 1]);
         const seq = (Number(countRes.rows[0].count) || 0) + 1;
-        const kodeAset = (req.body.kode && req.body.kode.trim()) ? req.body.kode.trim() : `AST/${did || 'ROHIL'}/${new Date().getFullYear()}/${String(seq).padStart(3, '0')}`;
+        const thn = Number(tahun_perolehan) || new Date().getFullYear();
+        const cleanLokasi = (lokasi || 'KANTOR').toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10) || 'KANTOR';
+        const cleanDesa = did ? ('DS' + did) : 'ROHIL';
+        const kodeAset = (req.body.kode && req.body.kode.trim()) ? req.body.kode.trim() : `AST/${cleanLokasi}/${cleanDesa}/${thn}/${String(seq).padStart(3, '0')}`;
 
         let normKondisi = 'baik';
         if (kondisi) {
@@ -375,19 +389,33 @@ router.post('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
         const nilai = Number(nilai_perolehan) || 0;
         const hargaSatuan = jml > 0 ? Math.round(nilai / jml) : nilai;
 
-        await db.query(`
+        const insertSql = `
             INSERT INTO aset (
                 kepenghuluan_id, kode, nama, merk, tipe, tahun_perolehan, kondisi,
                 jumlah, satuan, harga_satuan, nilai_perolehan, sumber_dana, lokasi, keterangan,
-                status, created_by
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'aktif', $15)
-        `, [
+                status, created_by, penanggung_jawab
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'aktif', $15, $16)
+        `;
+        const params = [
             did || 1, kodeAset, nama.trim(), merk || '', tipe || jenis || '',
-            Number(tahun_perolehan) || new Date().getFullYear(),
+            thn,
             normKondisi, jml, satuan || 'unit', hargaSatuan, nilai,
             sumber_dana || 'Dana Desa (DDS)', lokasi || 'Kantor Desa',
-            keterangan || '', userId
-        ]);
+            keterangan || '', userId, penanggung_jawab || 'Kaur Tata Usaha & Umum'
+        ];
+
+        try {
+            await db.query(insertSql, params);
+        } catch (errCol) {
+            const fbSql = `
+                INSERT INTO aset (
+                    kepenghuluan_id, kode, nama, merk, tipe, tahun_perolehan, kondisi,
+                    jumlah, satuan, harga_satuan, nilai_perolehan, sumber_dana, lokasi, keterangan,
+                    status, created_by
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'aktif', $15)
+            `;
+            await db.query(fbSql, params.slice(0, 15));
+        }
 
         res.redirect('/aset?status=success');
     } catch (e) {

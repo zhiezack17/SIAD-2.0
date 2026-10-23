@@ -38,7 +38,7 @@ const produkHukumController = {
 
     postTambah: async (req, res) => {
         try {
-            const { jenis, nomor, tahun, judul, status } = req.body;
+            const { jenis, nomor, tahun, judul, status, tanggal_ditetapkan } = req.body;
             const userDesa = ac.getDesaNama(req, 'Desa');
             const did = ac.getDesaId(req);
             let driveUrl = '';
@@ -50,9 +50,15 @@ const produkHukumController = {
             const next_id = res_id.rows[0].next_id;
 
             const targetDesaId = did || null;
-            const sql = 'INSERT INTO produk_hukum (id, jenis, nomor, tahun, judul, tentang, status, drive_file_url, file_url, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
-            const p = [next_id, jenis, nomor, tahun, judul, '-', status, driveUrl, driveUrl, targetDesaId];
-            await db.query(sql, p);
+            const tglDitetapkan = tanggal_ditetapkan || null;
+            const sql = 'INSERT INTO produk_hukum (id, jenis, nomor, tahun, judul, tentang, status, drive_file_url, file_url, kepenghuluan_id, tanggal_ditetapkan) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)';
+            const p = [next_id, jenis, nomor, tahun, judul, '-', status, driveUrl, driveUrl, targetDesaId, tglDitetapkan];
+            try {
+                await db.query(sql, p);
+            } catch (errCol) {
+                const fallbackSql = 'INSERT INTO produk_hukum (id, jenis, nomor, tahun, judul, tentang, status, drive_file_url, file_url, kepenghuluan_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
+                await db.query(fallbackSql, [next_id, jenis, nomor, tahun, judul, '-', status, driveUrl, driveUrl, targetDesaId]);
+            }
 
             res.redirect('/produk-hukum?status=success_add');
         } catch (error) {
@@ -62,7 +68,7 @@ const produkHukumController = {
 
     postEdit: async (req, res) => {
         try {
-            const { id, jenis, nomor, tahun, judul, status } = req.body;
+            const { id, jenis, nomor, tahun, judul, status, tanggal_ditetapkan } = req.body;
             const isSuper = ac.isSuperAdmin(req);
             const did = ac.getDesaId(req);
 
@@ -78,14 +84,15 @@ const produkHukumController = {
                 return res.redirect('/produk-hukum?status=error&msg=' + encodeURIComponent('Akses ditolak atau data tidak ditemukan.'));
             }
 
-            let query = 'UPDATE produk_hukum SET jenis=$1, nomor=$2, tahun=$3, judul=$4, status=$5, tentang=$6';
-            let params = [jenis, nomor, tahun, judul, status, '-'];
+            const tglDitetapkan = tanggal_ditetapkan || null;
+            let query = 'UPDATE produk_hukum SET jenis=$1, nomor=$2, tahun=$3, judul=$4, status=$5, tentang=$6, tanggal_ditetapkan=$7';
+            let params = [jenis, nomor, tahun, judul, status, '-', tglDitetapkan];
 
             if (req.file) {
                 const userDesa = ac.getDesaNama(req, 'Desa');
                 const driveData = await uploadToDrive(req.file, userDesa, 'Produk Hukum', jenis);
                 if (driveData && driveData.webViewLink) {
-                    query += ', drive_file_url=$7, file_url=$7';
+                    query += `, drive_file_url=$${params.length + 1}, file_url=$${params.length + 1}`;
                     params.push(driveData.webViewLink);
                 }
             }
@@ -98,6 +105,28 @@ const produkHukumController = {
                 query += ` WHERE id=$${nextParam}`;
                 params.push(id);
             }
+
+            try {
+                await db.query(query, params);
+            } catch (errCol) {
+                // Fallback jika kolom tanggal_ditetapkan belum sinkron
+                let fbQuery = 'UPDATE produk_hukum SET jenis=$1, nomor=$2, tahun=$3, judul=$4, status=$5, tentang=$6';
+                let fbParams = [jenis, nomor, tahun, judul, status, '-'];
+                if (params.length > 7) {
+                    fbQuery += `, drive_file_url=$7, file_url=$7 WHERE id=$8`;
+                    fbParams.push(params[7], id);
+                } else {
+                    fbQuery += ` WHERE id=$7`;
+                    fbParams.push(id);
+                }
+                await db.query(fbQuery, fbParams);
+            }
+
+            res.redirect('/produk-hukum?status=success_edit');
+        } catch (error) {
+            res.redirect('/produk-hukum?status=error&msg=' + encodeURIComponent(error.message));
+        }
+    },
 
             await db.query(query, params);
             res.redirect('/produk-hukum?status=success_edit');

@@ -126,7 +126,7 @@ h1, h2, h3, h4, h5, h6, .stat-value { font-family: 'Sora', sans-serif !important
 .btn-primary:hover { background: #1d4ed8 !important; }
 
 /* STATS GRID */
-.stats-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; gap: 20px !important; margin-bottom: 30px !important; }
+.stats-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 20px !important; margin-bottom: 30px !important; }
 .stat-card {
   background: var(--card-bg) !important; backdrop-filter: blur(10px) !important;
   padding: 24px !important; border-radius: 20px !important;
@@ -169,6 +169,7 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
 @media (max-width: 1024px) {
   .sidebar { width: 240px !important; flex: 0 0 240px !important; }
   .dashboard-content { padding: 24px !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
 }
 #mobileMenuBtn { display: none; }
 .sidebar-overlay { display: none; }
@@ -311,14 +312,14 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
                         <i class="fa-solid fa-house-chimney" style="color:var(--accent-blue);"></i>
                         <span>SIAD 2.0</span>
                         <i class="fa-solid fa-chevron-right" style="font-size:10px;opacity:0.6;"></i>
-                        <span style="color:var(--text-primary);font-weight:600;"><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : 'Dashboard' %></span>
+                        <span style="color:var(--text-primary);font-weight:600;"><%= (typeof pageTitle !== 'undefined' && pageTitle) ? pageTitle : ((typeof title !== 'undefined' && title) ? title.replace(/\s*-\s*SIAD\s*2\.0/i, '').replace(/SIAD\s*2\.0\s*[-–•]\s*/i, '').trim() : 'Dashboard') %></span>
                     </div>
 
                     <!-- SWITCHER DESA UNTUK SUPER ADMIN (KABUPATEN) & BADGE DESA UNTUK ADMIN DESA / PERANGKAT -->
                     <% if (user && user.is_super_admin && typeof kepList !== 'undefined' && kepList.length > 0) { %>
                     <form action="/switch-desa" method="POST" id="formSwitchDesa" style="margin: 0 0 0 10px; display: flex; align-items: center; gap: 6px;">
                         <i class="fa-solid fa-building-columns" style="color: var(--accent-blue);"></i>
-                        <select name="kepenghuluan_id" id="selectKepenghuluanTop" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12.5px; font-weight: 700; background: #fff; color: #1e293b; outline: none; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); max-width: 260px;">
+                        <select name="kepenghuluan_id" id="selectKepenghuluanTop" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12.5px; font-weight: 700; background: #fff; color: #1e293b; outline: none; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); min-width: 250px; max-width: 380px; text-overflow: ellipsis;">
                             <option value="all" <%= !activeDesaId ? 'selected' : '' %>>🌐 Semua Kepenghuluan (Kabupaten)</option>
                             <% kepList.forEach(k => { %>
                                 <option value="<%= k.id %>" <%= String(activeDesaId) === String(k.id) ? 'selected' : '' %>>
