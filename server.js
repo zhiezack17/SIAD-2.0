@@ -96,6 +96,31 @@ app.use((req, res) => {
     res.status(404).render('404', { title: 'Halaman Tidak Ditemukan' });
 });
 
+// Global 500 Error Handler to prevent blank white screens
+app.use((err, req, res, next) => {
+    console.error('❌ Unhandled Server Error:', err);
+    if (res.headersSent) {
+        return next(err);
+    }
+    res.status(500).render('500', { 
+        title: 'Terjadi Kendala Sistem - SIAD 2.0',
+        error: process.env.NODE_ENV === 'production' 
+            ? 'Sistem mendeteksi kendala sementara saat memuat data. Silakan muat ulang halaman atau kembali ke Dashboard.' 
+            : err.message
+    }, (renderErr, html) => {
+        if (renderErr) {
+            return res.status(500).send(`
+                <div style="font-family:sans-serif;padding:40px;max-width:600px;margin:50px auto;border:1px solid #fecaca;background:#fff5f5;border-radius:12px;text-align:center;">
+                    <h2 style="color:#dc2626;margin-bottom:10px;">💥 Terjadi Kendala Sistem (500)</h2>
+                    <p style="color:#475569;font-size:14px;line-height:1.6;">Sistem mendeteksi kendala saat memproses halaman ini. Data Anda tetap aman.</p>
+                    <a href="/dashboard" style="display:inline-block;margin-top:15px;background:#2563eb;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px;">Kembali ke Dashboard</a>
+                </div>
+            `);
+        }
+        res.send(html);
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 SIAD 2.0 Server running on http://localhost:${PORT}`);
 });

@@ -81,6 +81,29 @@
                 </thead>
                 <tbody>
                     <% if (typeof data !== 'undefined' && data.length > 0) { %>
+                        <% 
+                            const toIsoDate = (val) => {
+                                if (!val) return '';
+                                if (typeof val === 'string') return val.substring(0, 10);
+                                try {
+                                    const dt = val instanceof Date ? val : new Date(val);
+                                    if (isNaN(dt.getTime())) return '';
+                                    return dt.toISOString().split('T')[0];
+                                } catch (e) {
+                                    return '';
+                                }
+                            };
+                            const toLocaleDate = (val) => {
+                                if (!val) return '-';
+                                try {
+                                    const dt = val instanceof Date ? val : new Date(val);
+                                    if (isNaN(dt.getTime())) return '-';
+                                    return dt.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+                                } catch (e) {
+                                    return '-';
+                                }
+                            };
+                        %>
                         <% data.forEach(function(item, idx) { %>
                             <tr class="baris-surat" style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
                                 <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top; text-align: center; color: #94a3b8; font-weight: 700;">
@@ -89,10 +112,9 @@
                                 <td style="padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
                                     <div style="font-weight: 800; color: #0f172a;"><%= item.nomor_surat %></div>
                                     <div style="color: #64748b; font-size: 12px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
-                                        <span><i class="fa-regular fa-calendar" style="width: 14px;"></i> Tgl Surat: <strong><%= new Date(item.tanggal_surat).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></strong></span>
+                                        <span><i class="fa-regular fa-calendar" style="width: 14px;"></i> Tgl Surat: <strong><%= toLocaleDate(item.tanggal_surat) %></strong></span>
                                         <% if (tab === 'masuk') { %>
-                                            <% const tglTrm = item.tanggal_terima ? new Date(item.tanggal_terima) : new Date(item.tanggal_surat); %>
-                                            <span style="color: #2563eb;"><i class="fa-solid fa-inbox" style="width: 14px;"></i> Diterima: <strong><%= tglTrm.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></strong></span>
+                                            <span style="color: #2563eb;"><i class="fa-solid fa-inbox" style="width: 14px;"></i> Diterima: <strong><%= toLocaleDate(item.tanggal_terima || item.tanggal_surat) %></strong></span>
                                         <% } %>
                                     </div>
                                 </td>
@@ -175,16 +197,16 @@
                                         <% 
                                             const itemJson = JSON.stringify({
                                                 id: item.id,
-                                                nomor_surat: item.nomor_surat,
-                                                tanggal_surat: item.tanggal_surat ? item.tanggal_surat.substring(0, 10) : '',
-                                                tanggal_terima: item.tanggal_terima ? item.tanggal_terima.substring(0, 10) : '',
+                                                nomor_surat: item.nomor_surat || '',
+                                                tanggal_surat: toIsoDate(item.tanggal_surat),
+                                                tanggal_terima: toIsoDate(item.tanggal_terima || item.tanggal_surat),
                                                 pengirim: item.pengirim || '',
                                                 tujuan: item.tujuan || '',
                                                 perihal: item.perihal || '',
                                                 file_url: item.file_url || item.file_pdf_url || ''
                                             }).replace(/'/g, "&#39;");
                                         %>
-                                        <button type="button" onclick='bukaModalEditSurat(<%- itemJson %>)' style="background: #f8fafc; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                        <button type="button" onclick='bukaModalEditSuratJson(<%- itemJson %>)' style="background: #f8fafc; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                                             <i class="fa-solid fa-pen-to-square"></i> Edit
                                         </button>
 
@@ -549,6 +571,9 @@ function tutupModalTambahSurat() {
 }
 
 // Modal Edit Surat
+function bukaModalEditSuratJson(item) {
+    bukaModalEditSurat(item);
+}
 function bukaModalEditSurat(item) {
     if (!item) return;
     document.getElementById('edit_surat_id').value = item.id;

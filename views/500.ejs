@@ -1,0 +1,18 @@
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 20px;">
+    <div style="width: 80px; height: 80px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; color: #dc2626; margin-bottom: 20px;">
+        ⚠️
+    </div>
+    <h1 style="font-size: 3rem; color: #0f172a; margin: 0 0 10px 0; font-weight: 800;">500</h1>
+    <h2 style="font-size: 20px; color: #1e293b; margin: 0 0 10px 0; font-weight: 700;">Terjadi Kendala Pemrosesan Sistem</h2>
+    <p style="color: #64748b; margin: 0 0 25px 0; max-width: 500px; font-size: 14.5px; line-height: 1.6;">
+        <%= typeof error !== 'undefined' && error ? error : 'Sistem mengalami kendala sementara saat memproses permintaan ini. Data administrasi Anda tetap tersimpan dengan aman.' %>
+    </p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <button onclick="window.location.reload()" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            🔄 Coba Muat Ulang
+        </button>
+        <a href="/dashboard" style="background: #2563eb; color: white; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px; text-decoration: none; box-shadow: 0 4px 10px rgba(37,99,235,0.2);">
+            🏠 Kembali ke Dashboard
+        </a>
+    </div>
+</div>

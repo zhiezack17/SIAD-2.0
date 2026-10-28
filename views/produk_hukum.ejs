@@ -120,7 +120,17 @@
                             <td style="padding: 12px 10px; text-align: center;">
                                 <div style="display: flex; gap: 6px; justify-content: center;">
                                     <% 
-                                        const tglFmt = item.tanggal_ditetapkan ? new Date(item.tanggal_ditetapkan).toISOString().substring(0, 10) : '';
+                                        let tglFmt = '';
+                                        if (item.tanggal_ditetapkan) {
+                                            if (typeof item.tanggal_ditetapkan === 'string') {
+                                                tglFmt = item.tanggal_ditetapkan.substring(0, 10);
+                                            } else {
+                                                try {
+                                                    const dt = item.tanggal_ditetapkan instanceof Date ? item.tanggal_ditetapkan : new Date(item.tanggal_ditetapkan);
+                                                    if (!isNaN(dt.getTime())) tglFmt = dt.toISOString().split('T')[0];
+                                                } catch(e) {}
+                                            }
+                                        }
                                         const hasFile = Boolean(item.drive_file_url || item.file_url);
                                         const phEditData = JSON.stringify({
                                             id: item.id,
