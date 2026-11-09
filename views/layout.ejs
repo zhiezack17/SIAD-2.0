@@ -243,6 +243,93 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* ============================================================== */
+/* SIDEBAR COLLAPSED & HIDDEN MODE (RESPONSIVE SCREENSPACE BOOST) */
+/* ============================================================== */
+.sidebar {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), flex 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.main-wrapper {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-width: 0 !important;
+}
+
+#sidebarToggleBtn {
+  display: inline-flex !important;
+  align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #fff; border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 15px;
+  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-right: 12px; flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+#sidebarToggleBtn:hover {
+  background: #f1f5f9;
+  color: var(--accent-blue);
+  border-color: #cbd5e1;
+}
+
+@media (min-width: 993px) {
+  .dashboard-layout.sidebar-collapsed .sidebar {
+    width: 72px !important;
+    flex: 0 0 72px !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-title-text,
+  .dashboard-layout.sidebar-collapsed .nav-text,
+  .dashboard-layout.sidebar-collapsed .sidebar-search,
+  .dashboard-layout.sidebar-collapsed #surat-icon,
+  .dashboard-layout.sidebar-collapsed .submenu {
+    display: none !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-header {
+    padding: 18px 8px !important;
+    justify-content: center !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-header img {
+    margin-right: 0 !important;
+  }
+  .dashboard-layout.sidebar-collapsed #sidebarCollapseBtn {
+    display: none !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-nav {
+    padding: 16px 8px !important;
+    align-items: center !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-nav .nav-item {
+    width: 48px !important;
+    height: 48px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+    gap: 0 !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-nav .nav-item i {
+    font-size: 18px !important;
+    margin: 0 !important;
+  }
+  .dashboard-layout.sidebar-collapsed .sidebar-nav .nav-item:hover {
+    background: rgba(255,255,255,0.15) !important;
+  }
+  .dashboard-layout.sidebar-collapsed .main-wrapper {
+    max-width: calc(100% - 72px) !important;
+    flex: 1 1 calc(100% - 72px) !important;
+  }
+
+  /* FULL HIDE SIDEBAR MODE */
+  .dashboard-layout.sidebar-hidden .sidebar {
+    display: none !important;
+    width: 0 !important;
+    flex: 0 0 0 !important;
+  }
+  .dashboard-layout.sidebar-hidden .main-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -264,37 +351,37 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
             const _isKaurUmum = _r === 'kaur_umum' || _r.includes('kaur_umum') || _r.includes('kaur umum');
         %>
         <nav class="sidebar-nav">
-            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/dashboard" class="nav-item" title="Dashboard"><i class="fa-solid fa-house"></i> <span class="nav-text">Dashboard</span></a>
             <% if (!_isKaurUmum) { %>
                 <% if (!_isPimpinanOrSekdes) { %>
-                <a href="/workspace" class="nav-item"><i class="fa-solid fa-folder-tree"></i> Workspace</a>
+                <a href="/workspace" class="nav-item" title="Workspace"><i class="fa-solid fa-folder-tree"></i> <span class="nav-text">Workspace</span></a>
                 <% } %>
             <% } %>
             <div>
                 <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); const ic=document.getElementById('surat-icon'); const isNowHidden=m.classList.toggle('hidden'); if(isNowHidden){ ic.className='fa-solid fa-plus'; } else { ic.className='fa-solid fa-minus'; }" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-                    <span><i class="fa-solid fa-envelope"></i> Surat</span>
+                    <span><i class="fa-solid fa-envelope"></i> <span class="nav-text">Surat</span></span>
                     <i id="surat-icon" class="fa-solid fa-minus" style="font-size:13px;"></i>
                 </div>
                 <div id="surat-menu" class="submenu">
-                    <a href="/surat?tab=masuk" class="nav-item"><i class="fa-solid fa-inbox"></i> Surat Masuk</a>
-                    <a href="/surat?tab=keluar" class="nav-item"><i class="fa-solid fa-paper-plane"></i> Surat Keluar</a>
-                    <a href="/surat/layanan" class="nav-item"><i class="fa-solid fa-id-card"></i> Layanan Surat Warga</a>
+                    <a href="/surat?tab=masuk" class="nav-item" title="Surat Masuk"><i class="fa-solid fa-inbox"></i> <span class="nav-text">Surat Masuk</span></a>
+                    <a href="/surat?tab=keluar" class="nav-item" title="Surat Keluar"><i class="fa-solid fa-paper-plane"></i> <span class="nav-text">Surat Keluar</span></a>
+                    <a href="/surat/layanan" class="nav-item" title="Layanan Surat Warga"><i class="fa-solid fa-id-card"></i> <span class="nav-text">Layanan Surat Warga</span></a>
                 </div>
             </div>
             <% if (!_isKaurUmum) { %>
-            <a href="/spj" class="nav-item"><i class="fa-solid fa-briefcase"></i> Kegiatan (SPJ)</a>
-            <a href="/spj?tab=pajak" class="nav-item"><i class="fa-solid fa-receipt"></i> Rekap Pajak (Buku)</a>
-            <a href="/produk-hukum" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Produk Hukum</a>
-            <a href="/bumdes" class="nav-item"><i class="fa-solid fa-store"></i> BUMDes</a>
-            <a href="/aset" class="nav-item"><i class="fa-solid fa-screwdriver-wrench"></i> Aset</a>
-            <a href="/musdes" class="nav-item"><i class="fa-solid fa-users-rectangle"></i> Musyawarah Desa</a>
+            <a href="/spj" class="nav-item" title="Kegiatan (SPJ)"><i class="fa-solid fa-briefcase"></i> <span class="nav-text">Kegiatan (SPJ)</span></a>
+            <a href="/spj?tab=pajak" class="nav-item" title="Rekap Pajak (Buku)"><i class="fa-solid fa-receipt"></i> <span class="nav-text">Rekap Pajak (Buku)</span></a>
+            <a href="/produk-hukum" class="nav-item" title="Produk Hukum"><i class="fa-solid fa-scale-balanced"></i> <span class="nav-text">Produk Hukum</span></a>
+            <a href="/bumdes" class="nav-item" title="BUMDes"><i class="fa-solid fa-store"></i> <span class="nav-text">BUMDes</span></a>
+            <a href="/aset" class="nav-item" title="Aset"><i class="fa-solid fa-screwdriver-wrench"></i> <span class="nav-text">Aset</span></a>
+            <a href="/musdes" class="nav-item" title="Musyawarah Desa"><i class="fa-solid fa-users-rectangle"></i> <span class="nav-text">Musyawarah Desa</span></a>
             <% if (!_isPimpinanOrSekdes) { %>
-            <a href="/arsip" class="nav-item"><i class="fa-solid fa-box-archive"></i> Arsip Lainnya</a>
+            <a href="/arsip" class="nav-item" title="Arsip Lainnya"><i class="fa-solid fa-box-archive"></i> <span class="nav-text">Arsip Lainnya</span></a>
             <% } %>
-            <a href="/laporan" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+            <a href="/laporan" class="nav-item" title="Laporan"><i class="fa-solid fa-chart-pie"></i> <span class="nav-text">Laporan</span></a>
             <% if (_isAdmin) { %>
-            <a href="/master_data" class="nav-item"><i class="fa-solid fa-database"></i> Master Data</a>
-            <a href="/pengaturan" class="nav-item"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+            <a href="/master_data" class="nav-item" title="Master Data"><i class="fa-solid fa-database"></i> <span class="nav-text">Master Data</span></a>
+            <a href="/pengaturan" class="nav-item" title="Pengaturan"><i class="fa-solid fa-gear"></i> <span class="nav-text">Pengaturan</span></a>
             <% } %>
             <% } %>
         </nav>
@@ -650,6 +737,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
+function toggleSidebar() {
+    if (window.innerWidth <= 992) {
+        toggleMobileSidebar();
+        return;
+    }
+    var layout = document.querySelector('.dashboard-layout');
+    if (!layout) return;
+    
+    var isCollapsed = layout.classList.toggle('sidebar-collapsed');
+    try {
+        localStorage.setItem('siad_sidebar_collapsed', isCollapsed ? '1' : '0');
+    } catch(e){}
+    
+    var collapseIcon = document.getElementById('collapseIcon');
+    if (collapseIcon) {
+        collapseIcon.className = isCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+    }
+    var topToggle = document.getElementById('topbarToggleIcon');
+    if (topToggle) {
+        topToggle.className = isCollapsed ? 'fa-solid fa-bars' : 'fa-solid fa-bars-staggered';
+    }
+    var labelLebar = document.getElementById('labelModeLebar');
+    if (labelLebar) {
+        labelLebar.textContent = isCollapsed ? 'Tampilkan Menu' : 'Mode Layar Lebar';
+    }
+}
+
+function toggleFullHideSidebar() {
+    var layout = document.querySelector('.dashboard-layout');
+    if (!layout) return;
+    var isHidden = layout.classList.toggle('sidebar-hidden');
+    var labelLebar = document.getElementById('labelModeLebar');
+    if (labelLebar) {
+        labelLebar.textContent = isHidden ? 'Tampilkan Menu' : 'Mode Layar Lebar';
+    }
+}
+
+(function() {
+    try {
+        if (window.innerWidth > 992 && localStorage.getItem('siad_sidebar_collapsed') === '1') {
+            var layout = document.querySelector('.dashboard-layout');
+            if (layout) layout.classList.add('sidebar-collapsed');
+            var collapseIcon = document.getElementById('collapseIcon');
+            if (collapseIcon) collapseIcon.className = 'fa-solid fa-chevron-right';
+            var topToggle = document.getElementById('topbarToggleIcon');
+            if (topToggle) topToggle.className = 'fa-solid fa-bars';
+            var labelLebar = document.getElementById('labelModeLebar');
+            if (labelLebar) labelLebar.textContent = 'Tampilkan Menu';
+        }
+    } catch(e){}
+})();
 
 function toggleMobileSidebar() {
     var sb = document.querySelector('.sidebar');

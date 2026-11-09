@@ -381,6 +381,9 @@ function exportPajakToExcel() {
             <button id="btn-rekap-realisasi" onclick="bukaModalFilterRekap()" data-siad-tooltip="Cetak rekapitulasi realisasi SPJ format Siskeudes" style="background: #0f172a; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
                 🖨️ Rekapitulasi Realisasi (Siskeudes)
             </button>
+            <button type="button" onclick="toggleSidebar()" data-siad-tooltip="Sembunyikan / Tampilkan Menu Samping agar Ruang Tabel Lebih Luas" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 10px 14px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
+                <i class="fa-solid fa-arrows-left-right-to-line"></i> <span id="labelModeLebar">Mode Layar Lebar</span>
+            </button>
             <button id="btn-tambah-kegiatan" onclick="bukaModalSPJ()" data-siad-tooltip="Tambah kegiatan baru APBDes & pagu anggaran" style="background: #1d4ed8; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(29,78,216,0.3);">
                 + Tambah Kegiatan
             </button>
@@ -388,18 +391,18 @@ function exportPajakToExcel() {
     </div>
     
     <div style="overflow-x: auto;">
-        <table id="tabel-spj-kegiatan" style="width: 100%; min-width: 1400px; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
+        <table id="tabel-spj-kegiatan" style="width: 100%; min-width: 1020px; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
             <thead>
                 <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
-                    <th style="padding: 12px 8px; width: 35px; text-align: center;">No</th>
-                    <th style="padding: 12px 14px; min-width: 500px; width: 44%;">Nama Kegiatan & Bidang APBDes</th>
-                    <th style="padding: 12px 8px; width: 85px; text-align: center;">Sumber Dana</th>
-                    <th style="padding: 12px 8px; width: 120px;">Pagu Anggaran</th>
-                    <th style="padding: 12px 8px; width: 135px;">Realisasi (Rp & %)</th>
-                    <th style="padding: 12px 8px; width: 95px;">Lokasi</th>
-                    <th style="padding: 12px 8px; width: 110px;">Status Verifikasi</th>
-                    <th style="padding: 12px 8px; width: 85px; text-align: center;">Notifikasi</th>
-                    <th style="padding: 12px 8px; width: 135px; text-align: right;">Aksi</th>
+                    <th style="padding: 10px 8px; width: 35px; text-align: center;">No</th>
+                    <th style="padding: 10px 12px; min-width: 270px; max-width: 360px;">Nama Kegiatan & Bidang APBDes</th>
+                    <th style="padding: 10px 6px; width: 65px; text-align: center;">Sumber</th>
+                    <th style="padding: 10px 8px; width: 110px;">Pagu Anggaran</th>
+                    <th style="padding: 10px 8px; width: 120px;">Realisasi (Rp & %)</th>
+                    <th style="padding: 10px 6px; width: 75px; text-align: center;">Lokasi</th>
+                    <th style="padding: 10px 6px; width: 110px; text-align: center;">Status Verifikasi</th>
+                    <th style="padding: 10px 6px; width: 85px; text-align: center;">Notifikasi</th>
+                    <th style="padding: 10px 8px; width: 130px; text-align: right;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -407,7 +410,7 @@ function exportPajakToExcel() {
                     <% data.forEach((item, index) => { %>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
                         <td style="padding: 12px 8px; text-align: center;"><%= index + 1 %></td>
-                        <td style="padding: 12px 14px; min-width: 500px; line-height: 1.5;">
+                        <td style="padding: 10px 12px; min-width: 270px; max-width: 360px; line-height: 1.4;">
                             <div style="font-weight: bold; color: #0f172a; font-size: 13.5px;"><%= item.nama_kegiatan %></div>
                             <div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
                                 <span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px;">
@@ -455,8 +458,8 @@ function exportPajakToExcel() {
                                 <span style="font-size: 10.5px; font-weight: 700; color: #475569;"><%= pctVal %>%</span>
                             </div>
                         </td>
-                        <td style="padding: 12px 10px; color: #475569;"><%= item.lokasi || '-' %></td>
-                        <td style="padding: 12px 10px;">
+                        <td style="padding: 10px 6px; text-align: center; color: #475569; font-size: 12px;"><%= item.lokasi || '-' %></td>
+                        <td style="padding: 10px 6px; text-align: center;">
                             <% 
                                 const isHistorisItem = Number(item.tahun) <= 2025;
                                 const tahapVerif = item.tahap_verifikasi || 'DRAFT'; 
@@ -479,7 +482,7 @@ function exportPajakToExcel() {
                         </td>
                         
                         <!-- TOMBOL CEPAT NOTIFIKASI WHATSAPP BERJENJANG / ARSIP -->
-                        <td style="padding: 12px 10px; text-align: center;">
+                        <td style="padding: 10px 6px; text-align: center;">
                             <% 
                                 const paguFmt = 'Rp ' + Number(item.pagu_anggaran).toLocaleString('id-ID');
                                 let waMsg = '';
@@ -522,8 +525,8 @@ function exportPajakToExcel() {
                             </a>
                         </td>
 
-                        <td style="padding: 12px 10px; text-align: right;">
-                            <div style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
+                        <td style="padding: 10px 8px; text-align: right;">
+                            <div style="display: flex; gap: 3px; justify-content: flex-end; align-items: center;">
                                 <button onclick="window.location.href='/spj/dokumen/<%= item.id %>'" title="Berkas & Alur Verifikasi" style="background:#10b981; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">📂 Berkas</button>
                                 <button onclick="window.location.href='/spj/pajak/<%= item.id %>'" title="Kelola Pajak" style="background:#3b82f6; color:white; border:none; padding:6px 9px; border-radius:4px; cursor:pointer; font-size:11.5px; font-weight:bold;">💸</button>
                                 <a href="/spj/cetak/<%= item.id %>" target="_blank" title="Cetak Lembar Pengesahan" style="text-decoration:none; background:#0f172a; color:white; padding:6px 9px; border-radius:4px; font-size:11.5px; font-weight:bold;">🖨️</a>
