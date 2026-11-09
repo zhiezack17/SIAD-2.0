@@ -32,7 +32,14 @@ const produkHukumController = {
                 user: req.session.user
             });
         } catch (error) {
-            res.send('<div style="padding:40px;"><h2>💥 Error Produk Hukum:</h2><p>' + error.message + '</p></div>');
+            console.error('[PRODUK_HUKUM:getIndex error]', error);
+            res.render('produk_hukum', {
+                title: 'Produk Hukum - SIAD 2.0',
+                data: [],
+                status: 'error',
+                msg: 'Terjadi kendala saat memuat daftar produk hukum.',
+                user: req.session.user
+            });
         }
     },
 

@@ -5,6 +5,7 @@ package-lock.json
 # Environment and sensitive keys
 .env
 .env.*
+!.env.example
 .env_*
 *.env
 credentials.json

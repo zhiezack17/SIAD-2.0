@@ -3,6 +3,7 @@ const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 const QRCode = require('qrcode');
 const bkuParser = require('../services/bkuParser');
+const { recordAudit } = require('../services/auditLog');
 
 const spjController = {
     // === INDUK KEGIATAN SPJ ===
@@ -305,9 +306,9 @@ const spjController = {
                 for (const r of fotoRes.rows) {
                     if (r.file_url) await deleteFromDrive(r.file_url);
                 }
-                const pajakRes = await db.query('SELECT file_bukti FROM spj_pajak WHERE kegiatan_id=$1', [id]);
+                const pajakRes = await db.query('SELECT file_url FROM spj_pajak WHERE kegiatan_id=$1', [id]);
                 for (const r of pajakRes.rows) {
-                    if (r.file_bukti) await deleteFromDrive(r.file_bukti);
+                    if (r.file_url) await deleteFromDrive(r.file_url);
                 }
             } catch (errDrive) {
                 console.warn('[SPJ:postDelete] Gagal bersihkan file di Drive:', errDrive.message);
@@ -536,6 +537,12 @@ const spjController = {
             if (updateFields.length > 0) {
                 const updateSql = `UPDATE spj_kegiatan SET ${updateFields.join(', ')} WHERE id=$1`;
                 await db.query(updateSql, updateParams);
+            recordAudit(req, {
+                action: aksi === 'revisi' ? 'REVISI_SPJ' : (nextTahap === 'SELESAI_FINAL' ? 'PENGESAHAN_SPJ' : 'VERIFIKASI_SPJ'),
+                entity: 'SPJ_KEGIATAN',
+                recordId: kegiatan_id,
+                details: userRole.toUpperCase() + ' (' + userNama + ') memproses SPJ: ' + (k.nama_kegiatan || '') + ' -> Status: ' + nextTahap
+            });
             }
 
             res.redirect('/spj/dokumen/' + kegiatan_id);
@@ -824,9 +831,9 @@ const spjController = {
 
             // 1. Ambil file_bukti sebelum dihapus dari DB dan bersihkan di Google Drive
             try {
-                const check = await db.query('SELECT file_bukti FROM spj_pajak WHERE id=$1', [id]);
-                if (check.rows.length > 0 && check.rows[0].file_bukti) {
-                    await deleteFromDrive(check.rows[0].file_bukti);
+                const check = await db.query('SELECT file_url FROM spj_pajak WHERE id=$1', [id]);
+                if (check.rows.length > 0 && check.rows[0].file_url) {
+                    await deleteFromDrive(check.rows[0].file_url);
                 }
             } catch (errDrive) {
                 console.warn('[SPJ:postDeletePajak] Gagal hapus di Drive:', errDrive.message);

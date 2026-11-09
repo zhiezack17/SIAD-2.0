@@ -448,6 +448,69 @@
             </div>
         </form>
     </div>
+
+    <!-- Card Audit Trail / Log Aktivitas Pengguna (SEC-11) -->
+    <div class="pengaturan-card" style="margin-top: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="margin: 0; color: #1e293b; font-size: 19px; display: flex; align-items: center; gap: 8px;">
+                    <span>📋</span> Log Aktivitas & Audit Trail Keamanan
+                </h3>
+                <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">Pencatatan riwayat aksi pengguna, login, verifikasi, dan perubahan data secara real-time</p>
+            </div>
+            <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px;">
+                🔒 Auto-Audit Active
+            </span>
+        </div>
+
+        <div style="overflow-x: auto; max-height: 400px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+                    <tr style="border-bottom: 2px solid #cbd5e1; text-align: left; color: #475569;">
+                        <th style="padding: 10px 12px; width: 140px;">Waktu & Tanggal</th>
+                        <th style="padding: 10px 12px; width: 120px;">Pengguna</th>
+                        <th style="padding: 10px 12px; width: 130px;">Aksi</th>
+                        <th style="padding: 10px 12px; width: 100px;">Entitas</th>
+                        <th style="padding: 10px 12px;">Rincian Aktivitas</th>
+                        <th style="padding: 10px 12px; width: 120px; text-align: right;">Alamat IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof auditLogs !== 'undefined' && auditLogs && auditLogs.length > 0) { %>
+                        <% auditLogs.forEach(function(log) { 
+                            let badgeBg = '#f1f5f9'; let badgeTxt = '#475569';
+                            if (log.action.includes('LOGIN_SUCCESS')) { badgeBg = '#dcfce7'; badgeTxt = '#15803d'; }
+                            else if (log.action.includes('LOGIN_FAILED')) { badgeBg = '#fee2e2'; badgeTxt = '#b91c1c'; }
+                            else if (log.action.includes('LOGOUT')) { badgeBg = '#f3e8ff'; badgeTxt = '#7e22ce'; }
+                            else if (log.action.includes('UPDATE') || log.action.includes('GANTI')) { badgeBg = '#fef3c7'; badgeTxt = '#b45309'; }
+                            else if (log.action.includes('DELETE') || log.action.includes('HAPUS')) { badgeBg = '#fee2e2'; badgeTxt = '#dc2626'; }
+                            const tgl = new Date(log.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'medium' });
+                        %>
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 8px 12px; color: #64748b; font-family: monospace;"><%= tgl %></td>
+                            <td style="padding: 8px 12px; font-weight: 600; color: #0f172a;"><%= log.username || 'System' %></td>
+                            <td style="padding: 8px 12px;">
+                                <span style="background: <%= badgeBg %>; color: <%= badgeTxt %>; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px;">
+                                    <%= log.action %>
+                                </span>
+                            </td>
+                            <td style="padding: 8px 12px; color: #475569; font-weight: 600;"><%= log.entity %></td>
+                            <td style="padding: 8px 12px; color: #334155;"><%= log.details || '-' %></td>
+                            <td style="padding: 8px 12px; text-align: right; font-family: monospace; color: #64748b;"><%= log.ip_address || '-' %></td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" style="padding: 25px; text-align: center; color: #94a3b8;">
+                                Belum ada riwayat aktivitas tercatat.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <script>

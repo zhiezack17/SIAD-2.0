@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const ac = require('../middleware/access');
 const bcrypt = require('bcrypt');
+const { recordAudit } = require('../services/auditLog');
 
 const pengaturanController = {
     getIndex: async (req, res) => {
@@ -62,6 +63,24 @@ const pengaturanController = {
                 }
             }
 
+            // Ambil riwayat Audit Trail untuk Super Admin / Admin (SEC-11)
+            let auditLogs = [];
+            if (ac.isSuperAdmin(req) || ac.isAdmin(req)) {
+                try {
+                    let aSql = "SELECT a.*, k.nama as kepenghuluan_nama FROM audit_logs a LEFT JOIN kepenghuluan k ON a.kepenghuluan_id = k.id";
+                    let aParams = [];
+                    if (!ac.isSuperAdmin(req) && did) {
+                        aSql += " WHERE a.kepenghuluan_id = $1";
+                        aParams.push(did);
+                    }
+                    aSql += " ORDER BY a.id DESC LIMIT 80";
+                    const aRes = await db.query(aSql, aParams);
+                    auditLogs = aRes.rows;
+                } catch (eAudit) {
+                    auditLogs = [];
+                }
+            }
+
             res.render('pengaturan', {
                 title: 'Pengaturan & Onboarding Desa - SIAD 2.0',
                 data: data,
@@ -69,6 +88,7 @@ const pengaturanController = {
                 generatedUsers: generatedUsers,
                 generatedDesa: generatedDesa,
                 daftarPengguna: daftarPengguna,
+                auditLogs: auditLogs,
                 query: req.query
             });
         } catch (error) {
@@ -109,6 +129,12 @@ const pengaturanController = {
                     );
                 }
             }
+            recordAudit(req, {
+                action: 'UPDATE_PROFIL_DESA',
+                entity: 'PROFIL_DESA',
+                recordId: did || 'UMUM',
+                details: 'Memperbarui profil desa: ' + (nama_desa || '') + ' (Kades: ' + (nama_kepala_desa || '') + ')'
+            });
             res.redirect('/pengaturan?status=success');
         } catch (error) {
             console.error('Error Update Pengaturan:', error);

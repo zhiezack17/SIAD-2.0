@@ -39,6 +39,16 @@ app.use(express.json());
 // Trust Proxy for HTTPS behind Nginx reverse proxy
 app.set('trust proxy', 1);
 
+// SEC-09: HTTP Security Headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    next();
+});
+
 // Validate Session Secret in Production
 const isProd = process.env.NODE_ENV === 'production';
 const sessionSecret = process.env.SESSION_SECRET;
@@ -61,7 +71,8 @@ app.use(session({
         httpOnly: true,
         secure: isProd || process.env.COOKIE_SECURE === 'true',
         sameSite: 'lax',
-        maxAge: (Number(process.env.SESSION_MAX_AGE_DAYS) || 30) * 24 * 60 * 60 * 1000 
+        // SEC-12: Default masa aktif sesi 24 jam (1 hari), mencegah risiko session hijacking berkepanjangan
+        maxAge: (Number(process.env.SESSION_MAX_AGE_DAYS) || 1) * 24 * 60 * 60 * 1000 
     }
 }));
 

@@ -6,16 +6,26 @@ const { google } = require('googleapis');
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyO2T5KDAijIJHwkFNoO2-C7gD-_S94AkLIHsS5t3J1b6IatjBNeCqdzHobS24y08TVkw/exec';
 const TRASH_FOLDER_ID = '1Ca69EF_LI9wUiLU_qY4RkJ4KNHc6TKrH'; // Folder 📁 Sampah SIAD (Trash) di Google Drive
 
-// Inisialisasi Service Account sebagai fallback proteksi hapus/pindah sampah
+// SEC-01: Inisialisasi Service Account sebagai fallback proteksi hapus/pindah sampah
+// Mendukung pembacaan dari environment variable GOOGLE_SERVICE_ACCOUNT_JSON atau file credentials.json
 let saDrive = null;
 try {
-    const credPath = path.join(__dirname, '../credentials.json');
-    if (fs.existsSync(credPath)) {
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+        const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
         const auth = new google.auth.GoogleAuth({
-            keyFile: credPath,
+            credentials,
             scopes: ['https://www.googleapis.com/auth/drive']
         });
         saDrive = google.drive({ version: 'v3', auth });
+    } else {
+        const credPath = path.join(__dirname, '../credentials.json');
+        if (fs.existsSync(credPath)) {
+            const auth = new google.auth.GoogleAuth({
+                keyFile: credPath,
+                scopes: ['https://www.googleapis.com/auth/drive']
+            });
+            saDrive = google.drive({ version: 'v3', auth });
+        }
     }
 } catch (e) {
     console.warn('[Drive Config] Service Account Drive init optional:', e.message);

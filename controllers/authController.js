@@ -2,6 +2,7 @@ const db = require('../config/db');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const { recordFailedLogin, recordSuccessfulLogin } = require('../middleware/rateLimiter');
+const { recordAudit } = require('../services/auditLog');
 
 const isAdmin = (user) => {
     if (!user) return false;
@@ -106,6 +107,12 @@ const authController = {
                         }
                         req.session.userId = user.id;
                         req.session.user = sessionUserData;
+                        recordAudit(req, { 
+                            action: 'LOGIN_SUCCESS', 
+                            entity: 'PENGGUNA', 
+                            recordId: user.id, 
+                            details: `Login berhasil sebagai ${user.username} (${sessionUserData.peran})` 
+                        });
                         req.session.save(() => {
                             return res.redirect('/dashboard');
                         });
@@ -114,6 +121,12 @@ const authController = {
             }
 
             recordFailedLogin(req);
+            recordAudit(req, {
+                action: 'LOGIN_FAILED',
+                entity: 'PENGGUNA',
+                recordId: username,
+                details: `Percobaan login gagal untuk username: ${username}`
+            });
             return res.render('login', { title: 'Masuk Sistem - SIAD 2.0', error: 'Username atau password salah!', layout: false });
 
         } catch (error) {
@@ -123,6 +136,14 @@ const authController = {
     },
 
     logout: (req, res) => {
+        if (req.session && req.session.user) {
+            recordAudit(req, {
+                action: 'LOGOUT',
+                entity: 'PENGGUNA',
+                recordId: req.session.userId,
+                details: `User ${req.session.user.username} logout dari sistem`
+            });
+        }
         req.session.destroy((err) => {
             if (err) console.error('Error saat logout:', err);
             res.redirect('/login');
@@ -142,8 +163,15 @@ const authController = {
                 return res.status(400).json({ success: false, message: 'Semua kolom kata sandi wajib diisi!' });
             }
 
-            if (password_baru.length < 6) {
-                return res.status(400).json({ success: false, message: 'Kata sandi baru minimal 6 karakter!' });
+            if (password_baru.length < 8) {
+                return res.status(400).json({ success: false, message: 'Kata sandi baru minimal 8 karakter!' });
+            }
+
+            if (!/[A-Z]/.test(password_baru) || !/[a-z]/.test(password_baru) || !/[0-9]/.test(password_baru)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Kata sandi baru harus kombinasi huruf besar, huruf kecil, dan angka!' 
+                });
             }
 
             if (password_baru !== konfirmasi_password) {
@@ -175,6 +203,13 @@ const authController = {
             if (req.session.user) {
                 req.session.user.wajib_ganti_password = false;
             }
+
+            recordAudit(req, {
+                action: 'GANTI_PASSWORD',
+                entity: 'PENGGUNA',
+                recordId: userId,
+                details: `Pengguna ${userRes.rows[0].username} berhasil memperbarui kata sandi`
+            });
 
             return res.json({ 
                 success: true, 
@@ -228,7 +263,19 @@ const authController = {
         } else {
             req.session.active_kepenghuluan_id = Number(kepId);
         }
-        const redirectUrl = req.query?.redirect || req.body?.redirect || req.get('Referrer') || '/dashboard';
+
+        recordAudit(req, {
+            action: 'SWITCH_DESA',
+            entity: 'KEPENGHULUAN',
+            recordId: kepId || 'SEMUA',
+            details: `Super Admin beralih tampilan wilayah kerja ke: ${kepId ? 'ID ' + kepId : 'Semua Kepenghuluan'}`
+        });
+
+        let redirectUrl = req.query?.redirect || req.body?.redirect || req.get('Referrer') || '/dashboard';
+        // SEC-03: Cegah Open Redirect - hanya izinkan relative path internal yang diawali '/' tunggal
+        if (typeof redirectUrl !== 'string' || !redirectUrl.startsWith('/') || redirectUrl.startsWith('//') || redirectUrl.includes('\\')) {
+            redirectUrl = '/dashboard';
+        }
         res.redirect(redirectUrl);
     },
 

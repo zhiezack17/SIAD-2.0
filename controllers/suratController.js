@@ -2,6 +2,7 @@ const db = require('../config/db');
 const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 const ExcelJS = require('exceljs');
+const { recordAudit } = require('../services/auditLog');
 
 const suratController = {
     getIndex: async (req, res) => {
@@ -67,7 +68,13 @@ const suratController = {
 
             res.render('surat', { title: 'Manajemen Surat - SIAD 2.0', tab: tab, data: data });
         } catch (error) {
-            res.send('<div style="padding:40px;font-family:sans-serif;"><h2>💥 Oops! Ada Error:</h2><p style="color:red;font-size:18px;">' + error.message + '</p><pre style="background:#f1f5f9;padding:15px;border-radius:8px;">' + error.stack + '</pre></div>');
+            console.error('[SURAT:getIndex error]', error);
+            res.render('surat', { 
+                title: 'Manajemen Surat - SIAD 2.0', 
+                tab: tab, 
+                data: [], 
+                error: 'Terjadi kendala saat memuat data surat. Silakan coba beberapa saat lagi.' 
+            });
         }
     },
     postSuratMasuk: async (req, res) => {
@@ -95,9 +102,16 @@ const suratController = {
                     : 'INSERT INTO surat_masuk (nomor_surat, tanggal_surat, pengirim, perihal, file_url) VALUES ($1, $2, $3, $4, $5)';
                 await db.query(fbSql, did ? [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl, did] : [nomor_surat, tanggal_surat, pengirim, perihal, driveUrl]);
             }
+            recordAudit(req, {
+                action: 'TAMBAH_SURAT_MASUK',
+                entity: 'SURAT_MASUK',
+                recordId: nomor_surat || '-',
+                details: 'Input surat masuk no: ' + (nomor_surat || '') + ' dari: ' + (pengirim || '') + ' perihal: ' + (perihal || '')
+            });
             res.redirect('/surat?tab=masuk&status=success');
         } catch (error) {
-            res.send('<div style="padding:40px;font-family:sans-serif;"><h2>💥 Oops! Gagal Upload Surat Masuk:</h2><p style="color:red;">' + error.message + '</p></div>');
+            console.error('[SURAT:postSuratMasuk error]', error);
+            res.redirect('/surat?tab=masuk&error=' + encodeURIComponent('Gagal menyimpan surat masuk. Silakan periksa kelengkapan berkas Anda.'));
         }
     },
     postEditSurat: async (req, res) => {
@@ -175,9 +189,16 @@ const suratController = {
                     await db.query(fallback, [nomor_surat, tanggal_surat, tujuan, perihal, driveUrl]);
                 } else throw e;
             }
+            recordAudit(req, {
+                action: 'TAMBAH_SURAT_KELUAR',
+                entity: 'SURAT_KELUAR',
+                recordId: nomor_surat || '-',
+                details: 'Input surat keluar no: ' + (nomor_surat || '') + ' ke: ' + (tujuan || '') + ' perihal: ' + (perihal || '')
+            });
             res.redirect('/surat?tab=keluar&status=success');
         } catch (error) {
-            res.send('<div style="padding:40px;font-family:sans-serif;"><h2>💥 Oops! Gagal Upload Surat Keluar:</h2><p style="color:red;">' + error.message + '</p></div>');
+            console.error('[SURAT:postSuratKeluar error]', error);
+            res.redirect('/surat?tab=keluar&error=' + encodeURIComponent('Gagal menyimpan surat keluar. Silakan periksa kelengkapan berkas Anda.'));
         }
     },
     deleteSurat: async (req, res) => {
@@ -208,9 +229,16 @@ const suratController = {
                     await db.query(`DELETE FROM ${tbl} WHERE id = $1`, [id]);
                 } else throw e;
             }
+            recordAudit(req, {
+                action: 'HAPUS_SURAT',
+                entity: type === 'keluar' ? 'SURAT_KELUAR' : 'SURAT_MASUK',
+                recordId: id,
+                details: 'Menghapus surat ' + (type || 'masuk') + ' ID: ' + id
+            });
             res.redirect('/surat?tab=' + type);
         } catch (error) {
-            res.send('<div style="padding:40px;font-family:sans-serif;"><h2>💥 Oops! Gagal Hapus:</h2><p style="color:red;">' + error.message + '</p></div>');
+            console.error('[SURAT:deleteSurat error]', error);
+            res.redirect('/surat?tab=' + (type || 'masuk') + '&error=' + encodeURIComponent('Gagal menghapus surat. Silakan coba kembali.'));
         }
     },
     editSurat: async (req, res) => { return suratController.postEditSurat(req, res); },
@@ -685,12 +713,12 @@ async function getDesaMetadata(targetDesaId) {
         }
 
         const sekRes = await db.query(`
-            SELECT nama_lengkap, nama FROM pengguna 
+            SELECT nama_lengkap FROM pengguna 
             WHERE kepenghuluan_id = $1 AND (role ILIKE '%sek%' OR peran ILIKE '%sek%')
             ORDER BY id ASC LIMIT 1
         `, [targetDesaId || 1]);
         if (sekRes.rows.length > 0) {
-            defaultDesa.sekretaris = sekRes.rows[0].nama_lengkap || sekRes.rows[0].nama || 'Sekretaris Kepenghuluan';
+            defaultDesa.sekretaris = sekRes.rows[0].nama_lengkap || 'Sekretaris Kepenghuluan';
         }
     } catch (e) {
         console.error('[getDesaMetadata error]', e.message);
