@@ -19,12 +19,15 @@
             </div>
         </div>
         
-        <div style="display: flex; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+        <div style="display: flex; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; flex-wrap: wrap;">
             <a href="/surat?tab=masuk" style="text-decoration: none; background: <%= tab === 'masuk' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'masuk' ? 'white' : '#475569' %>; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-inbox"></i> Surat Masuk & Disposisi
             </a>
             <a href="/surat?tab=keluar" style="text-decoration: none; background: <%= tab === 'keluar' ? '#2563eb' : '#f1f5f9' %>; color: <%= tab === 'keluar' ? 'white' : '#475569' %>; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-paper-plane"></i> Surat Keluar
+            </a>
+            <a href="/surat/layanan" style="text-decoration: none; background: #f1f5f9; color: #475569; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-id-card"></i> Layanan Surat Warga
             </a>
         </div>
     </div>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm 20mm 15mm 20mm;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 20px;
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .header-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .kop-logo {
+            width: 80px;
+            height: auto;
+        }
+        .kop-title-kab {
+            font-size: 13.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+        .kop-title-kec {
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+        }
+        .kop-title-desa {
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 2px 0;
+            letter-spacing: 1px;
+        }
+        .kop-alamat {
+            font-size: 9.5pt;
+            font-style: italic;
+            margin: 3px 0 0 0;
+        }
+        .double-line {
+            border: none;
+            border-top: 3.5px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin: 6px 0 20px 0;
+        }
+        .doc-title-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .doc-title {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: underline;
+            margin: 0;
+        }
+        .doc-number {
+            font-size: 11.5pt;
+            margin-top: 3px;
+        }
+        .content-p {
+            text-align: justify;
+            text-indent: 35px;
+            margin: 12px 0;
+        }
+        .table-data {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0 16px 20px;
+            font-size: 11.5pt;
+        }
+        .table-data td {
+            padding: 4px 6px;
+            vertical-align: top;
+        }
+        .table-data td.label-col {
+            width: 190px;
+        }
+        .table-data td.separator-col {
+            width: 15px;
+            text-align: center;
+        }
+        .sig-container {
+            width: 100%;
+            margin-top: 35px;
+            page-break-inside: avoid;
+        }
+        .sig-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .sig-table td {
+            vertical-align: top;
+        }
+        .sig-space {
+            height: 75px;
+        }
+        .qr-box {
+            text-align: center;
+            display: inline-block;
+            border: 1px dashed #64748b;
+            padding: 6px 8px;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .qr-caption {
+            font-size: 8pt;
+            color: #334155;
+            margin-top: 4px;
+            max-width: 130px;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Cetak (Layar Monitor) -->
+    <div class="no-print" style="background: #0f172a; color: white; padding: 12px 20px; margin: -20px -20px 25px -20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.15);">
+        <div>
+            <b>🖨️ Pratinjau Dokumen Layanan Surat Resmi</b> &bull; Kepenghuluan <%= surat.kepenghuluan_nama %>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+                Cetak Dokumen Sekarang (PDF)
+            </button>
+            <button onclick="window.close()" style="background: #64748b; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- KOP RESMI PEMKAB ROKAN HILIR -->
+    <table class="header-table">
+        <tr>
+            <td style="width: 15%; text-align: center;">
+                <img src="/assets/img/logo-rohil.png" onerror="this.src='/images/logo.png'; this.onerror=null;" alt="Logo Rohil" class="kop-logo">
+            </td>
+            <td style="width: 85%; text-align: center;">
+                <div class="kop-title-kab">PEMERINTAH KABUPATEN ROKAN HILIR</div>
+                <div class="kop-title-kec">KECAMATAN <%= (surat.kecamatan_nama || 'BAGAN SINEMBAH').toUpperCase() %></div>
+                <div class="kop-title-desa">KEPENGHULUAN <%= (surat.kepenghuluan_nama || 'BAGAN BATU').toUpperCase() %></div>
+                <div class="kop-alamat"><%= surat.alamat_kantor || 'Jl. Jenderal Sudirman No. 01, Kodepos 28992' %></div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="double-line"></div>
+
+    <% 
+        let judulSurat = 'SURAT KETERANGAN';
+        if (surat.jenis_surat === 'SKU') judulSurat = 'SURAT KETERANGAN USAHA';
+        else if (surat.jenis_surat === 'SKTM') judulSurat = 'SURAT KETERANGAN TIDAK MAMPU';
+        else if (surat.jenis_surat === 'SKCK') judulSurat = 'SURAT PENGANTAR CATATAN KEPOLISIAN';
+        else if (surat.jenis_surat === 'DOMISILI') judulSurat = 'SURAT KETERANGAN DOMISILI';
+        else if (surat.jenis_surat === 'KTP_KK') judulSurat = 'SURAT PENGANTAR KTP / KK';
+        else if (surat.jenis_surat === 'BELUM_MENIKAH') judulSurat = 'SURAT KETERANGAN BELUM MENIKAH';
+        else if (surat.jenis_surat === 'KEMATIAN') judulSurat = 'SURAT KETERANGAN KEMATIAN';
+        else if (surat.jenis_surat === 'KELAHIRAN') judulSurat = 'SURAT KETERANGAN KELAHIRAN';
+        else if (surat.jenis_surat === 'LAINNYA') judulSurat = 'SURAT KETERANGAN';
+
+        const tglSuratObj = surat.tanggal_surat ? new Date(surat.tanggal_surat) : new Date();
+        const tglSuratFormat = tglSuratObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        let tglLahirFormat = '-';
+        if (surat.tanggal_lahir) {
+            tglLahirFormat = new Date(surat.tanggal_lahir).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        const ttl = (surat.tempat_lahir ? surat.tempat_lahir + ', ' : '') + tglLahirFormat;
+    %>
+
+    <!-- JUDUL SURAT -->
+    <div class="doc-title-container">
+        <h3 class="doc-title"><%= judulSurat %></h3>
+        <div class="doc-number">Nomor : <%= surat.nomor_surat %></div>
+    </div>
+
+    <!-- PEMBUKA -->
+    <p class="content-p">
+        Yang bertanda tangan di bawah ini, Penghulu Kepenghuluan <%= surat.kepenghuluan_nama %>, Kecamatan <%= surat.kecamatan_nama %>, Kabupaten Rokan Hilir, Provinsi Riau, dengan ini menerangkan bahwa:
+    </p>
+
+    <!-- TABEL BIODATA PEMOHON -->
+    <table class="table-data">
+        <tr>
+            <td class="label-col">Nama Lengkap</td>
+            <td class="separator-col">:</td>
+            <td style="font-weight: bold; text-transform: uppercase;"><%= surat.nama_warga %></td>
+        </tr>
+        <tr>
+            <td class="label-col">NIK</td>
+            <td class="separator-col">:</td>
+            <td style="font-weight: bold; letter-spacing: 0.5px;"><%= surat.nik %></td>
+        </tr>
+        <tr>
+            <td class="label-col">Tempat / Tgl. Lahir</td>
+            <td class="separator-col">:</td>
+            <td><%= ttl %></td>
+        </tr>
+        <tr>
+            <td class="label-col">Jenis Kelamin</td>
+            <td class="separator-col">:</td>
+            <td><%= surat.jenis_kelamin || 'Laki-laki' %></td>
+        </tr>
+        <tr>
+            <td class="label-col">Agama</td>
+            <td class="separator-col">:</td>
+            <td><%= surat.agama || 'Islam' %></td>
+        </tr>
+        <tr>
+            <td class="label-col">Pekerjaan</td>
+            <td class="separator-col">:</td>
+            <td><%= surat.pekerjaan || 'Wiraswasta' %></td>
+        </tr>
+        <tr>
+            <td class="label-col">Alamat Domisili</td>
+            <td class="separator-col">:</td>
+            <td><%= surat.alamat || '-' %></td>
+        </tr>
+    </table>
+
+    <!-- ISI SPESIFIK SESUAI JENIS SURAT -->
+    <% if (surat.jenis_surat === 'SKU') { %>
+        <p class="content-p">
+            Bahwa nama yang bersangkutan tersebut di atas adalah benar warga masyarakat yang bertempat tinggal di Kepenghuluan <%= surat.kepenghuluan_nama %> dan menurut pendataan serta sepengetahuan kami, yang bersangkutan benar memiliki dan menjalankan kegiatan usaha sebagaimana rincian berikut:
+        </p>
+        <div style="margin-left: 35px; margin-bottom: 10px; font-weight: bold; background: #fafafa; padding: 10px; border-left: 3px solid #000;">
+            <%= surat.keterangan_tambahan || 'Usaha Perdagangan / Jasa di Wilayah Kepenghuluan' %>
+        </div>
+        <p class="content-p">
+            Surat Keterangan Usaha (SKU) ini diberikan kepada yang bersangkutan untuk keperluan: <b><%= surat.keperluan || 'Persyaratan Administrasi / Pengajuan Modal' %></b>.
+        </p>
+
+    <% } else if (surat.jenis_surat === 'SKTM') { %>
+        <p class="content-p">
+            Bahwa nama yang bersangkutan tersebut di atas adalah benar penduduk Kepenghuluan <%= surat.kepenghuluan_nama %> dan berdasarkan data serta fakta di lapangan yang bersangkutan tergolong ke dalam <b>Keluarga Kurang Mampu / Pra-Sejahtera</b> di wilayah Kepenghuluan kami.
+        </p>
+        <% if (surat.keterangan_tambahan) { %>
+            <div style="margin-left: 35px; margin-bottom: 10px; font-style: italic;">
+                <%= surat.keterangan_tambahan %>
+            </div>
+        <% } %>
+        <p class="content-p">
+            Surat Keterangan ini dibuat dan diberikan untuk dipergunakan sebagai: <b><%= surat.keperluan || 'Persyaratan Pengajuan Beasiswa / Bantuan Pengobatan' %></b>.
+        </p>
+
+    <% } else if (surat.jenis_surat === 'SKCK') { %>
+        <p class="content-p">
+            Bahwa nama tersebut di atas adalah benar warga Kepenghuluan <%= surat.kepenghuluan_nama %>. Sepanjang pengamatan dan catatan kami, yang bersangkutan memiliki catatan perikelakuan yang baik, tidak sedang menjalani hukuman pidana, serta tidak pernah terlibat dalam tindakan kriminalitas atau pelanggaran hukum yang meresahkan ketertiban masyarakat.
+        </p>
+        <p class="content-p">
+            Surat Pengantar ini diberikan untuk melengkapi persyaratan: <b><%= surat.keperluan || 'Pengurusan Catatan Kepolisian (SKCK) di Polsek / Polres' %></b>.
+        </p>
+
+    <% } else if (surat.jenis_surat === 'DOMISILI') { %>
+        <p class="content-p">
+            Bahwa nama yang bersangkutan tersebut di atas adalah benar penduduk yang berdomisili dan menetap di lingkungan Kepenghuluan <%= surat.kepenghuluan_nama %>, Kecamatan <%= surat.kecamatan_nama %>, Kabupaten Rokan Hilir.
+        </p>
+        <p class="content-p">
+            Surat Keterangan Domisili ini diterbitkan untuk keperluan: <b><%= surat.keperluan || 'Kelengkapan Administrasi Kependudukan' %></b>.
+        </p>
+
+    <% } else { %>
+        <p class="content-p">
+            Bahwa nama yang bersangkutan tersebut di atas adalah benar warga masyarakat Kepenghuluan <%= surat.kepenghuluan_nama %>, Kecamatan <%= surat.kecamatan_nama %>, Kabupaten Rokan Hilir.
+        </p>
+        <% if (surat.keterangan_tambahan) { %>
+            <p class="content-p"><%= surat.keterangan_tambahan %></p>
+        <% } %>
+        <p class="content-p">
+            Surat Keterangan ini diberikan kepada yang bersangkutan untuk keperluan: <b><%= surat.keperluan || 'Administrasi Resmi' %></b>.
+        </p>
+    <% } %>
+
+    <!-- PENUTUP -->
+    <p class="content-p">
+        Demikian Surat Keterangan ini kami buat dan berikan kepada yang bersangkutan dengan sebenarnya agar dapat dipergunakan sebagaimana mestinya.
+    </p>
+
+    <!-- TANDA TANGAN & QR CODE VALIDASI -->
+    <div class="sig-container">
+        <table class="sig-table">
+            <tr>
+                <td style="width: 50%; text-align: left; vertical-align: middle;">
+                    <div class="qr-box">
+                        <img src="<%= qrCodeDataUrl %>" alt="QR Code Validasi" style="width: 100px; height: 100px; display: block; margin: 0 auto;">
+                        <div class="qr-caption">
+                            <b>DOKUMEN RESMI</b><br>
+                            Terdaftar di SIAD 2.0 Kab. Rokan Hilir.<br>
+                            Pindai untuk verifikasi.
+                        </div>
+                    </div>
+                </td>
+                <td style="width: 50%; text-align: center;">
+                    <div><%= surat.kepenghuluan_nama %>, <%= tglSuratFormat %></div>
+                    <div style="font-weight: bold; margin-top: 2px;"><%= surat.penandatangan_jabatan || 'Penghulu' %> <%= surat.kepenghuluan_nama %></div>
+                    
+                    <div class="sig-space"></div>
+                    
+                    <div style="font-weight: bold; text-decoration: underline; text-transform: uppercase;">
+                        <%= surat.penandatangan_nama || surat.nama_kepala_desa || 'PENGHULU' %>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

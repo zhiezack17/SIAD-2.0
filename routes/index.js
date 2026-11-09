@@ -12,6 +12,7 @@ const masterController = require('../controllers/masterController');
 const pengaturanController = require('../controllers/pengaturanController');
 const bumdesController = require('../controllers/bumdesController');
 const searchController = require('../controllers/searchController');
+const pelayananController = require('../controllers/pelayananController');
 const ac = require('../middleware/access');
 
 const requireAuth = authController.requireAuth;
@@ -274,6 +275,13 @@ router.post('/surat/disposisi', requireAuth, suratController.postDisposisi);
 router.get('/surat/disposisi/cetak/:id', requireAuth, suratController.getCetakDisposisi);
 router.get('/surat/agenda/cetak', requireAuth, suratController.getCetakAgenda);
 router.get('/surat/agenda/excel', requireAuth, suratController.getExportAgendaExcel);
+
+// --- Rute Modul Layanan Administrasi Kependudukan (Surat Pengantar Warga) ---
+router.get('/surat/layanan', requireAuth, pelayananController.getIndex);
+router.post('/surat/layanan/buat', requireAuth, pelayananController.postBuat);
+router.get('/surat/layanan/cetak/:id', requireAuth, pelayananController.getCetak);
+router.post('/surat/layanan/hapus', requireAuth, pelayananController.postHapus);
+router.get('/validasi/surat/:id', pelayananController.getValidasiPublik);
 
 // --- Rute SPJ (GET) ---
 router.get('/spj', requireAuth, ac.blockKaurUmum, spjController.getIndex);

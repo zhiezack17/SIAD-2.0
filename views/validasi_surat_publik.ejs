@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            max-width: 520px;
+            width: 100%;
+            padding: 30px 25px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .badge-verified {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .badge-invalid {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin: 20px 0;
+            font-size: 13.5px;
+        }
+        .meta-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .meta-table td.label {
+            color: #64748b;
+            font-weight: 600;
+            width: 40%;
+        }
+        .meta-table td.val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .footer-note {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-top: 25px;
+            line-height: 1.4;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div style="margin-bottom: 15px;">
+            <img src="/assets/img/logo-rohil.png" onerror="this.src='/images/logo.png'; this.onerror=null;" alt="Logo Rohil" style="height: 60px; width: auto;">
+        </div>
+        <h2 style="margin: 0 0 5px 0; font-size: 18px; font-weight: 800; color: #0f172a;">SIAD 2.0 KABUPATEN ROKAN HILIR</h2>
+        <p style="margin: 0 0 20px 0; font-size: 12.5px; color: #64748b;">Sistem Informasi Arsip Digital & Pelayanan Administrasi Desa</p>
+
+        <% if (isValid && surat) { %>
+            <div class="badge-verified">
+                <span>✓</span> DOKUMEN RESMI TERVERIFIKASI
+            </div>
+            
+            <p style="font-size: 13px; color: #334155; margin: 0 0 15px 0;">
+                Dokumen ini resmi diterbitkan oleh <b>Pemerintah Kepenghuluan <%= surat.kepenghuluan_nama %></b>, Kecamatan <%= surat.kecamatan_nama %>, Kabupaten Rokan Hilir.
+            </p>
+
+            <table class="meta-table">
+                <tr>
+                    <td class="label">Nomor Surat</td>
+                    <td class="val" style="font-family: monospace;"><%= surat.nomor_surat %></td>
+                </tr>
+                <tr>
+                    <td class="label">Jenis Surat</td>
+                    <td class="val"><%= surat.jenis_surat %></td>
+                </tr>
+                <tr>
+                    <td class="label">Tanggal Diterbitkan</td>
+                    <td class="val"><%= new Date(surat.tanggal_surat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></td>
+                </tr>
+                <tr>
+                    <td class="label">Nama Pemohon / Warga</td>
+                    <td class="val" style="text-transform: uppercase;"><%= surat.nama_warga %></td>
+                </tr>
+                <tr>
+                    <td class="label">NIK Warga</td>
+                    <td class="val" style="font-family: monospace;">
+                        <%= surat.nik ? surat.nik.substring(0, 6) + '******' + surat.nik.substring(12) : '-' %>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Keperluan</td>
+                    <td class="val"><%= surat.keperluan || '-' %></td>
+                </tr>
+                <tr>
+                    <td class="label">Penandatangan</td>
+                    <td class="val"><%= surat.penandatangan_nama || 'Penghulu' %> (<%= surat.penandatangan_jabatan || 'Penghulu' %>)</td>
+                </tr>
+            </table>
+        <% } else { %>
+            <div class="badge-invalid">
+                <span>✗</span> DOKUMEN TIDAK TERDAFTAR
+            </div>
+            <p style="font-size: 13.5px; color: #64748b;">
+                Nomor identitas dokumen tidak ditemukan dalam basis data arsip SIAD 2.0. Harap periksa kembali keaslian dokumen fisik ke kantor kepenghuluan bersangkutan.
+            </p>
+        <% } %>
+
+        <div class="footer-note">
+            Keabsahan dokumen ini dilindungi oleh regulasi kearsipan digital dan sistem verifikasi QR Code terintegrasi Dinas Kominfotiks / Pemerintahan Desa Kabupaten Rokan Hilir.
+        </div>
+    </div>
+
+</body>
+</html>
