@@ -97,6 +97,11 @@
                     </select>
                 </div>
 
+                <!-- TOMBOL IMPORT BKU SISKEUDES -->
+                <button id="btn-import-bku-pajak" onclick="bukaModalImportBKU()" data-siad-tooltip="Import data Belanja SPP dan Setoran Pajak otomatis dari file BKU Siskeudes (PDF/Excel)" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(4,120,87,0.3);">
+                    📥 Import BKU Siskeudes
+                </button>
+
                 <!-- TOMBOL EKSPOR EXCEL -->
                 <button id="btn-export-pajak-excel" onclick="exportPajakToExcel()" data-siad-tooltip="Unduh seluruh rekap setoran pajak ke file Excel (.xlsx)" style="background: #15803d; color: white; border: none; padding: 9px 15px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                     📥 Unduh Excel (.xlsx)
@@ -368,6 +373,10 @@ function exportPajakToExcel() {
             <p style="margin:5px 0 0 0; color: #64748b;">Manajemen Data Induk SPJ & Alur Verifikasi Bertingkat</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- TOMBOL IMPORT BKU SISKEUDES -->
+            <button id="btn-import-bku-kegiatan" onclick="bukaModalImportBKU()" data-siad-tooltip="Import data Belanja SPP dan Setoran Pajak otomatis dari file BKU Siskeudes (PDF/Excel)" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(4,120,87,0.3);">
+                📥 Import BKU Siskeudes
+            </button>
             <!-- TOMBOL CETAK REKAPITULASI REALISASI SPJ (SISKEUDES) -->
             <button id="btn-rekap-realisasi" onclick="bukaModalFilterRekap()" data-siad-tooltip="Cetak rekapitulasi realisasi SPJ format Siskeudes" style="background: #0f172a; color: white; padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
                 🖨️ Rekapitulasi Realisasi (Siskeudes)
@@ -846,3 +855,786 @@ function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, 
 }
 </script>
 <% } %>
+
+<!-- ============================================================== -->
+<!-- MODAL IMPORT BKU SISKEUDES (AUTOMATED PARSER & DRAFT ENGINE)   -->
+<!-- ============================================================== -->
+<div id="modalImportBKU" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.65); display:none; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(4px); padding:20px; box-sizing:border-box;">
+    <div style="background:white; border-radius:14px; width:100%; max-width:1050px; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); overflow:hidden;">
+        
+        <!-- HEADER MODAL -->
+        <div style="padding:18px 24px; background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color:white; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155;">
+            <div>
+                <h3 style="margin:0; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <span>📥</span> Import BKU Siskeudes (Buku Kas Umum)
+                </h3>
+                <p style="margin:3px 0 0 0; font-size:12px; color:#94a3b8;">
+                    Ekstraksi Otomatis Belanja (SPP) ke SPJ Kegiatan dan Penyetoran Pajak (SSP) ke Buku Pembantu Pajak
+                </p>
+            </div>
+            <button type="button" onclick="tutupModalImportBKU()" style="background:transparent; border:none; color:#94a3b8; font-size:20px; cursor:pointer; line-height:1; padding:4px 8px; border-radius:6px; transition:0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94a3b8'">✕</button>
+        </div>
+
+        <!-- BODY MODAL -->
+        <div style="flex:1; overflow-y:auto; padding:24px; background:#f8fafc;">
+
+            <!-- STEP 1: UPLOAD & FILTER BIDANG -->
+            <div id="bkuStepUpload">
+                <!-- DROPZONE FILE -->
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-weight:700; font-size:13px; color:#1e293b; margin-bottom:6px;">
+                        1. Pilih Berkas Laporan BKU Siskeudes (.PDF atau .XLSX / .XLS) <span style="color:red;">*</span>
+                    </label>
+                    <div id="bkuDropzone" onclick="document.getElementById('bkuFileInput').click()" style="border:2px dashed #94a3b8; border-radius:10px; padding:25px 20px; text-align:center; background:white; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#2563eb'; this.style.background='#f0f7ff'" onmouseout="this.style.borderColor='#94a3b8'; this.style.background='white'">
+                        <div style="font-size:36px; margin-bottom:8px;">📄</div>
+                        <div style="font-size:14px; font-weight:700; color:#0f172a;" id="bkuDropzoneLabel">
+                            Klik di sini atau seret berkas BKU ke area ini
+                        </div>
+                        <div style="font-size:12px; color:#64748b; margin-top:4px;">
+                            Mendukung Laporan BKU Penatausahaan Siskeudes (PDF resmi hingga 100+ halaman atau file Excel)
+                        </div>
+                        <input type="file" id="bkuFileInput" accept=".pdf,.xlsx,.xls" style="display:none;" onchange="handleBkuFileSelected(this)">
+                    </div>
+                    <div id="bkuFileInfo" style="display:none; margin-top:8px; padding:8px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; font-size:12.5px; color:#166534; font-weight:600;">
+                        ✓ Berkas siap: <span id="bkuFileName">-</span> (<span id="bkuFileSize">-</span>)
+                    </div>
+                </div>
+
+                <!-- FILTER BIDANG (UNTUK KAUR/KASI) -->
+                <div style="background:white; border-radius:10px; padding:18px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <label style="font-weight:800; font-size:13px; color:#0f172a; display:block;">
+                                2. Pilih Bidang Kegiatan yang Hendak Diimpor:
+                            </label>
+                            <span style="font-size:11.5px; color:#64748b;">
+                                Memungkinkan Kaur / Kasi hanya mengimpor belanja yang menjadi kewenangannya masing-masing.
+                            </span>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" onclick="setAllBidangCheckboxes(true)" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:4px 10px; border-radius:5px; font-size:11.5px; font-weight:700; cursor:pointer; color:#334155;">
+                                ✓ Pilih Semua
+                            </button>
+                            <button type="button" onclick="setAllBidangCheckboxes(false)" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:4px 10px; border-radius:5px; font-size:11.5px; font-weight:700; cursor:pointer; color:#64748b;">
+                                ✕ Kosongkan
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:10px; margin-top:12px;">
+                        <!-- BIDANG 1 -->
+                        <label style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; transition:0.15s;">
+                            <input type="checkbox" class="bku-bidang-cb" value="Bidang 1: Penyelenggaraan Pemerintahan Desa" checked style="margin-top:3px; transform:scale(1.15);">
+                            <div>
+                                <div style="font-weight:700; font-size:12.5px; color:#0f172a;">Bidang 1: Pemerintahan Desa</div>
+                                <div style="font-size:11px; color:#64748b;">Kaur Tata Usaha & Umum (Siltap, Operasional, BPKep)</div>
+                            </div>
+                        </label>
+
+                        <!-- BIDANG 2 -->
+                        <label style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; transition:0.15s;">
+                            <input type="checkbox" class="bku-bidang-cb" value="Bidang 2: Pelaksanaan Pembangunan Desa" checked style="margin-top:3px; transform:scale(1.15);">
+                            <div>
+                                <div style="font-weight:700; font-size:12.5px; color:#0f172a;">Bidang 2: Pembangunan Desa</div>
+                                <div style="font-size:11px; color:#64748b;">Kaur Pembangunan / Kasi Kesejahteraan (Fisik & Sarpras)</div>
+                            </div>
+                        </label>
+
+                        <!-- BIDANG 3 -->
+                        <label style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; transition:0.15s;">
+                            <input type="checkbox" class="bku-bidang-cb" value="Bidang 3: Pembinaan Kemasyarakatan" checked style="margin-top:3px; transform:scale(1.15);">
+                            <div>
+                                <div style="font-weight:700; font-size:12.5px; color:#0f172a;">Bidang 3: Pembinaan Kemasyarakatan</div>
+                                <div style="font-size:11px; color:#64748b;">Kasi Pelayanan (Posyandu, Stunting, Guru Ngaji, HUT RI)</div>
+                            </div>
+                        </label>
+
+                        <!-- BIDANG 4 -->
+                        <label style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; transition:0.15s;">
+                            <input type="checkbox" class="bku-bidang-cb" value="Bidang 4: Pemberdayaan Masyarakat" checked style="margin-top:3px; transform:scale(1.15);">
+                            <div>
+                                <div style="font-weight:700; font-size:12.5px; color:#0f172a;">Bidang 4: Pemberdayaan Masyarakat</div>
+                                <div style="font-size:11px; color:#64748b;">Kaur Keuangan / BUMDes / BUMKep / Ketapang</div>
+                            </div>
+                        </label>
+
+                        <!-- BIDANG 5 -->
+                        <label style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; transition:0.15s;">
+                            <input type="checkbox" class="bku-bidang-cb" value="Bidang 5: Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa" checked style="margin-top:3px; transform:scale(1.15);">
+                            <div>
+                                <div style="font-weight:700; font-size:12.5px; color:#0f172a;">Bidang 5: Darurat & Mendesak Desa</div>
+                                <div style="font-size:11px; color:#64748b;">Satgas / Tim Pelaksana (BLT Dana Desa, Kebencanaan)</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- OPSI PAJAK & ATURAN VERIFIKASI -->
+                <div style="background:#eff6ff; border-radius:10px; padding:16px; border:1px solid #bfdbfe; margin-bottom:20px;">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                        <input type="checkbox" id="bkuIncludePajak" checked style="transform:scale(1.2); cursor:pointer;">
+                        <label for="bkuIncludePajak" style="font-weight:700; font-size:13px; color:#1e40af; cursor:pointer;">
+                            🧾 Sinkronkan Penyetoran Pajak (SSP) ke Buku Pembantu Pajak
+                        </label>
+                    </div>
+                    <div style="font-size:12px; color:#3b82f6; line-height:1.5; margin-left:26px;">
+                        Mencatat otomatis setoran PPN, PPh 21, PPh 22, PPh 23, dan Pajak Daerah beserta bukti SSP dan tanggal penyetoran.
+                    </div>
+                </div>
+
+                <!-- ATURAN VERIFIKASI & ARSIP HISTORIS -->
+                <div style="background:#fefce8; border-radius:10px; padding:16px; border:1px solid #fef08a;">
+                    <div style="font-weight:800; font-size:12.5px; color:#854d0e; display:flex; align-items:center; gap:6px;">
+                        ⚖️ Ketentuan Alur Verifikasi Bertingkat & Arsip Digital:
+                    </div>
+                    <ul style="margin:6px 0 0 20px; padding:0; font-size:12px; color:#713f12; line-height:1.6;">
+                        <li><strong>Tahun Anggaran &le; 2025:</strong> Dianggap sebagai arsip historis yang telah terealisasi lampau, dapat langsung disahkan final (Selesai) oleh Bendahara / Admin tanpa perlu verifikasi 4 jenjang berulang.</li>
+                        <li><strong>Tahun Anggaran &ge; 2026:</strong> Masuk sebagai status <strong>DRAFT</strong> agar diproses melalui alur verifikasi resmi 4 tahap (Kaur ➔ Bendahara ➔ Sekdes ➔ Penghulu).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- STEP 2: PREVIEW & SELECTION -->
+            <div id="bkuStepPreview" style="display:none;">
+                <!-- STATS CARDS -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:18px;">
+                    <div style="background:white; border-radius:8px; padding:12px 14px; border:1px solid #e2e8f0; border-left:4px solid #3b82f6;">
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">📍 Kepenghuluan</div>
+                        <div style="font-size:14px; font-weight:800; color:#0f172a; margin-top:3px;" id="prevDesa">-</div>
+                        <div style="font-size:11px; color:#64748b;" id="prevKecamatan">-</div>
+                    </div>
+
+                    <div style="background:white; border-radius:8px; padding:12px 14px; border:1px solid #e2e8f0; border-left:4px solid #8b5cf6;">
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">📅 Periode Anggaran</div>
+                        <div style="font-size:14px; font-weight:800; color:#0f172a; margin-top:3px;" id="prevTahun">-</div>
+                        <div style="font-size:11px; color:#64748b;" id="prevPeriode">-</div>
+                    </div>
+
+                    <div style="background:white; border-radius:8px; padding:12px 14px; border:1px solid #e2e8f0; border-left:4px solid #10b981;">
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">💰 Total Belanja (SPP)</div>
+                        <div style="font-size:15px; font-weight:800; color:#059669; margin-top:3px;" id="prevTotalBelanja">-</div>
+                        <div style="font-size:11px; color:#64748b;"><span id="prevCountSPP">0</span> SPP Terdeteksi</div>
+                    </div>
+
+                    <div style="background:white; border-radius:8px; padding:12px 14px; border:1px solid #e2e8f0; border-left:4px solid #f59e0b;">
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">🧾 Penyetoran Pajak (SSP)</div>
+                        <div style="font-size:15px; font-weight:800; color:#d97706; margin-top:3px;" id="prevTotalPajak">-</div>
+                        <div style="font-size:11px; color:#64748b;"><span id="prevCountPajak">0</span> Bukti SSP</div>
+                    </div>
+                </div>
+
+                <!-- PREVIEW TABS & CONTROLS -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; background:white; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" id="btnTabPreviewSPP" onclick="switchPreviewSubTab('spp')" style="background:#1d4ed8; color:white; border:none; padding:7px 14px; border-radius:6px; font-weight:700; font-size:12.5px; cursor:pointer;">
+                            📁 Belanja SPP (<span id="badgeTabSPP">0</span>)
+                        </button>
+                        <button type="button" id="btnTabPreviewPajak" onclick="switchPreviewSubTab('pajak')" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:7px 14px; border-radius:6px; font-weight:700; font-size:12.5px; cursor:pointer;">
+                            🧾 Setoran Pajak (<span id="badgeTabPajak">0</span>)
+                        </button>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div id="filterBidangPreviewWrapper" style="display:flex; align-items:center; gap:6px;">
+                            <label style="font-size:12px; font-weight:700; color:#475569;">Filter Bidang:</label>
+                            <select id="selFilterBidangPreview" onchange="applyPreviewBidangFilter()" style="padding:6px 10px; font-size:12px; border-radius:6px; border:1px solid #cbd5e1; background:white; font-weight:600;">
+                                <option value="ALL">Semua Bidang Terpilih</option>
+                                <option value="Bidang 1">Bidang 1: Pemerintahan</option>
+                                <option value="Bidang 2">Bidang 2: Pembangunan</option>
+                                <option value="Bidang 3">Bidang 3: Pembinaan</option>
+                                <option value="Bidang 4">Bidang 4: Pemberdayaan</option>
+                                <option value="Bidang 5">Bidang 5: Darurat & Mendesak</option>
+                            </select>
+                        </div>
+
+                        <button type="button" onclick="toggleSelectOnlyNew()" style="background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; padding:6px 11px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">
+                            ✨ Hanya Centang Data Baru
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABEL PREVIEW BELANJA SPP -->
+                <div id="subTabContentSPP" style="background:white; border-radius:8px; border:1px solid #e2e8f0; overflow:hidden;">
+                    <div style="max-height:360px; overflow-y:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                            <thead style="position:sticky; top:0; background:#f8fafc; z-index:2; border-bottom:2px solid #e2e8f0;">
+                                <tr style="color:#475569; text-align:left;">
+                                    <th style="padding:10px; width:35px; text-align:center;">
+                                        <input type="checkbox" id="cbSelectAllSPP" onchange="toggleSelectAllSPP(this.checked)" checked style="cursor:pointer;">
+                                    </th>
+                                    <th style="padding:10px; width:130px;">No. SPP & Tgl</th>
+                                    <th style="padding:10px;">Kegiatan & Uraian Belanja</th>
+                                    <th style="padding:10px; width:160px;">Bidang & Rekening</th>
+                                    <th style="padding:10px; width:85px;">Sumber</th>
+                                    <th style="padding:10px; text-align:right; width:120px;">Realisasi</th>
+                                    <th style="padding:10px; text-align:center; width:95px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyPreviewSPP">
+                                <!-- Generated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TABEL PREVIEW PAJAK -->
+                <div id="subTabContentPajak" style="background:white; border-radius:8px; border:1px solid #e2e8f0; overflow:hidden; display:none;">
+                    <div style="max-height:360px; overflow-y:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                            <thead style="position:sticky; top:0; background:#f8fafc; z-index:2; border-bottom:2px solid #e2e8f0;">
+                                <tr style="color:#475569; text-align:left;">
+                                    <th style="padding:10px; width:35px; text-align:center;">
+                                        <input type="checkbox" id="cbSelectAllPajak" onchange="toggleSelectAllPajak(this.checked)" checked style="cursor:pointer;">
+                                    </th>
+                                    <th style="padding:10px; width:130px;">No. SSP & Tgl</th>
+                                    <th style="padding:10px;">Uraian Penyetoran Pajak</th>
+                                    <th style="padding:10px; width:110px;">Jenis Pajak</th>
+                                    <th style="padding:10px; width:110px;">Kode Rekening</th>
+                                    <th style="padding:10px; text-align:right; width:120px;">Nominal Setor</th>
+                                    <th style="padding:10px; text-align:center; width:95px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyPreviewPajak">
+                                <!-- Generated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- OPSI FAST TRACK ARSIP HISTORIS (UNTUK TA <= 2025) -->
+                <div id="fastTrackNoticeBox" style="margin-top:14px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 16px; display:none;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="cbFastTrackArchive" checked style="transform:scale(1.2);">
+                        <span style="font-size:12.5px; font-weight:700; color:#166534;">
+                            ⚡ Sahkan Langsung sebagai Arsip Historis Final (Selesai)
+                        </span>
+                    </label>
+                    <div style="font-size:11.5px; color:#15803d; margin-left:24px; margin-top:3px;">
+                        Karena ini berkas tahun lampau (&le; 2025), data dapat langsung disahkan final sebagai arsip tanpa harus menunggu persetujuan 4 tahap manual.
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: SUCCESS STATE -->
+            <div id="bkuStepSuccess" style="display:none; text-align:center; padding:35px 20px;">
+                <div style="font-size:54px; margin-bottom:12px;">🎉</div>
+                <h3 style="margin:0; font-size:20px; font-weight:800; color:#0f172a;">Import BKU Siskeudes Selesai!</h3>
+                <p id="bkuSuccessMessage" style="margin:8px 0 20px 0; font-size:14px; color:#475569; line-height:1.6;">
+                    Data berhasil disimpan ke sistem SIAD 2.0.
+                </p>
+                <button type="button" onclick="location.reload()" style="background:#059669; color:white; border:none; padding:10px 24px; border-radius:8px; font-weight:700; font-size:13.5px; cursor:pointer; box-shadow:0 2px 4px rgba(5,150,105,0.3);">
+                    ✓ Selesai & Segarkan Halaman
+                </button>
+            </div>
+
+        </div>
+
+        <!-- FOOTER MODAL -->
+        <div id="bkuModalFooter" style="padding:16px 24px; background:white; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div id="bkuSelectionSummary" style="font-size:12.5px; font-weight:700; color:#334155; display:none;">
+                Terpilih: <span id="lblCountSelectedKegiatan" style="color:#2563eb;">0</span> Kegiatan 
+                (<span id="lblNominalSelectedKegiatan" style="color:#059669;">Rp 0</span>) &bull; 
+                <span id="lblCountSelectedPajak" style="color:#d97706;">0</span> Pajak 
+                (<span id="lblNominalSelectedPajak" style="color:#d97706;">Rp 0</span>)
+            </div>
+            <div style="display:flex; gap:10px; margin-left:auto;">
+                <button type="button" id="btnBkuBatal" onclick="tutupModalImportBKU()" style="padding:9px 18px; border:none; background:#e2e8f0; color:#475569; font-weight:700; font-size:13px; border-radius:6px; cursor:pointer;">
+                    Batal
+                </button>
+
+                <button type="button" id="btnBkuKembaliUpload" onclick="kembaliKeUploadBKU()" style="padding:9px 16px; border:1px solid #cbd5e1; background:white; color:#334155; font-weight:700; font-size:13px; border-radius:6px; cursor:pointer; display:none;">
+                    ⬅️ Pilih Berkas Lain
+                </button>
+
+                <button type="button" id="btnBkuAnalyze" onclick="prosesAnalisisBKU()" style="padding:9px 20px; border:none; background:#2563eb; color:white; font-weight:700; font-size:13px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,99,235,0.3);">
+                    🔍 Analisis & Pratinjau Berkas
+                </button>
+
+                <button type="button" id="btnBkuCommit" onclick="eksekusiImportBKU()" style="padding:9px 22px; border:none; background:#059669; color:white; font-weight:700; font-size:13px; border-radius:6px; cursor:pointer; display:none; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(5,150,105,0.3);">
+                    💾 Mulai Import ke Sistem
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ==============================================================
+// LOGIKA CLIENT-SIDE IMPORT BKU SISKEUDES
+// ==============================================================
+let bkuParsedData = null;
+let bkuSelectedFile = null;
+
+function bukaModalImportBKU() {
+    bkuParsedData = null;
+    bkuSelectedFile = null;
+    document.getElementById('bkuFileInput').value = '';
+    document.getElementById('bkuFileInfo').style.display = 'none';
+    document.getElementById('bkuDropzoneLabel').innerText = 'Klik di sini atau seret berkas BKU ke area ini';
+    
+    document.getElementById('bkuStepUpload').style.display = 'block';
+    document.getElementById('bkuStepPreview').style.display = 'none';
+    document.getElementById('bkuStepSuccess').style.display = 'none';
+
+    document.getElementById('btnBkuAnalyze').style.display = 'inline-flex';
+    document.getElementById('btnBkuKembaliUpload').style.display = 'none';
+    document.getElementById('btnBkuCommit').style.display = 'none';
+    document.getElementById('bkuSelectionSummary').style.display = 'none';
+    document.getElementById('bkuModalFooter').style.display = 'flex';
+
+    document.getElementById('modalImportBKU').style.display = 'flex';
+}
+
+function tutupModalImportBKU() {
+    document.getElementById('modalImportBKU').style.display = 'none';
+}
+
+function kembaliKeUploadBKU() {
+    document.getElementById('bkuStepUpload').style.display = 'block';
+    document.getElementById('bkuStepPreview').style.display = 'none';
+    document.getElementById('btnBkuAnalyze').style.display = 'inline-flex';
+    document.getElementById('btnBkuKembaliUpload').style.display = 'none';
+    document.getElementById('btnBkuCommit').style.display = 'none';
+    document.getElementById('bkuSelectionSummary').style.display = 'none';
+}
+
+function handleBkuFileSelected(input) {
+    if (input.files && input.files[0]) {
+        bkuSelectedFile = input.files[0];
+        document.getElementById('bkuFileName').innerText = bkuSelectedFile.name;
+        const kb = Math.round(bkuSelectedFile.size / 1024);
+        document.getElementById('bkuFileSize').innerText = kb > 1024 ? (kb / 1024).toFixed(2) + ' MB' : kb + ' KB';
+        document.getElementById('bkuFileInfo').style.display = 'block';
+        document.getElementById('bkuDropzoneLabel').innerText = bkuSelectedFile.name;
+    }
+}
+
+function setAllBidangCheckboxes(checked) {
+    const cbs = document.querySelectorAll('.bku-bidang-cb');
+    cbs.forEach(cb => cb.checked = checked);
+}
+
+function getSelectedBidangList() {
+    const checked = [];
+    document.querySelectorAll('.bku-bidang-cb:checked').forEach(cb => {
+        checked.push(cb.value);
+    });
+    return checked;
+}
+
+// DRAG AND DROP HANDLERS
+const dropzoneEl = document.getElementById('bkuDropzone');
+if (dropzoneEl) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzoneEl.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzoneEl.style.borderColor = '#2563eb';
+            dropzoneEl.style.background = '#f0f7ff';
+        }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzoneEl.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzoneEl.style.borderColor = '#94a3b8';
+            dropzoneEl.style.background = 'white';
+        }, false);
+    });
+    dropzoneEl.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files[0]) {
+            bkuSelectedFile = dt.files[0];
+            document.getElementById('bkuFileInput').files = dt.files;
+            handleBkuFileSelected(document.getElementById('bkuFileInput'));
+        }
+    });
+}
+
+// 1. KIRIM BERKAS KE BACKEND UNTUK DIANALISIS
+async function prosesAnalisisBKU() {
+    if (!bkuSelectedFile) {
+        return alert('Harap pilih berkas BKU Siskeudes (PDF atau Excel) terlebih dahulu!');
+    }
+
+    const selectedBidang = getSelectedBidangList();
+    if (selectedBidang.length === 0) {
+        return alert('Harap pilih minimal satu Bidang Kegiatan yang hendak diimpor!');
+    }
+
+    const btnAnalyze = document.getElementById('btnBkuAnalyze');
+    const originalText = btnAnalyze.innerHTML;
+    btnAnalyze.disabled = true;
+    btnAnalyze.innerHTML = '⏳ Membaca & Menganalisis BKU...';
+
+    try {
+        const formData = new FormData();
+        formData.append('file_bku', bkuSelectedFile);
+
+        const resp = await fetch('/spj/bku/preview', {
+            method: 'POST',
+            body: formData
+        });
+
+        const res = await resp.json();
+        if (!res.success) {
+            alert('Gagal menganalisis berkas BKU: ' + (res.message || 'Format tidak sesuai'));
+            btnAnalyze.disabled = false;
+            btnAnalyze.innerHTML = originalText;
+            return;
+        }
+
+        bkuParsedData = res;
+        tampilkanPratinjauBKU(res);
+
+    } catch (err) {
+        console.error('Error prosesAnalisisBKU:', err);
+        alert('Terjadi kesalahan saat memproses BKU: ' + err.message);
+    } finally {
+        btnAnalyze.disabled = false;
+        btnAnalyze.innerHTML = originalText;
+    }
+}
+
+// 2. RENDER PRATINJAU INTERAKTIF
+function tampilkanPratinjauBKU(data) {
+    document.getElementById('prevDesa').innerText = data.meta.desa || data.user_desa || 'Kepenghuluan';
+    document.getElementById('prevKecamatan').innerText = data.meta.kecamatan ? 'Kec. ' + data.meta.kecamatan : '';
+    document.getElementById('prevTahun').innerText = 'TA ' + (data.meta.tahun || new Date().getFullYear());
+    document.getElementById('prevPeriode').innerText = data.meta.periode || 'Tahun Anggaran Berjalan';
+    
+    document.getElementById('prevTotalBelanja').innerText = 'Rp ' + Number(data.summary.total_realisasi || 0).toLocaleString('id-ID');
+    document.getElementById('prevCountSPP').innerText = data.kegiatan ? data.kegiatan.length : 0;
+    
+    document.getElementById('prevTotalPajak').innerText = 'Rp ' + Number(data.summary.total_setoran_pajak || 0).toLocaleString('id-ID');
+    document.getElementById('prevCountPajak').innerText = data.pajak ? data.pajak.length : 0;
+
+    document.getElementById('badgeTabSPP').innerText = data.kegiatan ? data.kegiatan.length : 0;
+    document.getElementById('badgeTabPajak').innerText = data.pajak ? data.pajak.length : 0;
+
+    // Fast-track notice
+    const fastTrackBox = document.getElementById('fastTrackNoticeBox');
+    if (data.is_historis) {
+        fastTrackBox.style.display = 'block';
+    } else {
+        fastTrackBox.style.display = 'none';
+    }
+
+    renderTableSPP();
+    renderTablePajak();
+    updateLiveTally();
+
+    // Switch view
+    document.getElementById('bkuStepUpload').style.display = 'none';
+    document.getElementById('bkuStepPreview').style.display = 'block';
+    document.getElementById('btnBkuAnalyze').style.display = 'none';
+    document.getElementById('btnBkuKembaliUpload').style.display = 'inline-block';
+    document.getElementById('btnBkuCommit').style.display = 'inline-flex';
+    document.getElementById('bkuSelectionSummary').style.display = 'block';
+}
+
+function switchPreviewSubTab(tab) {
+    const btnSPP = document.getElementById('btnTabPreviewSPP');
+    const btnPajak = document.getElementById('btnTabPreviewPajak');
+    const contentSPP = document.getElementById('subTabContentSPP');
+    const contentPajak = document.getElementById('subTabContentPajak');
+    const filterBidangWrapper = document.getElementById('filterBidangPreviewWrapper');
+
+    if (tab === 'spp') {
+        btnSPP.style.background = '#1d4ed8';
+        btnSPP.style.color = 'white';
+        btnSPP.style.border = 'none';
+        btnPajak.style.background = '#f1f5f9';
+        btnPajak.style.color = '#475569';
+        btnPajak.style.border = '1px solid #cbd5e1';
+
+        contentSPP.style.display = 'block';
+        contentPajak.style.display = 'none';
+        if (filterBidangWrapper) filterBidangWrapper.style.display = 'flex';
+    } else {
+        btnPajak.style.background = '#1d4ed8';
+        btnPajak.style.color = 'white';
+        btnPajak.style.border = 'none';
+        btnSPP.style.background = '#f1f5f9';
+        btnSPP.style.color = '#475569';
+        btnSPP.style.border = '1px solid #cbd5e1';
+
+        contentPajak.style.display = 'block';
+        contentSPP.style.display = 'none';
+        if (filterBidangWrapper) filterBidangWrapper.style.display = 'none';
+    }
+}
+
+function renderTableSPP() {
+    const tbody = document.getElementById('tbodyPreviewSPP');
+    if (!tbody || !bkuParsedData || !bkuParsedData.kegiatan) return;
+
+    const allowedBidang = getSelectedBidangList();
+    const selFilter = document.getElementById('selFilterBidangPreview').value;
+
+    let html = '';
+    bkuParsedData.kegiatan.forEach((item, idx) => {
+        // Cek filter bidang awal
+        if (!allowedBidang.includes(item.bidang)) return;
+        // Cek filter bidang dropdown dalam preview
+        if (selFilter !== 'ALL' && !item.bidang.includes(selFilter)) return;
+
+        const isDup = item.is_duplicate;
+        const isChecked = !isDup; // Duplikat otomatis tidak tercentang
+
+        html += `
+            <tr style="border-bottom:1px solid #f1f5f9; ${isDup ? 'background:#fffbeb;' : ''}">
+                <td style="padding:10px; text-align:center;">
+                    <input type="checkbox" class="cb-preview-spp" data-idx="${idx}" ${isChecked ? 'checked' : ''} onchange="updateLiveTally()">
+                </td>
+                <td style="padding:10px;">
+                    <div style="font-weight:700; color:#0f172a; font-family:monospace; font-size:11.5px;">${item.no_bukti || '-'}</div>
+                    <div style="color:#64748b; font-size:11px;">📅 ${item.tanggal || '-'}</div>
+                </td>
+                <td style="padding:10px;">
+                    <div style="font-weight:700; color:#0f172a; font-size:12.5px;">${item.nama_kegiatan}</div>
+                    <div style="font-size:11px; color:#475569; margin-top:2px;">${item.jabatan_pelaksana || 'Pelaksana'}</div>
+                </td>
+                <td style="padding:10px;">
+                    <div style="font-weight:600; color:#334155; font-size:11px;">${item.bidang.split(':')[0]}</div>
+                    <div style="font-family:monospace; font-size:10.5px; color:#2563eb;">Rek: ${item.kode_rekening || '-'}</div>
+                </td>
+                <td style="padding:10px;">
+                    <span style="background:#eef2ff; color:#3730a3; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10.5px; border:1px solid #c7d2fe;">
+                        ${(item.sumber_dana || '').split(' ')[0]}
+                    </span>
+                </td>
+                <td style="padding:10px; text-align:right; font-weight:800; color:#0f172a;">
+                    Rp ${Number(item.realisasi_anggaran || 0).toLocaleString('id-ID')}
+                </td>
+                <td style="padding:10px; text-align:center;">
+                    ${isDup ? `
+                        <span style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:20px; font-weight:700; font-size:10px; border:1px solid #fde68a;" title="Sudah tercatat di SIAD sebelumnya">
+                            ⚠️ Duplikat
+                        </span>
+                    ` : `
+                        <span style="background:#ecfdf5; color:#065f46; padding:3px 8px; border-radius:20px; font-weight:700; font-size:10px; border:1px solid #a7f3d0;">
+                            ✨ Baru
+                        </span>
+                    `}
+                </td>
+            </tr>
+        `;
+    });
+
+    if (!html) {
+        html = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#94a3b8;">Tidak ada kegiatan pada bidang yang dipilih.</td></tr>`;
+    }
+
+    tbody.innerHTML = html;
+}
+
+function renderTablePajak() {
+    const tbody = document.getElementById('tbodyPreviewPajak');
+    if (!tbody || !bkuParsedData || !bkuParsedData.pajak) return;
+
+    const includePajak = document.getElementById('bkuIncludePajak').checked;
+
+    let html = '';
+    bkuParsedData.pajak.forEach((item, idx) => {
+        const isDup = item.is_duplicate;
+        const isChecked = includePajak && !isDup;
+
+        html += `
+            <tr style="border-bottom:1px solid #f1f5f9; ${isDup ? 'background:#fffbeb;' : ''}">
+                <td style="padding:10px; text-align:center;">
+                    <input type="checkbox" class="cb-preview-pajak" data-idx="${idx}" ${isChecked ? 'checked' : ''} onchange="updateLiveTally()">
+                </td>
+                <td style="padding:10px;">
+                    <div style="font-weight:700; color:#0f172a; font-family:monospace; font-size:11.5px;">${item.no_bukti || '-'}</div>
+                    <div style="color:#64748b; font-size:11px;">📅 ${item.tanggal || '-'}</div>
+                </td>
+                <td style="padding:10px;">
+                    <div style="font-weight:600; color:#0f172a; font-size:12px;">${item.uraian}</div>
+                </td>
+                <td style="padding:10px;">
+                    <span style="background:#dbeafe; color:#1e40af; padding:2px 7px; border-radius:4px; font-weight:700; font-size:11px;">
+                        ${item.jenis_pajak || 'Pajak'}
+                    </span>
+                </td>
+                <td style="padding:10px; font-family:monospace; font-size:11px; color:#475569;">
+                    ${item.kode_rekening || '-'}
+                </td>
+                <td style="padding:10px; text-align:right; font-weight:800; color:#15803d;">
+                    Rp ${Number(item.nominal || 0).toLocaleString('id-ID')}
+                </td>
+                <td style="padding:10px; text-align:center;">
+                    ${isDup ? `
+                        <span style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:20px; font-weight:700; font-size:10px; border:1px solid #fde68a;">
+                            ⚠️ Duplikat
+                        </span>
+                    ` : `
+                        <span style="background:#ecfdf5; color:#065f46; padding:3px 8px; border-radius:20px; font-weight:700; font-size:10px; border:1px solid #a7f3d0;">
+                            ✨ Baru
+                        </span>
+                    `}
+                </td>
+            </tr>
+        `;
+    });
+
+    if (!html) {
+        html = `<tr><td colspan="7" style="text-align:center; padding:25px; color:#94a3b8;">Tidak ada data setoran pajak pada berkas ini.</td></tr>`;
+    }
+
+    tbody.innerHTML = html;
+}
+
+function applyPreviewBidangFilter() {
+    renderTableSPP();
+    updateLiveTally();
+}
+
+function toggleSelectAllSPP(checked) {
+    document.querySelectorAll('.cb-preview-spp').forEach(cb => cb.checked = checked);
+    updateLiveTally();
+}
+
+function toggleSelectAllPajak(checked) {
+    document.querySelectorAll('.cb-preview-pajak').forEach(cb => cb.checked = checked);
+    updateLiveTally();
+}
+
+function toggleSelectOnlyNew() {
+    if (!bkuParsedData) return;
+    document.querySelectorAll('.cb-preview-spp').forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = bkuParsedData.kegiatan[idx];
+        cb.checked = !item.is_duplicate;
+    });
+    document.querySelectorAll('.cb-preview-pajak').forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = bkuParsedData.pajak[idx];
+        cb.checked = !item.is_duplicate;
+    });
+    updateLiveTally();
+}
+
+function updateLiveTally() {
+    if (!bkuParsedData) return;
+
+    let countKeg = 0;
+    let nomKeg = 0;
+    document.querySelectorAll('.cb-preview-spp:checked').forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = bkuParsedData.kegiatan[idx];
+        if (item) {
+            countKeg++;
+            nomKeg += Number(item.realisasi_anggaran || 0);
+        }
+    });
+
+    let countPajak = 0;
+    let nomPajak = 0;
+    document.querySelectorAll('.cb-preview-pajak:checked').forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = bkuParsedData.pajak[idx];
+        if (item) {
+            countPajak++;
+            nomPajak += Number(item.nominal || 0);
+        }
+    });
+
+    document.getElementById('lblCountSelectedKegiatan').innerText = countKeg;
+    document.getElementById('lblNominalSelectedKegiatan').innerText = 'Rp ' + nomKeg.toLocaleString('id-ID');
+    document.getElementById('lblCountSelectedPajak').innerText = countPajak;
+    document.getElementById('lblNominalSelectedPajak').innerText = 'Rp ' + nomPajak.toLocaleString('id-ID');
+
+    const totalSelected = countKeg + countPajak;
+    const btnCommit = document.getElementById('btnBkuCommit');
+    btnCommit.innerText = `💾 Mulai Import ke Sistem (${totalSelected} Item)`;
+    btnCommit.disabled = totalSelected === 0;
+}
+
+// 3. EKSEKUSI PENYIMPANAN KE DATABASE
+async function eksekusiImportBKU() {
+    if (!bkuParsedData) return;
+
+    const selectedKegiatan = [];
+    document.querySelectorAll('.cb-preview-spp:checked').forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = bkuParsedData.kegiatan[idx];
+        if (item) selectedKegiatan.push(item);
+    });
+
+    const selectedPajak = [];
+    document.querySelectorAll('.cb-preview-pajak:checked').forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = bkuParsedData.pajak[idx];
+        if (item) selectedPajak.push(item);
+    });
+
+    if (selectedKegiatan.length === 0 && selectedPajak.length === 0) {
+        return alert('Pilih minimal satu kegiatan SPJ atau data pajak untuk diimpor!');
+    }
+
+    const tahun = bkuParsedData.meta.tahun || new Date().getFullYear();
+    const isHistoris = bkuParsedData.is_historis;
+    const fastTrackEl = document.getElementById('cbFastTrackArchive');
+    const fastTrack = isHistoris && fastTrackEl && fastTrackEl.checked;
+
+    let confirmMsg = `Konfirmasi Import BKU:\n\n` +
+        `• Jumlah Kegiatan SPJ: ${selectedKegiatan.length} transaksi\n` +
+        `• Jumlah Setoran Pajak: ${selectedPajak.length} bukti SSP\n` +
+        `• Tahun Anggaran: ${tahun}\n`;
+
+    if (fastTrack) {
+        confirmMsg += `• Alur: ARSIP HISTORIS FINAL (Otomatis disahkan tanpa 4 tahap verifikasi manual)\n\n`;
+    } else {
+        confirmMsg += `• Alur: DRAFT BERJENJANG (Wajib verifikasi bertingkat 4 tahap: Kaur ➔ Bendahara ➔ Sekdes ➔ Penghulu)\n\n`;
+    }
+
+    confirmMsg += `Lanjutkan proses penyimpanan ke database?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    const btnCommit = document.getElementById('btnBkuCommit');
+    const originalText = btnCommit.innerHTML;
+    btnCommit.disabled = true;
+    btnCommit.innerHTML = '⏳ Menyimpan ke Database...';
+
+    try {
+        const resp = await fetch('/spj/bku/import', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                kegiatan: selectedKegiatan,
+                pajak: selectedPajak,
+                tahun: tahun,
+                fast_track: fastTrack
+            })
+        });
+
+        const res = await resp.json();
+        if (!res.success) {
+            alert('Gagal mengimpor data BKU: ' + (res.message || 'Terjadi kesalahan'));
+            btnCommit.disabled = false;
+            btnCommit.innerHTML = originalText;
+            return;
+        }
+
+        // Tampilkan State Sukses
+        document.getElementById('bkuStepPreview').style.display = 'none';
+        document.getElementById('bkuModalFooter').style.display = 'none';
+        document.getElementById('bkuStepSuccess').style.display = 'block';
+        document.getElementById('bkuSuccessMessage').innerHTML = `
+            <strong>${res.inserted_kegiatan || 0} Kegiatan SPJ</strong> berhasil ditambahkan ke Induk SPJ.<br>
+            <strong>${res.inserted_pajak || 0} Setoran Pajak</strong> berhasil dicatat ke Buku Pembantu Pajak.
+        `;
+
+    } catch (err) {
+        console.error('Error eksekusiImportBKU:', err);
+        alert('Terjadi kesalahan saat menyimpan data: ' + err.message);
+        btnCommit.disabled = false;
+        btnCommit.innerHTML = originalText;
+    }
+}
+</script>

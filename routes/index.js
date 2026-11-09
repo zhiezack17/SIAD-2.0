@@ -302,6 +302,10 @@ router.get('/spj/pajak/:id', requireAuth, ac.blockKaurUmum, spjController.getPaj
 router.post('/spj/pajak/tambah', requireAuth, ac.blockKaurUmum, upload.single('file_bukti'), spjController.postTambahPajak);
 router.post('/spj/pajak/hapus', requireAuth, ac.blockKaurUmum, spjController.postDeletePajak);
 
+// --- Rute Import BKU Siskeudes (PDF & Excel) ---
+router.post('/spj/bku/preview', requireAuth, ac.blockKaurUmum, upload.single('file_bku'), spjController.postPreviewBku);
+router.post('/spj/bku/import', requireAuth, ac.blockKaurUmum, express.json({ limit: '20mb' }), spjController.postImportBku);
+
 
 
 router.get('/produk-hukum', requireAuth, ac.blockKaurUmum, produkHukumController.getIndex);

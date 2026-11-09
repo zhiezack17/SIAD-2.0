@@ -2,6 +2,7 @@ const db = require('../config/db');
 const { uploadToDrive, deleteFromDrive } = require('../config/drive');
 const ac = require('../middleware/access');
 const QRCode = require('qrcode');
+const bkuParser = require('../services/bkuParser');
 
 const spjController = {
     // === INDUK KEGIATAN SPJ ===
@@ -1334,6 +1335,298 @@ const spjController = {
         } catch (error) {
             console.error('[SPJ:getCetakBukuPajak]', error);
             res.redirect('/spj?status=error&msg=' + encodeURIComponent(error.message));
+        }
+    },
+
+    // === IMPORT BKU SISKEUDES (PDF & EXCEL) ===
+    postPreviewBku: async (req, res) => {
+        try {
+            if (!req.file || !req.file.buffer) {
+                return res.status(400).json({ success: false, message: 'Harap pilih berkas BKU Siskeudes (format PDF atau Excel).' });
+            }
+
+            const parsed = await bkuParser.parseBku(req.file.buffer, req.file.originalname, req.file.mimetype);
+
+            if (!parsed.kegiatan || parsed.kegiatan.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Tidak ditemukan transaksi belanja (SPP) dalam berkas BKU ini. Pastikan berkas adalah Laporan BKU Siskeudes yang valid.' 
+                });
+            }
+
+            const did = ac.getDesaId(req);
+            const tahun = parsed.meta.tahun || new Date().getFullYear();
+
+            // Cek data existing di database untuk deteksi duplikasi
+            const existingKegiatanMap = new Map();
+            if (did) {
+                try {
+                    const existRes = await db.query(
+                        `SELECT id, nama_kegiatan, kode_rekening, keterangan, realisasi_anggaran 
+                         FROM spj_kegiatan 
+                         WHERE (kepenghuluan_id = $1 OR kepenghuluan_id IS NULL) AND tahun = $2`,
+                        [did, tahun]
+                    );
+                    existRes.rows.forEach(row => {
+                        if (row.keterangan) {
+                            existingKegiatanMap.set(row.keterangan.trim().toLowerCase(), row);
+                        }
+                        if (row.nama_kegiatan) {
+                            existingKegiatanMap.set(row.nama_kegiatan.trim().toLowerCase(), row);
+                        }
+                    });
+                } catch (errCheck) {
+                    console.warn('[postPreviewBku:checkExistingKegiatan]', errCheck.message);
+                }
+            }
+
+            // Tandai kegiatan apakah baru atau duplikat
+            const kegiatanEnriched = parsed.kegiatan.map((item, idx) => {
+                const noBuktiKey = item.no_bukti ? item.no_bukti.toLowerCase() : '';
+                const namaKey = item.nama_kegiatan ? item.nama_kegiatan.toLowerCase() : '';
+                
+                let isDuplicate = false;
+                let existingId = null;
+
+                for (const [key, val] of existingKegiatanMap.entries()) {
+                    if (noBuktiKey && key.includes(noBuktiKey)) {
+                        isDuplicate = true;
+                        existingId = val.id;
+                        break;
+                    }
+                    if (namaKey && (key.includes(namaKey) || namaKey.includes(key))) {
+                        isDuplicate = true;
+                        existingId = val.id;
+                        break;
+                    }
+                }
+
+                return {
+                    id_temp: idx + 1,
+                    ...item,
+                    is_duplicate: isDuplicate,
+                    existing_id: existingId
+                };
+            });
+
+            // Cek duplikasi untuk setoran pajak
+            const existingPajakSet = new Set();
+            if (did) {
+                try {
+                    const existPajak = await db.query(
+                        `SELECT kode_billing, ntpn, uraian, nominal 
+                         FROM spj_pajak 
+                         WHERE (kepenghuluan_id = $1 OR kepenghuluan_id IS NULL)`,
+                        [did]
+                    );
+                    existPajak.rows.forEach(r => {
+                        if (r.kode_billing) existingPajakSet.add(r.kode_billing.trim().toLowerCase());
+                        if (r.ntpn) existingPajakSet.add(r.ntpn.trim().toLowerCase());
+                        if (r.uraian) existingPajakSet.add(r.uraian.trim().toLowerCase());
+                    });
+                } catch (errP) {
+                    console.warn('[postPreviewBku:checkExistingPajak]', errP.message);
+                }
+            }
+
+            const pajakEnriched = (parsed.pajak_setoran || []).map((p, idx) => {
+                const noBuktiKey = p.no_bukti ? p.no_bukti.toLowerCase() : '';
+                const uraianKey = p.uraian ? p.uraian.toLowerCase() : '';
+                const isDup = (noBuktiKey && existingPajakSet.has(noBuktiKey)) || (uraianKey && existingPajakSet.has(uraianKey));
+                return {
+                    id_temp: idx + 1,
+                    ...p,
+                    is_duplicate: isDup
+                };
+            });
+
+            return res.json({
+                success: true,
+                meta: parsed.meta,
+                summary: parsed.summary,
+                kegiatan: kegiatanEnriched,
+                pajak: pajakEnriched,
+                user_desa: ac.getDesaNama(req, 'Desa'),
+                is_historis: Number(tahun) <= 2025
+            });
+
+        } catch (error) {
+            console.error('[SPJ:postPreviewBku]', error);
+            return res.status(500).json({ success: false, message: 'Gagal memproses berkas BKU: ' + error.message });
+        }
+    },
+
+    postImportBku: async (req, res) => {
+        try {
+            const { kegiatan, pajak, tahun, fast_track } = req.body;
+            const did = ac.getDesaId(req);
+            const userNama = req.session && req.session.user ? (req.session.user.nama || req.session.user.username) : 'Bendahara Desa';
+            const userRole = ac.getUserRole(req);
+            const admin = ac.isAdmin(req);
+            const tahunNum = tahun ? Number(tahun) : new Date().getFullYear();
+            const isHistoris = tahunNum <= 2025;
+            const canFastTrackArchive = isHistoris && (fast_track === true || fast_track === 'true') && (userRole.includes('bendahara') || admin);
+
+            let insertedKegiatan = 0;
+            let insertedPajak = 0;
+            const kegiatanIdMap = new Map();
+
+            // 1. Simpan Kegiatan SPJ Terpilih
+            if (Array.isArray(kegiatan) && kegiatan.length > 0) {
+                for (const item of kegiatan) {
+                    const nama = item.nama_kegiatan || 'Belanja SPJ';
+                    const pagu = Number(item.pagu_anggaran) || Number(item.realisasi_anggaran) || 0;
+                    const realisasi = Number(item.realisasi_anggaran) || pagu;
+                    const noBukti = item.no_bukti || '';
+                    const ket = `[BKU Siskeudes: ${noBukti}] ${item.uraian_rincian || ''}`.trim();
+                    const bidang = item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
+                    const kodeRek = item.kode_rekening || '';
+                    const sumberDana = item.sumber_dana || 'DDS (Dana Desa)';
+                    const jenisBelanja = item.jenis_belanja || 'barang_jasa';
+                    const pelaksana = item.jabatan_pelaksana || 'Kaur / Kasi Pelaksana Kegiatan';
+                    
+                    let tglMulai = null;
+                    if (item.tanggal && item.tanggal.includes('/')) {
+                        const parts = item.tanggal.split('/');
+                        if (parts.length === 3) {
+                            tglMulai = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                        }
+                    }
+
+                    let insertSql = '';
+                    let insertParams = [];
+
+                    if (canFastTrackArchive) {
+                        // MODE ARSIP HISTORIS (TA <= 2025): Langsung disahkan SELESAI / SELESAI_FINAL
+                        insertSql = `
+                            INSERT INTO spj_kegiatan 
+                            (nama_kegiatan, tahun, pagu_anggaran, realisasi_anggaran, lokasi, tanggal_mulai, status, keterangan, kepenghuluan_id, tahap_verifikasi,
+                             bidang, sub_bidang, kode_rekening, tahap, sumber_dana, jenis_belanja, prioritas_permendes,
+                             nama_pelaksana, jabatan_pelaksana,
+                             verifikasi_bendahara_oleh, verifikasi_bendahara_at,
+                             verifikasi_sekdes_oleh, verifikasi_sekdes_at,
+                             persetujuan_penghulu_oleh, persetujuan_penghulu_at,
+                             catatan_revisi)
+                            VALUES ($1, $2, $3, $4, $5, $6, 'SELESAI', $7, $8, 'SELESAI_FINAL',
+                                    $9, $10, $11, 'Tahap 1', $12, $13, 'non_prioritas',
+                                    $14, $15,
+                                    $16, NOW(), 'Tidak Diperlukan (Arsip Historis BKU)', NOW(), 'Tidak Diperlukan (Arsip Historis BKU)', NOW(),
+                                    $17)
+                            RETURNING id
+                        `;
+                        insertParams = [
+                            nama,
+                            tahunNum,
+                            pagu,
+                            realisasi,
+                            item.lokasi || 'Kepenghuluan',
+                            tglMulai,
+                            ket,
+                            did || null,
+                            bidang,
+                            item.sub_bidang || '',
+                            kodeRek,
+                            sumberDana,
+                            jenisBelanja,
+                            userNama,
+                            pelaksana,
+                            userNama,
+                            `[IMPORT BKU SISKEUDES TA ${tahunNum}] Diimpor otomatis ke Arsip Historis oleh ${userNama}.`
+                        ];
+                    } else {
+                        // MODE DRAFT BERJENJANG (TA >= 2026 atau DRAFT biasa):
+                        // Masuk sebagai DRAFT agar diverifikasi berjenjang 4 tahap
+                        insertSql = `
+                            INSERT INTO spj_kegiatan 
+                            (nama_kegiatan, tahun, pagu_anggaran, realisasi_anggaran, lokasi, tanggal_mulai, status, keterangan, kepenghuluan_id, tahap_verifikasi,
+                             bidang, sub_bidang, kode_rekening, tahap, sumber_dana, jenis_belanja, prioritas_permendes,
+                             nama_pelaksana, jabatan_pelaksana)
+                            VALUES ($1, $2, $3, $4, $5, $6, 'DRAFT', $7, $8, 'DRAFT',
+                                    $9, $10, $11, 'Tahap 1', $12, $13, 'non_prioritas',
+                                    $14, $15)
+                            RETURNING id
+                        `;
+                        insertParams = [
+                            nama,
+                            tahunNum,
+                            pagu,
+                            realisasi,
+                            item.lokasi || 'Kepenghuluan',
+                            tglMulai,
+                            ket,
+                            did || null,
+                            bidang,
+                            item.sub_bidang || '',
+                            kodeRek,
+                            sumberDana,
+                            jenisBelanja,
+                            userNama,
+                            pelaksana
+                        ];
+                    }
+
+                    const resKeg = await db.query(insertSql, insertParams);
+                    if (resKeg.rows.length > 0) {
+                        insertedKegiatan++;
+                        const newId = resKeg.rows[0].id;
+                        if (noBukti) kegiatanIdMap.set(noBukti.toLowerCase(), newId);
+                        if (nama) kegiatanIdMap.set(nama.toLowerCase(), newId);
+                    }
+                }
+            }
+
+            // 2. Simpan Setoran Pajak Terpilih
+            if (Array.isArray(pajak) && pajak.length > 0) {
+                for (const p of pajak) {
+                    const nom = Number(p.nominal) || 0;
+                    if (nom <= 0) continue;
+
+                    let tglSetor = null;
+                    if (p.tanggal && p.tanggal.includes('/')) {
+                        const parts = p.tanggal.split('/');
+                        if (parts.length === 3) {
+                            tglSetor = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                        }
+                    }
+
+                    // Kaitkan dengan kegiatan jika ada kecocokan uraian
+                    let matchedKegId = null;
+                    const pUraian = (p.uraian || '').toLowerCase();
+                    for (const [k, kid] of kegiatanIdMap.entries()) {
+                        if (k && pUraian.includes(k.substring(0, 18))) {
+                            matchedKegId = kid;
+                            break;
+                        }
+                    }
+
+                    await db.query(`
+                        INSERT INTO spj_pajak 
+                        (kegiatan_id, jenis_pajak, nominal, kepenghuluan_id, ntpn, kode_billing, tanggal_setor, uraian)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    `, [
+                        matchedKegId,
+                        p.jenis_pajak || 'PPN',
+                        nom,
+                        did || null,
+                        p.no_bukti || null,
+                        p.kode_rekening || null,
+                        tglSetor || new Date(),
+                        `[SSP: ${p.no_bukti || '-'}] ${p.uraian || 'Penyetoran Pajak BKU'}`
+                    ]);
+                    insertedPajak++;
+                }
+            }
+
+            return res.json({
+                success: true,
+                message: `Berhasil mengimpor ${insertedKegiatan} kegiatan SPJ dan ${insertedPajak} data setoran pajak dari BKU Siskeudes!`,
+                inserted_kegiatan: insertedKegiatan,
+                inserted_pajak: insertedPajak
+            });
+
+        } catch (error) {
+            console.error('[SPJ:postImportBku]', error);
+            return res.status(500).json({ success: false, message: 'Gagal mengimpor data BKU: ' + error.message });
         }
     }
 };
