@@ -391,23 +391,23 @@ function exportPajakToExcel() {
         <table id="tabel-spj-kegiatan" style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
             <thead>
                 <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
-                    <th style="padding: 12px 10px; width: 35px;">No</th>
-                    <th style="padding: 12px 10px;">Nama Kegiatan & Bidang APBDes</th>
-                    <th style="padding: 12px 10px; width: 100px;">Sumber Dana</th>
-                    <th style="padding: 12px 10px; width: 130px;">Pagu Anggaran</th>
-                    <th style="padding: 12px 10px; width: 150px;">Realisasi (Rp & %)</th>
-                    <th style="padding: 12px 10px; width: 110px;">Lokasi</th>
-                    <th style="padding: 12px 10px; width: 125px;">Status Verifikasi</th>
-                    <th style="padding: 12px 10px; width: 105px; text-align: center;">Notifikasi</th>
-                    <th style="padding: 12px 10px; width: 160px; text-align: right;">Aksi</th>
+                    <th style="padding: 12px 8px; width: 35px; text-align: center;">No</th>
+                    <th style="padding: 12px 10px; min-width: 380px; width: 38%;">Nama Kegiatan & Bidang APBDes</th>
+                    <th style="padding: 12px 8px; width: 85px; text-align: center;">Sumber Dana</th>
+                    <th style="padding: 12px 8px; width: 120px;">Pagu Anggaran</th>
+                    <th style="padding: 12px 8px; width: 135px;">Realisasi (Rp & %)</th>
+                    <th style="padding: 12px 8px; width: 95px;">Lokasi</th>
+                    <th style="padding: 12px 8px; width: 110px;">Status Verifikasi</th>
+                    <th style="padding: 12px 8px; width: 85px; text-align: center;">Notifikasi</th>
+                    <th style="padding: 12px 8px; width: 135px; text-align: right;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 <% if (typeof data !== 'undefined' && data.length > 0) { %>
                     <% data.forEach((item, index) => { %>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 12px 10px; text-align: center;"><%= index + 1 %></td>
-                        <td style="padding: 12px 10px;">
+                        <td style="padding: 12px 8px; text-align: center;"><%= index + 1 %></td>
+                        <td style="padding: 12px 10px; min-width: 380px;">
                             <div style="font-weight: bold; color: #0f172a; font-size: 13.5px;"><%= item.nama_kegiatan %></div>
                             <div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
                                 <span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px;">

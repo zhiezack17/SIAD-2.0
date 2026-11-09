@@ -1151,10 +1151,11 @@ const spjController = {
             ];
 
             const bidangGroups = BIDANG_STANDARD.map(b => {
+                const bNum = parseInt(b.kode, 10);
                 const list = allKegiatan.filter(k => {
                     const bStr = (k.bidang || '').toLowerCase();
                     const kodeRek = (k.kode_rekening || '').trim();
-                    return bStr.includes(b.kode) || kodeRek.startsWith(b.kode) || bStr.includes(b.nama.toLowerCase().split(' ')[1]);
+                    return bStr.includes('bidang ' + bNum) || bStr.includes(b.kode) || kodeRek.startsWith('5.' + bNum) || (bNum === 4 && kodeRek.startsWith('6.')) || bStr.includes(b.nama.toLowerCase().split(' ')[1]);
                 });
 
                 let subtotalPagu = 0;
@@ -1471,7 +1472,7 @@ const spjController = {
             let insertedPajak = 0;
             const kegiatanIdMap = new Map();
 
-            // 1. Simpan Kegiatan SPJ Terpilih
+            // 1. Simpan atau Perbarui Kegiatan SPJ Terpilih
             if (Array.isArray(kegiatan) && kegiatan.length > 0) {
                 for (const item of kegiatan) {
                     const nama = item.nama_kegiatan || 'Belanja SPJ';
@@ -1480,6 +1481,7 @@ const spjController = {
                     const noBukti = item.no_bukti || '';
                     const ket = `[BKU Siskeudes: ${noBukti}] ${item.uraian_rincian || ''}`.trim();
                     const bidang = item.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa';
+                    const subBidang = item.sub_bidang || '';
                     const kodeRek = item.kode_rekening || '';
                     const sumberDana = item.sumber_dana || 'DDS (Dana Desa)';
                     const jenisBelanja = item.jenis_belanja || 'barang_jasa';
@@ -1491,6 +1493,41 @@ const spjController = {
                         if (parts.length === 3) {
                             tglMulai = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
                         }
+                    }
+
+                    // Cek jika sudah pernah diimpor (Upsert untuk perbaikan otomatis data)
+                    let existingKegId = null;
+                    if (noBukti) {
+                        try {
+                            const existCheck = await db.query(
+                                `SELECT id FROM spj_kegiatan 
+                                 WHERE (kepenghuluan_id = $1 OR kepenghuluan_id IS NULL) 
+                                   AND tahun = $2 
+                                   AND keterangan ILIKE $3 
+                                 LIMIT 1`,
+                                [did, tahunNum, `%${noBukti}%`]
+                            );
+                            if (existCheck.rows.length > 0) {
+                                existingKegId = existCheck.rows[0].id;
+                            }
+                        } catch (errExist) {
+                            console.warn('[postImportBku:existCheck]', errExist.message);
+                        }
+                    }
+
+                    if (existingKegId) {
+                        // Perbarui data yang sudah ada dengan nama & sub-bidang bersih dari BKU
+                        await db.query(
+                            `UPDATE spj_kegiatan 
+                             SET nama_kegiatan = $1, bidang = $2, sub_bidang = $3, kode_rekening = $4,
+                                 pagu_anggaran = $5, realisasi_anggaran = $6, sumber_dana = $7, jenis_belanja = $8
+                             WHERE id = $9`,
+                            [nama, bidang, subBidang, kodeRek, pagu, realisasi, sumberDana, jenisBelanja, existingKegId]
+                        );
+                        insertedKegiatan++;
+                        if (noBukti) kegiatanIdMap.set(noBukti.toLowerCase(), existingKegId);
+                        if (nama) kegiatanIdMap.set(nama.toLowerCase(), existingKegId);
+                        continue;
                     }
 
                     let insertSql = '';
@@ -1524,7 +1561,7 @@ const spjController = {
                             ket,
                             did || null,
                             bidang,
-                            item.sub_bidang || '',
+                            subBidang,
                             kodeRek,
                             sumberDana,
                             jenisBelanja,
@@ -1556,7 +1593,7 @@ const spjController = {
                             ket,
                             did || null,
                             bidang,
-                            item.sub_bidang || '',
+                            subBidang,
                             kodeRek,
                             sumberDana,
                             jenisBelanja,

@@ -11,9 +11,13 @@ function cleanNumber(val) {
 function cleanNamaKegiatan(rawUraian, fallbackRek) {
     if (!rawUraian) return fallbackRek || 'Kegiatan Belanja';
     let clean = rawUraian
-        .replace(/^Penarikan Dana.*?Kas di Bendahara\s*/i, '')
-        .replace(/^Pembayaran\s+(Kegiatan\s+|Belanja\s+)?/i, '')
+        .replace(/^(?:Penarikan Dana.*?Kas di Bendahara\s*|Pengembalian Sisa Dana.*?Kas di Bendahara\s*)/i, '')
+        .replace(/^Pembayaran\s+(?:Kegiatan\s+|Belanja\s+)?/i, '')
+        .replace(/\s+/g, ' ')
         .trim();
+    if (clean.length > 0) {
+        clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+    }
     return clean || fallbackRek || 'Kegiatan Belanja';
 }
 
@@ -35,21 +39,21 @@ function tentukanBidang(kodeRekening, namaKegiatan) {
             jabatan: 'Kaur Pembangunan / Kasi Kesejahteraan'
         };
     }
-    if (/posyandu|stunting|pmt|guru|masjid|gharim|hut ri|pelatihan|kejaksaan|polres|sosialisasi|pkk|bbgrm|turnamen/i.test(nama) || rek.startsWith('5.2.2') || rek.startsWith('5.2.3')) {
+    if (/posyandu|stunting|pmt|guru|masjid|gharim|tahfiz|hut ri|pelatihan|kejaksaan|polres|sosialisasi|pkk|bbgrm|turnamen/i.test(nama) || rek.startsWith('5.2.2') || rek.startsWith('5.2.3')) {
         return {
             bidang: 'Bidang 3: Pembinaan Kemasyarakatan',
             jenis_belanja: 'barang_jasa',
             jabatan: 'Kasi Pelayanan'
         };
     }
-    if (rek.startsWith('6.2') || /bumdes|bumkep|ketapang|permodalan/i.test(nama)) {
+    if (rek.startsWith('6.2') || /bumdes|bumkep|ketapang|permodalan|koperasi|kopdes/i.test(nama)) {
         return {
             bidang: 'Bidang 4: Pemberdayaan Masyarakat',
             jenis_belanja: 'modal',
             jabatan: 'Pengelola BUMDes / Kaur Keuangan'
         };
     }
-    if (rek.startsWith('5.4') || /blt|darurat|bencana/i.test(nama)) {
+    if (rek.startsWith('5.4') || /blt|darurat|bencana|kebakaran|mpa/i.test(nama)) {
         return {
             bidang: 'Bidang 5: Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa',
             jenis_belanja: 'tidak_terduga',
@@ -61,6 +65,96 @@ function tentukanBidang(kodeRekening, namaKegiatan) {
         jenis_belanja: 'barang_jasa',
         jabatan: 'Kaur Tata Usaha & Umum'
     };
+}
+
+function tentukanSubBidang(kodeRekening, namaKegiatan, bidang) {
+    const rek = String(kodeRekening || '');
+    const nama = String(namaKegiatan || '').toLowerCase();
+
+    if (bidang.includes('Bidang 1') || rek.startsWith('5.1')) {
+        if (rek.startsWith('5.1.1') || /siltap|penghulu|kades|tunjangan kades/i.test(nama)) {
+            return 'Penghasilan Tetap dan Tunjangan Kepala Desa';
+        }
+        if (rek.startsWith('5.1.2') || /perangkat desa|siltap perangkat|tunjangan perangkat/i.test(nama)) {
+            return 'Penghasilan Tetap dan Tunjangan Perangkat Desa';
+        }
+        if (rek.startsWith('5.1.4') || /bpkep|bpd|tunjangan bpd/i.test(nama)) {
+            return 'Jaminan Sosial & Tunjangan BPKep / BPD';
+        }
+        if (/op bpkep|operasional bpkep/i.test(nama)) {
+            return 'Operasional BPKep / BPD';
+        }
+        if (/op kantor|operasional kantor|atk|listrik|cetak|rehab kantor|sarana prasarana/i.test(nama) || rek.startsWith('5.2.1')) {
+            return 'Operasional Pemerintah Desa & Sarana Prasarana';
+        }
+        if (/musrenbang|rkp|lpj|idm|epdeskel|prodeskel|siskeudes|perencanaan/i.test(nama)) {
+            return 'Tata Praja Pemerintahan, Perencanaan dan Keuangan';
+        }
+        return 'Penyelenggaraan Belanja Penghasilan Tetap & Operasional';
+    }
+
+    if (bidang.includes('Bidang 2') || rek.startsWith('5.3')) {
+        if (/box culvert|gorong|drainase|parit/i.test(nama)) {
+            return 'Pembangunan dan Pemeliharaan Drainase / Saluran Air';
+        }
+        if (/semenisasi|jalan|jembatan/i.test(nama)) {
+            return 'Pembangunan dan Pemeliharaan Jalan / Jembatan Desa';
+        }
+        if (/rehab|gedung|kantor/i.test(nama)) {
+            return 'Pembangunan / Pemeliharaan Gedung dan Fasilitas Umum';
+        }
+        if (/sarana|prasarana|aset/i.test(nama)) {
+            return 'Pengadaan Sarana dan Prasarana Fisik Desa';
+        }
+        return 'Pelaksanaan Pembangunan dan Penataan Ruang Desa';
+    }
+
+    if (bidang.includes('Bidang 3')) {
+        if (/posyandu|stunting|pmt|ibu hamil|lansia/i.test(nama)) {
+            return 'Penyelenggaraan Posyandu, Kesehatan dan Penanganan Stunting';
+        }
+        if (/guru|ngaji|tahfiz|masjid|imam|gharim/i.test(nama)) {
+            return 'Pembinaan Keagamaan, Rumah Ibadah dan Pendidikan Non Formal';
+        }
+        if (/perpustakaan/i.test(nama)) {
+            return 'Pengelolaan Perpustakaan dan Literasi Desa';
+        }
+        if (/rt\/rw|insentif rt|pbb|sopir|mobil siaga/i.test(nama)) {
+            return 'Pembinaan Lembaga Kemasyarakatan Desa (RT/RW & Layanan Siaga)';
+        }
+        if (/pkk|bbgrm|hut ri|lpm|kepemudaan|olahraga|turnamen/i.test(nama)) {
+            return 'Pembinaan Kesenian, Olahraga dan Kelembagaan Masyarakat';
+        }
+        if (/hukum|polres|kejaksaan|asistensi/i.test(nama)) {
+            return 'Ketenteraman, Ketertiban Umum dan Perlindungan Masyarakat';
+        }
+        return 'Pembinaan Kemasyarakatan dan Layanan Sosial Desa';
+    }
+
+    if (bidang.includes('Bidang 4') || rek.startsWith('6.2')) {
+        if (/bumdes|bumkep|penyertaan modal/i.test(nama)) {
+            return 'Penyertaan Modal dan Penguatan BUMDes / BUMKep';
+        }
+        if (/ketapang|ketahanan pangan|pertanian|perikanan/i.test(nama)) {
+            return 'Pengembangan Ketahanan Pangan Desa';
+        }
+        if (/kopdes|koperasi/i.test(nama)) {
+            return 'Pemberdayaan Koperasi dan Ekonomi Produktif Desa';
+        }
+        return 'Pemberdayaan Masyarakat dan Ekonomi Desa';
+    }
+
+    if (bidang.includes('Bidang 5') || rek.startsWith('5.4')) {
+        if (/blt/i.test(nama)) {
+            return 'Keadaan Mendesak (Bantuan Langsung Tunai / BLT Dana Desa)';
+        }
+        if (/bencana|mpa|api|kebakaran/i.test(nama)) {
+            return 'Penanggulangan Bencana dan Keadaan Darurat';
+        }
+        return 'Penanggulangan Bencana, Keadaan Darurat dan Mendesak Desa';
+    }
+
+    return 'Kegiatan Reguler / Umum';
 }
 
 function tentukanSumberDana(namaKegiatan, kodeRekening) {
@@ -95,50 +189,39 @@ function tentukanJenisPajak(namaRekening, uraian) {
 async function parseBkuPdf(buffer) {
     const data = await pdf(buffer);
     const text = data.text;
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
     let desa = '';
     let kecamatan = '';
     let tahun = new Date().getFullYear();
     let periode = '';
 
-    for (let i = 0; i < Math.min(lines.length, 60); i++) {
-        if (/PEMERINTAH DESA/i.test(lines[i])) {
-            desa = lines[i].replace(/PEMERINTAH DESA/i, '').trim();
+    for (let i = 0; i < Math.min(rawLines.length, 60); i++) {
+        if (/PEMERINTAH DESA/i.test(rawLines[i])) {
+            desa = rawLines[i].replace(/PEMERINTAH DESA/i, '').trim();
         }
-        if (/TAHUN ANGGARAN/i.test(lines[i])) {
-            const m = lines[i].match(/\d{4}/);
+        if (/TAHUN ANGGARAN/i.test(rawLines[i])) {
+            const m = rawLines[i].match(/\d{4}/);
             if (m) tahun = parseInt(m[0]);
         }
-        if (/KECAMATAN\s+([A-Z\s]+)/i.test(lines[i])) {
-            kecamatan = lines[i].replace(/KECAMATAN/i, '').replace(/[:]/g, '').trim();
+        if (/KECAMATAN\s+([A-Z\s]+)/i.test(rawLines[i])) {
+            kecamatan = rawLines[i].replace(/KECAMATAN/i, '').replace(/[:]/g, '').trim();
         }
-        if (/Periode/i.test(lines[i])) {
-            periode = lines[i].replace(/Periode/i, '').trim();
+        if (/Periode/i.test(rawLines[i])) {
+            periode = rawLines[i].replace(/Periode/i, '').trim();
         }
     }
+
+    // Bersihkan seluruh baris header berulang, nomor kolom, dan footer Siskeudes
+    const headerFooterRegex = /^(?:Printed by Siskeudes|\d{1,2}\/\d{1,2}\/\d{4} \d{1,2}:\d{2}:\d{2} (?:AM|PM)|Halaman \d+|BUKU KAS UMUM|KABUPATEN ROKAN HILIR|KECAMATAN.*|DESA.*|PEMERINTAH DESA.*|Tahun Anggaran \d{4}|Periode \d{2}\/\d{2}\/\d{4}.*|1 234|56|7|89|1 2 3 4 5 6 7 8 9|No\.|Tanggal|Rekening|Uraian|Penerimaan|Pengeluaran|Nomor Bukti|Netto|Transaksi \(Rp\)|Saldo|\( Rp \)|Kode|Total Halaman Ini.*|Total s\.d\. Halaman Lalu.*|Total Kumulatif.*)$/i;
+    const lines = rawLines.filter(l => !headerFooterRegex.test(l));
 
     const sppMap = new Map();
     const kwtMap = new Map();
     const sspMap = new Map();
 
-    let currentDate = '';
-    let currentUraianLines = [];
-
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-
-        // Lewati header & footer berulang Siskeudes
-        if (/^(No\.|Tanggal|Rekening|Uraian|Penerimaan|Pengeluaran|Nomor Bukti|Netto|Saldo|Periode|Kode|\( Rp \)|Printed by Siskeudes|Halaman\s+\d+|\d{2}\/\d{2}\/\d{4}\s+\d{1,2}:\d{2}:\d{2})/i.test(line)) {
-            continue;
-        }
-
-        // Deteksi Tanggal dan Nomor Urut Transaksi
-        const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{4})\s*(\d+)?$/);
-        if (dateMatch) {
-            currentDate = dateMatch[1];
-            continue;
-        }
 
         // Deteksi Baris Bukti (SPP, KWT, SSP, TBP)
         const buktiMatch = line.match(/(\d{4,5}\/(?:SPP|KWT|SSP|TBP)\/[0-9.]+\/\d{4})/);
@@ -158,20 +241,45 @@ async function parseBkuPdf(buffer) {
                 }
             }
 
-            let uraianText = currentUraianLines.join(' ').trim();
+            // Cari tanggal transaksi mundur hingga 6 baris sebelumnya
+            let dateLineIdx = -1;
+            for (let j = i - 1; j >= Math.max(0, i - 6); j--) {
+                if (/^\d{2}\/\d{2}\/\d{4}\d*/.test(lines[j])) {
+                    dateLineIdx = j;
+                    break;
+                }
+            }
+            const currentDate = dateLineIdx >= 0 ? lines[dateLineIdx].substring(0, 10) : '';
+
+            // Kumpulkan baris uraian transaksi tepat sebelum baris tanggal
+            let uraianParts = [];
+            if (dateLineIdx > 0) {
+                for (let j = dateLineIdx - 1; j >= Math.max(0, dateLineIdx - 4); j--) {
+                    const prev = lines[j];
+                    if (/^\d\.\d\.\d\.\d{2}\./.test(prev)) break;
+                    if (/SPP|KWT|SSP|TBP|STS/.test(prev)) break;
+                    if (/\d+,\d{2}/.test(prev) && prev.length > 15) break;
+                    uraianParts.unshift(prev);
+                }
+            }
+
+            let uraianText = uraianParts.join(' ').trim();
             if (!uraianText) uraianText = prevNamaRek || 'Belanja Kegiatan';
 
             if (noBukti.includes('/SPP/')) {
                 const cleanNama = cleanNamaKegiatan(uraianText, prevNamaRek);
                 const { bidang, jenis_belanja, jabatan } = tentukanBidang(prevRekening, cleanNama);
+                const subBidang = tentukanSubBidang(prevRekening, cleanNama, bidang);
                 const sumberDana = tentukanSumberDana(cleanNama, prevRekening);
 
                 if (!sppMap.has(noBukti)) {
                     sppMap.set(noBukti, {
                         no_bukti: noBukti,
                         nama_kegiatan: cleanNama,
+                        uraian_lengkap: uraianText,
                         tanggal: currentDate,
                         bidang,
+                        sub_bidang: subBidang,
                         sumber_dana: sumberDana,
                         jenis_belanja,
                         jabatan_pelaksana: jabatan,
@@ -209,8 +317,6 @@ async function parseBkuPdf(buffer) {
                     nominal
                 });
             }
-
-            currentUraianLines = [];
             continue;
         }
 
@@ -238,19 +344,13 @@ async function parseBkuPdf(buffer) {
             }
             continue;
         }
-
-        // Kumpulkan teks uraian
-        if (!/^\d\.\d\.\d\.\d{2}\./.test(line) && !/^\d+(?:\.\d{3})*,\d{2}/.test(line) && !line.includes('/')) {
-            currentUraianLines.push(line);
-            if (currentUraianLines.length > 5) currentUraianLines.shift();
-        }
     }
 
     return buildSummaryResponse({ desa, tahun, kecamatan, periode }, Array.from(sppMap.values()), Array.from(kwtMap.values()), Array.from(sspMap.values()));
 }
 
 /**
- * PARSER UNTUK BERKAS EXCEL (.xlsx / .xls) DARI SISKEUDES
+ * PARSER BUFFER EXCEL SISKEUDES (.XLSX / .XLS)
  */
 async function parseBkuExcel(buffer) {
     const workbook = new ExcelJS.Workbook();
@@ -262,25 +362,32 @@ async function parseBkuExcel(buffer) {
     let tahun = new Date().getFullYear();
     let periode = '';
 
+    for (let i = 1; i <= Math.min(worksheet.rowCount, 15); i++) {
+        const rowText = worksheet.getRow(i).values.filter(Boolean).join(' ');
+        if (/DESA|KEPENGHULUAN/i.test(rowText)) {
+            const m = rowText.match(/(?:DESA|KEPENGHULUAN)\s+([A-Z\s]+)/i);
+            if (m) desa = m[1].trim();
+        }
+        if (/TAHUN ANGGARAN/i.test(rowText)) {
+            const m = rowText.match(/\d{4}/);
+            if (m) tahun = parseInt(m[0]);
+        }
+        if (/KECAMATAN/i.test(rowText)) {
+            const m = rowText.match(/KECAMATAN\s+([A-Z\s]+)/i);
+            if (m) kecamatan = m[1].trim();
+        }
+        if (/Periode/i.test(rowText)) {
+            periode = rowText;
+        }
+    }
+
     const sppMap = new Map();
     const kwtMap = new Map();
     const sspMap = new Map();
 
     worksheet.eachRow((row, rowNumber) => {
-        const textRow = row.values ? row.values.map(v => String(v || '').trim()).join(' ') : '';
-        if (/PEMERINTAH DESA/i.test(textRow)) {
-            desa = textRow.replace(/.*PEMERINTAH DESA/i, '').trim();
-        }
-        if (/TAHUN ANGGARAN/i.test(textRow)) {
-            const m = textRow.match(/\d{4}/);
-            if (m) tahun = parseInt(m[0]);
-        }
-        if (/KECAMATAN\s+([A-Z\s]+)/i.test(textRow)) {
-            kecamatan = textRow.replace(/.*KECAMATAN/i, '').replace(/[:]/g, '').trim();
-        }
+        if (rowNumber < 6) return;
 
-        // Baca kolom tipikal Siskeudes:
-        // Col 2: Tanggal, Col 3: Kode Rekening, Col 4: Uraian, Col 5: Penerimaan, Col 6: Pengeluaran, Col 7: No Bukti
         const tgl = row.getCell(2).text ? String(row.getCell(2).text).trim() : '';
         const rek = row.getCell(3).text ? String(row.getCell(3).text).trim() : '';
         const uraian = row.getCell(4).text ? String(row.getCell(4).text).trim() : '';
@@ -293,6 +400,7 @@ async function parseBkuExcel(buffer) {
         if (noBukti.includes('/SPP/')) {
             const cleanNama = cleanNamaKegiatan(uraian, rek);
             const { bidang, jenis_belanja, jabatan } = tentukanBidang(rek, cleanNama);
+            const subBidang = tentukanSubBidang(rek, cleanNama, bidang);
             const sumberDana = tentukanSumberDana(cleanNama, rek);
             const nominal = pengeluaran || penerimaan;
 
@@ -300,8 +408,10 @@ async function parseBkuExcel(buffer) {
                 sppMap.set(noBukti, {
                     no_bukti: noBukti,
                     nama_kegiatan: cleanNama,
+                    uraian_lengkap: uraian,
                     tanggal: tgl,
                     bidang,
+                    sub_bidang: subBidang,
                     sumber_dana: sumberDana,
                     jenis_belanja,
                     jabatan_pelaksana: jabatan,
@@ -400,6 +510,8 @@ module.exports = {
     parseBkuPdf,
     parseBkuExcel,
     cleanNumber,
+    cleanNamaKegiatan,
     tentukanBidang,
+    tentukanSubBidang,
     tentukanSumberDana
 };
