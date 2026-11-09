@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f1f5f9;
+            color: #000;
+            margin: 0;
+            padding: 20px;
+        }
+        .no-print {
+            background: #0f172a;
+            color: white;
+            padding: 12px 20px;
+            margin: -20px -20px 25px -20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .label-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .asset-label {
+            background: white;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px 14px;
+            width: 360px;
+            box-sizing: border-box;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .label-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .label-logo {
+            width: 38px;
+            height: auto;
+        }
+        .label-instansi {
+            font-size: 8.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+        .label-desa {
+            font-size: 10pt;
+            font-weight: 900;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .label-body {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .label-info {
+            flex: 1;
+            font-size: 8.5pt;
+            line-height: 1.35;
+        }
+        .info-row {
+            margin-bottom: 3px;
+        }
+        .info-title {
+            font-size: 7.5pt;
+            color: #333;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .info-val {
+            font-weight: 800;
+            font-size: 9.5pt;
+            color: #000;
+        }
+        .label-qr {
+            width: 75px;
+            text-align: center;
+        }
+        .label-qr img {
+            width: 70px;
+            height: 70px;
+            display: block;
+            margin: 0 auto;
+        }
+        .label-footer {
+            border-top: 1px solid #000;
+            margin-top: 6px;
+            padding-top: 4px;
+            font-size: 7pt;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .label-grid { gap: 10mm; }
+            .asset-label { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <div>
+            <b>🏷️ Cetak Stiker Label QR Code Aset Fisik</b> &bull; <%= aset.nama %> (<%= aset.kode %>)
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+                Cetak Stiker Sekarang (PDF)
+            </button>
+            <button onclick="window.close()" style="background: #64748b; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- GRID LABEL STIKER (Mencetak 2 Copy Label untuk ditempel di fisik barang dan cadangan buku inventaris) -->
+    <div class="label-grid">
+        <% for (let i = 0; i < 2; i++) { %>
+        <div class="asset-label">
+            <div class="label-header">
+                <img src="/assets/img/logo-rohil.png" onerror="this.src='/images/logo.png'; this.onerror=null;" alt="Logo Rohil" class="label-logo">
+                <div>
+                    <div class="label-instansi">PEMERINTAH KAB. ROKAN HILIR</div>
+                    <div class="label-desa">KEPENGHULUAN <%= (aset.kepenghuluan_nama || 'DESA').toUpperCase() %></div>
+                </div>
+            </div>
+
+            <div class="label-body">
+                <div class="label-info">
+                    <div class="info-row">
+                        <div class="info-title">Kode Register Barang:</div>
+                        <div class="info-val" style="font-family: monospace; font-size: 10pt;"><%= aset.kode %></div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-title">Nama Barang / Aset:</div>
+                        <div class="info-val"><%= aset.nama %></div>
+                    </div>
+                    <div class="info-row" style="display: flex; gap: 10px;">
+                        <div>
+                            <div class="info-title">Tahun:</div>
+                            <div class="info-val"><%= aset.tahun_perolehan || '-' %></div>
+                        </div>
+                        <div>
+                            <div class="info-title">Lokasi:</div>
+                            <div class="info-val"><%= aset.lokasi || 'Kantor' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="label-qr">
+                    <img src="<%= qrCodeDataUrl %>" alt="QR Code Aset">
+                    <div style="font-size: 6.5pt; font-weight: bold; margin-top: 2px;">SCAN UNTUK CEK</div>
+                </div>
+            </div>
+
+            <div class="label-footer">
+                <span>INVENTARIS RESMI DESA</span>
+                <span>SIAD 2.0 KAB. ROHIL</span>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ const pengaturanController = require('../controllers/pengaturanController');
 const bumdesController = require('../controllers/bumdesController');
 const searchController = require('../controllers/searchController');
 const pelayananController = require('../controllers/pelayananController');
+const musdesController = require('../controllers/musdesController');
 const ac = require('../middleware/access');
 
 const requireAuth = authController.requireAuth;
@@ -437,6 +438,79 @@ router.post('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
     }
 });
 
+// --- RUTE CETAK STIKER LABEL QR CODE ASET FISIK (Fase 3) ---
+router.get('/aset/label/:id', requireAuth, ac.blockKaurUmum, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const did = ac.getDesaId(req);
+        const isSuper = ac.isSuperAdmin ? ac.isSuperAdmin(req) : false;
+
+        let sql = `
+            SELECT a.*, k.nama AS kepenghuluan_nama, kec.nama AS kecamatan_nama
+            FROM aset a
+            LEFT JOIN kepenghuluan k ON a.kepenghuluan_id = k.id
+            LEFT JOIN kecamatan kec ON k.kecamatan_id = kec.id
+            WHERE a.id = $1
+        `;
+        let params = [id];
+        if (!isSuper && did) {
+            sql += ' AND (a.kepenghuluan_id = $2 OR a.kepenghuluan_id IS NULL)';
+            params.push(did);
+        }
+
+        const result = await db.query(sql, params);
+        if (result.rows.length === 0) {
+            return res.status(404).send('Aset tidak ditemukan atau hak akses ditolak.');
+        }
+
+        const QRCode = require('qrcode');
+        const aset = result.rows[0];
+        const validasiUrl = `https://siad-v2.com/validasi/aset/${aset.id}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(validasiUrl, { width: 140, margin: 1 });
+
+        res.render('aset_label_cetak', {
+            title: `Label Stiker Aset - ${aset.nama}`,
+            aset,
+            qrCodeDataUrl,
+            layout: false
+        });
+    } catch (e) {
+        console.error('[ASET:label]', e);
+        res.status(500).send('Gagal merender label aset: ' + e.message);
+    }
+});
+
+// Endpoint Publik Validasi Keaslian Aset (Scan QR Code di Fisik Barang)
+router.get('/validasi/aset/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const sql = `
+            SELECT a.*, k.nama AS kepenghuluan_nama, kec.nama AS kecamatan_nama
+            FROM aset a
+            LEFT JOIN kepenghuluan k ON a.kepenghuluan_id = k.id
+            LEFT JOIN kecamatan kec ON k.kecamatan_id = kec.id
+            WHERE a.id = $1
+        `;
+        const result = await db.query(sql, [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).render('validasi_aset_publik', {
+                title: 'Validasi Aset Desa - SIAD 2.0',
+                isValid: false,
+                aset: null,
+                layout: false
+            });
+        }
+        res.render('validasi_aset_publik', {
+            title: 'Verifikasi Aset Desa - SIAD 2.0',
+            isValid: true,
+            aset: result.rows[0],
+            layout: false
+        });
+    } catch (e) {
+        res.status(500).send('Terjadi gangguan validasi aset.');
+    }
+});
+
 router.post('/aset/hapus/:id', requireAuth, ac.blockKaurUmum, async (req, res) => {
     try {
         const id = req.params.id;
@@ -456,6 +530,17 @@ router.post('/aset/hapus/:id', requireAuth, ac.blockKaurUmum, async (req, res) =
 });
 
 // === BUMDes ROUTES (Modul BUMDes Sesuai PP 11/2021) ===
+
+// --- RUTE MODUL MUSYAWARAH DESA / MUSDES (Fase 4) ---
+router.get('/musdes', requireAuth, musdesController.getIndex);
+router.post('/musdes/tambah', requireAuth, upload.fields([
+    { name: 'file_berita_acara', maxCount: 1 },
+    { name: 'file_notulensi', maxCount: 1 },
+    { name: 'file_daftar_hadir', maxCount: 1 }
+]), musdesController.postTambah);
+router.post('/musdes/hapus/:id', requireAuth, musdesController.postHapus);
+router.get('/musdes/cetak/:id', requireAuth, musdesController.getCetakBeritaAcara);
+
 router.get('/bumdes', requireAuth, ac.blockKaurUmum, bumdesController.getIndex);
 router.post('/bumdes/profil', requireAuth, ac.blockKaurUmum, upload.single('file_ad_art'), bumdesController.postProfil);
 router.post('/bumdes/pengurus', requireAuth, ac.blockKaurUmum, upload.single('file_sk'), bumdesController.postPengurus);

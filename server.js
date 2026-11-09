@@ -69,7 +69,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: { 
         httpOnly: true,
-        secure: isProd || process.env.COOKIE_SECURE === 'true',
+        secure: process.env.COOKIE_SECURE === 'true',
         sameSite: 'lax',
         // SEC-12: Default masa aktif sesi 24 jam (1 hari), mencegah risiko session hijacking berkepanjangan
         maxAge: (Number(process.env.SESSION_MAX_AGE_DAYS) || 1) * 24 * 60 * 60 * 1000 
@@ -83,6 +83,80 @@ app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.userRole = ac.getUserRole(req);
     res.locals.activeDesaId = req.session.active_kepenghuluan_id || (req.session.user ? req.session.user.kepenghuluan_id : null);
+
+    // --- IN-APP NOTIFICATION ENGINE (Fase 2: Peringatan Deadline & Tugas) ---
+    res.locals.notifCount = 0;
+    res.locals.notifList = [];
+
+    if (req.session && req.session.user) {
+        try {
+            const did = res.locals.activeDesaId;
+            const notifItems = [];
+
+            // A. Cek Surat Masuk belum didisposisi > 3 hari
+            let smSql = `
+                SELECT sm.id, sm.nomor_surat, sm.pengirim, sm.tanggal_surat, sm.perihal,
+                       EXTRACT(DAY FROM (NOW() - sm.tanggal_surat)) AS hari_lewat
+                FROM surat_masuk sm
+                LEFT JOIN disposisi_surat ds ON ds.surat_id = sm.id
+                WHERE ds.id IS NULL
+            `;
+            let smParams = [];
+            if (did) {
+                smSql += ' AND (sm.kepenghuluan_id = $1 OR sm.kepenghuluan_id IS NULL)';
+                smParams.push(did);
+            }
+            smSql += ' ORDER BY sm.id DESC LIMIT 4';
+            const smRes = await db.query(smSql, smParams);
+
+            smRes.rows.forEach(r => {
+                const terlambat = Number(r.hari_lewat) >= 3;
+                notifItems.push({
+                    icon: terlambat ? '🚨' : '📬',
+                    title: 'Surat Masuk Belum Disposisi',
+                    desc: 'No: ' + (r.nomor_surat || '-') + ' (' + (r.pengirim || 'Pengirim') + ')',
+                    link: '/surat?tab=masuk',
+                    time: terlambat ? ('Tertunda ' + Math.floor(r.hari_lewat) + ' hari') : 'Perlu Arahan'
+                });
+            });
+
+            // B. Cek SPJ Kegiatan yang sedang diverifikasi / perlu revisi
+            let spjSql = `
+                SELECT id, nama_kegiatan, tahun, tahap_verifikasi, pagu_anggaran
+                FROM spj_kegiatan
+                WHERE tahap_verifikasi IN ('VERIFIKASI_BENDAHARA', 'VERIFIKASI_SEKDES', 'VERIFIKASI_PENGHULU', 'PERLU_REVISI')
+            `;
+            let spjParams = [];
+            if (did) {
+                spjSql += ' AND (kepenghuluan_id = $1 OR kepenghuluan_id IS NULL)';
+                spjParams.push(did);
+            }
+            spjSql += ' ORDER BY id DESC LIMIT 4';
+            const spjRes = await db.query(spjSql, spjParams);
+
+            spjRes.rows.forEach(k => {
+                let statusLabel = 'Menunggu Verifikasi';
+                let icon = '⏳';
+                if (k.tahap_verifikasi === 'PERLU_REVISI') { statusLabel = 'Perlu Revisi'; icon = '⚠️'; }
+                else if (k.tahap_verifikasi === 'VERIFIKASI_BENDAHARA') { statusLabel = 'Verifikasi Bendahara'; }
+                else if (k.tahap_verifikasi === 'VERIFIKASI_SEKDES') { statusLabel = 'Verifikasi Sekdes'; }
+                else if (k.tahap_verifikasi === 'VERIFIKASI_PENGHULU') { statusLabel = 'Persetujuan Penghulu'; }
+
+                notifItems.push({
+                    icon: icon,
+                    title: 'SPJ: ' + statusLabel,
+                    desc: (k.nama_kegiatan || '') + ' (TA ' + k.tahun + ')',
+                    link: '/spj/dokumen/' + k.id,
+                    time: 'Pagu: Rp ' + Number(k.pagu_anggaran || 0).toLocaleString('id-ID')
+                });
+            });
+
+            res.locals.notifCount = notifItems.length;
+            res.locals.notifList = notifItems;
+        } catch (errNotif) {
+            // Abaikan error minor jika tabel belum siap
+        }
+    }
     
     // Khusus Super Admin / Auditor: sediakan daftar desa untuk switcher
     if (req.session && req.session.user && ac.isAdmin(req)) {

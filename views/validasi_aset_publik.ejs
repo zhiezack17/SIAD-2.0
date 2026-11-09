@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            padding: 30px 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .badge-verified {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 13.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin: 18px 0;
+            font-size: 13.5px;
+        }
+        .meta-table td {
+            padding: 9px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .meta-table td.label {
+            color: #64748b;
+            font-weight: 600;
+            width: 40%;
+        }
+        .meta-table td.val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .footer-note {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-top: 25px;
+            line-height: 1.4;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div style="margin-bottom: 15px;">
+            <img src="/assets/img/logo-rohil.png" onerror="this.src='/images/logo.png'; this.onerror=null;" alt="Logo Rohil" style="height: 60px; width: auto;">
+        </div>
+        <h2 style="margin: 0 0 5px 0; font-size: 18px; font-weight: 800; color: #0f172a;">SIAD 2.0 KABUPATEN ROKAN HILIR</h2>
+        <p style="margin: 0 0 20px 0; font-size: 12.5px; color: #64748b;">Sistem Inventaris Aset & Kekayaan Milik Desa</p>
+
+        <% if (isValid && aset) { %>
+            <div class="badge-verified">
+                <span>✓</span> ASET RESMI DESA TERVERIFIKASI
+            </div>
+            
+            <p style="font-size: 13px; color: #334155; margin: 0 0 15px 0;">
+                Barang ini tercatat secara sah sebagai aset inventaris <b>Pemerintah Kepenghuluan <%= aset.kepenghuluan_nama %></b>.
+            </p>
+
+            <table class="meta-table">
+                <tr>
+                    <td class="label">Kode Register</td>
+                    <td class="val" style="font-family: monospace;"><%= aset.kode %></td>
+                </tr>
+                <tr>
+                    <td class="label">Nama Barang</td>
+                    <td class="val"><%= aset.nama %></td>
+                </tr>
+                <tr>
+                    <td class="label">Merk / Tipe</td>
+                    <td class="val"><%= (aset.merk || '-') + ' ' + (aset.tipe ? '(' + aset.tipe + ')' : '') %></td>
+                </tr>
+                <tr>
+                    <td class="label">Tahun Perolehan</td>
+                    <td class="val"><%= aset.tahun_perolehan || '-' %></td>
+                </tr>
+                <tr>
+                    <td class="label">Kondisi Fisik</td>
+                    <td class="val">
+                        <span style="background: <%= aset.kondisi === 'baik' ? '#dcfce7' : '#fee2e2' %>; color: <%= aset.kondisi === 'baik' ? '#15803d' : '#b91c1c' %>; padding: 2px 8px; border-radius: 4px; font-size: 12px; text-transform: uppercase;">
+                            <%= (aset.kondisi || 'baik').replace(/_/g, ' ') %>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Jumlah / Satuan</td>
+                    <td class="val"><%= aset.jumlah || 1 %> <%= aset.satuan || 'unit' %></td>
+                </tr>
+                <tr>
+                    <td class="label">Nilai Aset</td>
+                    <td class="val">Rp <%= Number(aset.nilai_perolehan || 0).toLocaleString('id-ID') %></td>
+                </tr>
+                <tr>
+                    <td class="label">Lokasi Penempatan</td>
+                    <td class="val"><%= aset.lokasi || 'Kantor Desa' %></td>
+                </tr>
+                <tr>
+                    <td class="label">Penanggung Jawab</td>
+                    <td class="val"><%= aset.penanggung_jawab || 'Kaur Tata Usaha & Umum' %></td>
+                </tr>
+            </table>
+        <% } else { %>
+            <div style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 8px 18px; border-radius: 30px; font-weight: 800; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px;">
+                <span>✗</span> DATA ASET TIDAK DITEMUKAN
+            </div>
+            <p style="font-size: 13.5px; color: #64748b;">
+                Kode identifikasi aset tidak terdaftar dalam database inventaris desa.
+            </p>
+        <% } %>
+
+        <div class="footer-note">
+            Inventarisasi aset ini diawasi oleh Dinas Pemberdayaan Masyarakat dan Desa (DPMD) & Inspektorat Kabupaten Rokan Hilir.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+<div class="content-header" style="margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; margin-bottom: 4px;">
+                <a href="/dashboard" style="color: #3b82f6; text-decoration: none;">SIAD 2.0</a>
+                <span>/</span>
+                <span>Modul Pemerintahan</span>
+                <span>/</span>
+                <span style="color: #0f172a; font-weight: 600;">Musyawarah Desa (Musdes)</span>
+            </div>
+            <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+                <span style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; width: 36px; height: 36px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 4px 10px rgba(99,102,241,0.3);">
+                    <i class="fa-solid fa-users-rectangle"></i>
+                </span>
+                Musyawarah Desa (Musdes)
+            </h2>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">
+                Dokumentasi & Pengarsipan Digital Agenda Musyawarah, Notulensi, Daftar Hadir, dan Berita Acara Kepenghuluan.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="document.getElementById('modalTambahMusdes').style.display='flex'" style="background: linear-gradient(135deg, #4f46e5, #4338ca); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(79,70,229,0.25);">
+                <i class="fa-solid fa-plus"></i> Tambah Agenda Musdes
+            </button>
+        </div>
+    </div>
+</div>
+
+<% if (statusMsg) { %>
+    <div style="background: <%= statusType === 'danger' ? '#fef2f2' : (statusType === 'warning' ? '#fffbeb' : '#f0fdf4') %>; border-left: 4px solid <%= statusType === 'danger' ? '#ef4444' : (statusType === 'warning' ? '#f59e0b' : '#10b981') %>; color: <%= statusType === 'danger' ? '#991b1b' : (statusType === 'warning' ? '#92400e' : '#166534') %>; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center;">
+        <span><b><%= statusType === 'danger' ? 'Gagal:' : 'Berhasil:' %></b> <%= statusMsg %></span>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size:16px;">&times;</button>
+    </div>
+<% } %>
+
+<!-- KARTU STATISTIK RINGKAS -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 15px; margin-bottom: 20px;">
+    <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">Total Agenda Musdes</div>
+            <div style="font-size: 22px; font-weight: 800; color: #0f172a;"><%= stats.total %></div>
+        </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="width: 44px; height: 44px; border-radius: 10px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">Keputusan Disepakati</div>
+            <div style="font-size: 22px; font-weight: 800; color: #15803d;"><%= stats.disepakati %></div>
+        </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="width: 44px; height: 44px; border-radius: 10px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">Dengan Catatan</div>
+            <div style="font-size: 22px; font-weight: 800; color: #b45309;"><%= stats.catatan %></div>
+        </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="width: 44px; height: 44px; border-radius: 10px; background: #fee2e2; color: #b91c1c; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">Musdes Ditunda</div>
+            <div style="font-size: 22px; font-weight: 800; color: #b91c1c;"><%= stats.ditunda %></div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER & PENCARIAN -->
+<div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+    <form method="GET" action="/musdes" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        <div style="flex: 1; min-width: 220px;">
+            <input type="text" name="search" value="<%= search %>" placeholder="Cari judul musyawarah, lokasi, pimpinan..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+        </div>
+        <div style="width: 150px;">
+            <select name="tahun" style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px;">
+                <% for (let y = new Date().getFullYear() + 1; y >= 2024; y--) { %>
+                    <option value="<%= y %>" <%= String(tahun) === String(y) ? 'selected' : '' %>>TA <%= y %></option>
+                <% } %>
+            </select>
+        </div>
+        <div style="width: 200px;">
+            <select name="jenis" style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px;">
+                <option value="Semua" <%= jenis === 'Semua' ? 'selected' : '' %>>Semua Jenis Musdes</option>
+                <option value="Musdes RKP" <%= jenis === 'Musdes RKP' ? 'selected' : '' %>>Musdes RKPDes / RKP</option>
+                <option value="Musdes APBKep" <%= jenis === 'Musdes APBKep' ? 'selected' : '' %>>Musdes Penetapan APBKep</option>
+                <option value="Musdes Khusus BLT" <%= jenis === 'Musdes Khusus BLT' ? 'selected' : '' %>>Musdes Khusus (BLT DD)</option>
+                <option value="Musdes LPJ" <%= jenis === 'Musdes LPJ' ? 'selected' : '' %>>Musdes Pertanggungjawaban (LPJ)</option>
+                <option value="Musdes BUMDes" <%= jenis === 'Musdes BUMDes' ? 'selected' : '' %>>Musdes BUMDes / Koperasi</option>
+                <option value="Musyawarah Dusun" <%= jenis === 'Musyawarah Dusun' ? 'selected' : '' %>>Musyawarah Dusun (Musdus)</option>
+            </select>
+        </div>
+        <div style="width: 160px;">
+            <select name="status" style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px;">
+                <option value="Semua" <%= status === 'Semua' ? 'selected' : '' %>>Semua Status</option>
+                <option value="Disepakati" <%= status === 'Disepakati' ? 'selected' : '' %>>Disepakati</option>
+                <option value="Disepakati dengan Catatan" <%= status === 'Disepakati dengan Catatan' ? 'selected' : '' %>>Dengan Catatan</option>
+                <option value="Ditunda" <%= status === 'Ditunda' ? 'selected' : '' %>>Ditunda</option>
+            </select>
+        </div>
+        <button type="submit" style="background: #0f172a; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-filter"></i> Filter
+        </button>
+        <% if (search || jenis !== 'Semua' || status !== 'Semua') { %>
+            <a href="/musdes" style="color: #ef4444; text-decoration: none; font-size: 13px; font-weight: 600; padding: 6px 10px;">Reset</a>
+        <% } %>
+    </form>
+</div>
+
+<!-- TABEL DAFTAR AGENDA MUSDES -->
+<div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 13.5px;">
+            <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left;">
+                    <th style="padding: 12px 14px; width: 45px; text-align: center;">No</th>
+                    <th style="padding: 12px 14px; width: 130px;">Tanggal & Waktu</th>
+                    <th style="padding: 12px 14px; min-width: 320px;">Agenda & Jenis Musyawarah</th>
+                    <th style="padding: 12px 14px; width: 170px;">Pimpinan & Lokasi</th>
+                    <th style="padding: 12px 14px; width: 100px; text-align: center;">Peserta</th>
+                    <th style="padding: 12px 14px; width: 130px; text-align: center;">Status Hasil</th>
+                    <th style="padding: 12px 14px; width: 140px; text-align: center;">Berkas Bukti</th>
+                    <th style="padding: 12px 14px; width: 110px; text-align: center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (musdesList && musdesList.length > 0) { %>
+                    <% musdesList.forEach((m, idx) => { 
+                        const tglStr = new Date(m.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                    %>
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                        <td style="padding: 12px 14px; text-align: center; color: #94a3b8; font-weight: 600;"><%= idx + 1 %></td>
+                        <td style="padding: 12px 14px; vertical-align: top;">
+                            <div style="font-weight: 700; color: #0f172a;"><%= tglStr %></div>
+                            <div style="font-size: 11.5px; color: #64748b;"><i class="fa-regular fa-clock"></i> <%= m.waktu || '09:00 WIB' %></div>
+                        </td>
+                        <td style="padding: 12px 14px; vertical-align: top;">
+                            <div style="font-weight: 700; color: #0f172a; font-size: 14px;"><%= m.judul_musdes %></div>
+                            <div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                                <span style="background: #ede9fe; color: #6d28d9; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">
+                                    🏷️ <%= m.jenis_musdes %>
+                                </span>
+                                <% if (m.ringkasan_hasil) { %>
+                                    <span style="font-size: 11.5px; color: #64748b; font-style: italic;">
+                                        "<%= m.ringkasan_hasil.length > 60 ? m.ringkasan_hasil.substring(0, 60) + '...' : m.ringkasan_hasil %>"
+                                    </span>
+                                <% } %>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 14px; vertical-align: top;">
+                            <div style="font-weight: 600; color: #334155;"><i class="fa-solid fa-user-tie" style="color: #64748b;"></i> <%= m.pimpinan_sidang || 'Ketua BPKep' %></div>
+                            <div style="font-size: 12px; color: #64748b; margin-top: 2px;"><i class="fa-solid fa-location-dot" style="color: #64748b;"></i> <%= m.lokasi || 'Aula Kepenghuluan' %></div>
+                        </td>
+                        <td style="padding: 12px 14px; text-align: center; vertical-align: top;">
+                            <span style="background: #f1f5f9; color: #1e293b; padding: 3px 9px; border-radius: 6px; font-weight: 700; font-size: 12px; border: 1px solid #e2e8f0;">
+                                👥 <%= m.jumlah_peserta %> Orang
+                            </span>
+                        </td>
+                        <td style="padding: 12px 14px; text-align: center; vertical-align: top;">
+                            <% if (m.status_keputusan === 'Disepakati') { %>
+                                <span style="background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-check"></i> Disepakati
+                                </span>
+                            <% } else if (m.status_keputusan === 'Disepakati dengan Catatan') { %>
+                                <span style="background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-circle-exclamation"></i> Catatan
+                                </span>
+                            <% } else { %>
+                                <span style="background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-clock"></i> Ditunda
+                                </span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 12px 14px; text-align: center; vertical-align: top;">
+                            <div style="display: flex; justify-content: center; gap: 5px;">
+                                <% if (m.file_berita_acara) { %>
+                                    <a href="<%= m.file_berita_acara %>" target="_blank" title="Unduh Berita Acara" style="width: 28px; height: 28px; border-radius: 6px; background: #e0f2fe; color: #0284c7; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                        <i class="fa-solid fa-file-contract" style="font-size: 12px;"></i>
+                                    </a>
+                                <% } %>
+                                <% if (m.file_notulensi) { %>
+                                    <a href="<%= m.file_notulensi %>" target="_blank" title="Unduh Notulensi" style="width: 28px; height: 28px; border-radius: 6px; background: #fef3c7; color: #d97706; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                        <i class="fa-solid fa-book-open" style="font-size: 12px;"></i>
+                                    </a>
+                                <% } %>
+                                <% if (m.file_daftar_hadir) { %>
+                                    <a href="<%= m.file_daftar_hadir %>" target="_blank" title="Unduh Daftar Hadir" style="width: 28px; height: 28px; border-radius: 6px; background: #f1f5f9; color: #475569; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                        <i class="fa-solid fa-clipboard-user" style="font-size: 12px;"></i>
+                                    </a>
+                                <% } %>
+                                <% if (!m.file_berita_acara && !m.file_notulensi && !m.file_daftar_hadir) { %>
+                                    <span style="font-size: 11px; color: #94a3b8; font-style: italic;">Tidak ada file</span>
+                                <% } %>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 14px; text-align: center; vertical-align: top;">
+                            <div style="display: flex; justify-content: center; gap: 6px;">
+                                <a href="/musdes/cetak/<%= m.id %>" target="_blank" title="Cetak Format Berita Acara Resmi" style="background: #0f172a; color: white; width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                    <i class="fa-solid fa-print" style="font-size: 13px;"></i>
+                                </a>
+                                <form action="/musdes/hapus/<%= m.id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus arsip musdes ini?');" style="display: inline;">
+                                    <button type="submit" title="Hapus Musdes" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-trash" style="font-size: 12px;"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #64748b;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">🗳️</div>
+                            <div style="font-weight: 700; color: #1e293b; font-size: 15px;">Belum Ada Arsip Musyawarah Desa</div>
+                            <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Silakan klik tombol "Tambah Agenda Musdes" untuk mendokumentasikan musyawarah.</div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL TAMBAH AGENDA MUSDES -->
+<div id="modalTambahMusdes" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: white; border-radius: 14px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-users-rectangle" style="color: #4f46e5;"></i> Tambah Agenda Musyawarah Desa
+            </h3>
+            <button onclick="document.getElementById('modalTambahMusdes').style.display='none'" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <form action="/musdes/tambah" method="POST" enctype="multipart/form-data" style="padding: 20px;">
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Judul Musyawarah *</label>
+                <input type="text" name="judul_musdes" required placeholder="Contoh: Musdes Penyusunan RKP Kepenghuluan TA 2026" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Jenis Musyawarah *</label>
+                    <select name="jenis_musdes" required style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                        <option value="Musdes RKP">Musdes RKPDes / RKP</option>
+                        <option value="Musdes APBKep">Musdes Penetapan APBKep</option>
+                        <option value="Musdes Khusus BLT">Musdes Khusus (BLT DD)</option>
+                        <option value="Musdes LPJ">Musdes Pertanggungjawaban (LPJ)</option>
+                        <option value="Musdes BUMDes">Musdes BUMDes / Koperasi</option>
+                        <option value="Musyawarah Dusun">Musyawarah Dusun (Musdus)</option>
+                        <option value="Musyawarah Lainnya">Musyawarah Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Tanggal Pelaksanaan *</label>
+                    <input type="date" name="tanggal" required value="<%= new Date().toISOString().split('T')[0] %>" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Waktu Kegiatan</label>
+                    <input type="text" name="waktu" value="09:00 WIB s/d Selesai" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Tempat / Lokasi</label>
+                    <input type="text" name="lokasi" value="Aula Kantor Kepenghuluan" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Pimpinan Sidang / Rapat</label>
+                    <input type="text" name="pimpinan_sidang" placeholder="Contoh: Ketua BPKep" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Notulis Rapat</label>
+                    <input type="text" name="notulis" placeholder="Contoh: Sekretaris Desa" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Jumlah Peserta Hadir (Orang)</label>
+                    <input type="number" name="jumlah_peserta" min="0" value="35" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Status Keputusan</label>
+                    <select name="status_keputusan" style="width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;">
+                        <option value="Disepakati">Disepakati</option>
+                        <option value="Disepakati dengan Catatan">Disepakati dengan Catatan</option>
+                        <option value="Ditunda">Ditunda</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 5px;">Ringkasan Hasil / Poin Kesepakatan</label>
+                <textarea name="ringkasan_hasil" rows="3" placeholder="Tuliskan poin-poin utama kesepakatan musyawarah..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box;"></textarea>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                <div style="font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 10px;">📎 Upload Berkas Bukti (PDF / Foto Opsional)</div>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-size: 11.5px; color: #64748b; margin-bottom: 3px;">1. Berkas Berita Acara (Scan PDF):</label>
+                        <input type="file" name="file_berita_acara" accept=".pdf,.jpg,.jpeg,.png" style="font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11.5px; color: #64748b; margin-bottom: 3px;">2. Berkas Notulensi Rapat:</label>
+                        <input type="file" name="file_notulensi" accept=".pdf,.doc,.docx" style="font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11.5px; color: #64748b; margin-bottom: 3px;">3. Daftar Hadir Peserta:</label>
+                        <input type="file" name="file_daftar_hadir" accept=".pdf,.jpg,.jpeg,.png" style="font-size: 12px;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="document.getElementById('modalTambahMusdes').style.display='none'" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Batal</button>
+                <button type="submit" style="background: #4f46e5; color: white; border: none; padding: 9px 18px; border-radius: 6px; font-weight: 700; cursor: pointer;">Simpan Agenda</button>
+            </div>
+        </form>
+    </div>
+</div>

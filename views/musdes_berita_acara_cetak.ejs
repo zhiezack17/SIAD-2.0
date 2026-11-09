@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 20px;
+            font-size: 11pt;
+            line-height: 1.45;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .kop-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .kop-logo {
+            width: 75px;
+            height: auto;
+            text-align: center;
+        }
+        .kop-text {
+            text-align: center;
+        }
+        .kop-kab {
+            font-size: 13pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .kop-kec {
+            font-size: 12pt;
+            font-weight: bold;
+        }
+        .kop-desa {
+            font-size: 15pt;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .kop-alamat {
+            font-size: 9.5pt;
+            font-style: italic;
+        }
+        .double-line {
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 3px;
+            margin: 6px 0 16px 0;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 13pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .doc-nomor {
+            text-align: center;
+            font-size: 10.5pt;
+            margin-bottom: 16px;
+        }
+        p {
+            text-align: justify;
+            text-indent: 30px;
+            margin: 6px 0;
+        }
+        table.detail-table {
+            width: 100%;
+            margin: 8px 0 12px 20px;
+            border-collapse: collapse;
+            font-size: 11pt;
+        }
+        table.detail-table td {
+            padding: 3px 0;
+            vertical-align: top;
+        }
+        .kesepakatan-box {
+            border: 1px solid #000;
+            padding: 10px 14px;
+            margin: 12px 0;
+            background: #fafafa;
+        }
+        .sig-table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        .sig-table td {
+            vertical-align: top;
+            width: 33.33%;
+            padding: 0 10px;
+        }
+        .sig-space {
+            height: 70px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOMBOL CETAK -->
+    <div class="no-print" style="background: #1e293b; color: white; padding: 10px 20px; margin: -20px -20px 20px -20px; display: flex; justify-content: space-between; align-items: center;">
+        <div><b>🖨️ Pratinjau Cetak Berita Acara Musyawarah Kepenghuluan</b></div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                <i class="fa-solid fa-print"></i> Cetak Dokumen (PDF)
+            </button>
+            <button onclick="window.close()" style="background: #64748b; color: white; border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- KOP SURAT RESMI -->
+        <table class="kop-table">
+            <tr>
+                <td style="width: 15%; text-align: center;">
+                    <img src="/assets/img/logo-rohil.png" onerror="this.src='/images/logo.png'; this.onerror=null;" alt="Logo Rohil" class="kop-logo">
+                </td>
+                <td class="kop-text" style="width: 85%;">
+                    <div class="kop-kab">PEMERINTAH KABUPATEN ROKAN HILIR</div>
+                    <div class="kop-kec">KECAMATAN <%= (musdes.nama_kecamatan || 'BATU HAMPAR').toUpperCase() %></div>
+                    <div class="kop-desa">KEPENGHULUAN <%= (musdes.nama_kepenghuluan || 'BANTAIAN BARU').toUpperCase() %></div>
+                    <div class="kop-alamat"><%= musdes.prof_alamat || 'Kecamatan ' + (musdes.nama_kecamatan || 'Batu Hampar') + ', Kabupaten Rokan Hilir, Riau' %></div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="double-line"></div>
+
+        <!-- JUDUL DAN NOMOR -->
+        <div class="doc-title">BERITA ACARA MUSYAWARAH KEPENGHULUAN</div>
+        <div class="doc-nomor">
+            Nomor: <%= String(musdes.id).padStart(3, '0') %>/BA-MUSDES/<%= musdes.nama_kepenghuluan ? musdes.nama_kepenghuluan.replace(/\s+/g, '-').toUpperCase() : 'DESA' %>/<%= new Date(musdes.tanggal).getFullYear() %>
+        </div>
+
+        <% 
+            const d = new Date(musdes.tanggal);
+            const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][d.getDay()];
+            const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][d.getMonth()];
+        %>
+
+        <p>
+            Berkaitan dengan pelaksanaan <b><%= musdes.judul_musdes %></b> di Kepenghuluan <%= musdes.nama_kepenghuluan || 'Bantaian Baru' %>, Kecamatan <%= musdes.nama_kecamatan || 'Batu Hampar' %>, Kabupaten Rokan Hilir, pada hari ini:
+        </p>
+
+        <table class="detail-table">
+            <tr>
+                <td style="width: 25%;">Hari / Tanggal</td>
+                <td style="width: 3%;">:</td>
+                <td><b><%= namaHari %>, <%= d.getDate() %> <%= namaBulan %> <%= d.getFullYear() %></b></td>
+            </tr>
+            <tr>
+                <td>Waktu Pelaksanaan</td>
+                <td>:</td>
+                <td><%= musdes.waktu || '09:00 WIB s/d Selesai' %></td>
+            </tr>
+            <tr>
+                <td>Tempat</td>
+                <td>:</td>
+                <td><%= musdes.lokasi || 'Aula Kantor Kepenghuluan' %></td>
+            </tr>
+            <tr>
+                <td>Pimpinan Musyawarah</td>
+                <td>:</td>
+                <td><%= musdes.pimpinan_sidang || 'Ketua BPKep' %></td>
+            </tr>
+            <tr>
+                <td>Notulis</td>
+                <td>:</td>
+                <td><%= musdes.notulis || 'Sekretaris Desa' %></td>
+            </tr>
+            <tr>
+                <td>Jumlah Peserta Hadir</td>
+                <td>:</td>
+                <td><%= musdes.jumlah_peserta %> (tiga puluh lima) orang peserta sebagaimana terlampir dalam daftar hadir.</td>
+            </tr>
+        </table>
+
+        <p>
+            Telah diselenggarakan Musyawarah Kepenghuluan yang dihadiri oleh Penghulu beserta Perangkat Kepenghuluan, Badan Permusyawaratan Kepenghuluan (BPKep), Lembaga Pemberdayaan Masyarakat (LPM), Pengurus RT/RW, Tokoh Agama, Tokoh Adat, Tokoh Pemuda, dan perwakilan unsur perempuan/masyarakat.
+        </p>
+
+        <p>
+            Setelah dilakukan pembahasan dan diskusi terhadap materi/agenda musyawarah, selanjutnya seluruh peserta musyawarah menyepakati serta memutuskan beberapa hal berketetapan sebagai berikut:
+        </p>
+
+        <div class="kesepakatan-box">
+            <div style="font-weight: bold; margin-bottom: 6px; text-decoration: underline;">KESEPAKATAN DAN KEPUTUSAN MUSYAWARAH:</div>
+            <div style="font-weight: bold; color: <%= musdes.status_keputusan === 'Disepakati' ? '#166534' : '#92400e' %>; margin-bottom: 6px;">
+                STATUS: <%= (musdes.status_keputusan || 'DISEPAKATI').toUpperCase() %>
+            </div>
+            <div style="white-space: pre-line; line-height: 1.5;">
+                <%= musdes.ringkasan_hasil || 'Seluruh peserta musyawarah menyepakati agenda dan usulan program kerja untuk ditindaklanjuti ke tahapan penetapan Keputusan Kepenghuluan sesuai peraturan perundang-undangan yang berlaku.' %>
+            </div>
+        </div>
+
+        <p>
+            Demikian Berita Acara ini dibuat dan ditandatangani dengan penuh tanggung jawab dan rasa kebersamaan untuk dapat dipergunakan sebagaimana mestinya.
+        </p>
+
+        <!-- TANDA TANGAN 3 PIHAK -->
+        <table class="sig-table">
+            <tr>
+                <td>
+                    Wakil Tokoh Masyarakat,<br>
+                    <div class="sig-space"></div>
+                    <b><u>( ..................................... )</u></b>
+                </td>
+                <td>
+                    Pimpinan Musyawarah,<br>
+                    <b><%= musdes.pimpinan_sidang || 'Ketua BPKep' %></b>
+                    <div class="sig-space"></div>
+                    <b><u>( ..................................... )</u></b>
+                </td>
+                <td>
+                    Mengetahui,<br>
+                    <b>PENGHULU <%= (musdes.nama_kepenghuluan || 'BANTAIAN BARU').toUpperCase() %></b>
+                    <div class="sig-space"></div>
+                    <b><u><%= musdes.prof_kades || 'Penghulu ' + (musdes.nama_kepenghuluan || 'Bantaian Baru') %></u></b>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

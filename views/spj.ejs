@@ -388,11 +388,11 @@ function exportPajakToExcel() {
     </div>
     
     <div style="overflow-x: auto;">
-        <table id="tabel-spj-kegiatan" style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
+        <table id="tabel-spj-kegiatan" style="width: 100%; min-width: 1400px; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
             <thead>
                 <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; text-align: left; background: #f8fafc;">
                     <th style="padding: 12px 8px; width: 35px; text-align: center;">No</th>
-                    <th style="padding: 12px 10px; min-width: 380px; width: 38%;">Nama Kegiatan & Bidang APBDes</th>
+                    <th style="padding: 12px 14px; min-width: 500px; width: 44%;">Nama Kegiatan & Bidang APBDes</th>
                     <th style="padding: 12px 8px; width: 85px; text-align: center;">Sumber Dana</th>
                     <th style="padding: 12px 8px; width: 120px;">Pagu Anggaran</th>
                     <th style="padding: 12px 8px; width: 135px;">Realisasi (Rp & %)</th>
@@ -407,7 +407,7 @@ function exportPajakToExcel() {
                     <% data.forEach((item, index) => { %>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
                         <td style="padding: 12px 8px; text-align: center;"><%= index + 1 %></td>
-                        <td style="padding: 12px 10px; min-width: 380px;">
+                        <td style="padding: 12px 14px; min-width: 500px; line-height: 1.5;">
                             <div style="font-weight: bold; color: #0f172a; font-size: 13.5px;"><%= item.nama_kegiatan %></div>
                             <div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
                                 <span style="background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 11px;">
