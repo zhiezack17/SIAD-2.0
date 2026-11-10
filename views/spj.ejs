@@ -151,7 +151,7 @@
                             <td style="padding: 10px;"><%= idx + 1 %></td>
                             <td style="padding: 10px; font-weight: 600; color: #475569;"><%= tgl %></td>
                             <td style="padding: 10px; font-weight: bold; color: #0f172a;">
-                                <%= p.nama_kegiatan || 'Kegiatan #' + p.kegiatan_id %>
+                                <%= p.nama_kegiatan || (p.uraian ? p.uraian.replace(/^\[SSP:\s*[^\]]+\]\s*/i, '') : 'Penyetoran Kas Pajak Siskeudes') %>
                                 <% if (p.kegiatan_tahun) { %>
                                     <span style="font-size: 11px; color: #64748b; font-weight: normal;">(TA <%= p.kegiatan_tahun %>)</span>
                                 <% } %>
@@ -886,15 +886,15 @@ function editSPJ(id, nama, tahun, pagu, lokasi, tgl_mulai, tgl_selesai, status, 
                 <!-- DROPZONE FILE -->
                 <div style="margin-bottom:20px;">
                     <label style="display:block; font-weight:700; font-size:13px; color:#1e293b; margin-bottom:6px;">
-                        1. Pilih Berkas Laporan BKU Siskeudes (.PDF atau .XLSX / .XLS) <span style="color:red;">*</span>
+                        1. Pilih Berkas Laporan BKU / Buku Pembantu Pajak Siskeudes (.PDF atau .XLSX / .XLS) <span style="color:red;">*</span>
                     </label>
                     <div id="bkuDropzone" onclick="document.getElementById('bkuFileInput').click()" style="border:2px dashed #94a3b8; border-radius:10px; padding:25px 20px; text-align:center; background:white; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#2563eb'; this.style.background='#f0f7ff'" onmouseout="this.style.borderColor='#94a3b8'; this.style.background='white'">
                         <div style="font-size:36px; margin-bottom:8px;">📄</div>
                         <div style="font-size:14px; font-weight:700; color:#0f172a;" id="bkuDropzoneLabel">
-                            Klik di sini atau seret berkas BKU ke area ini
+                            Klik di sini atau seret berkas BKU / Buku Pajak ke area ini
                         </div>
                         <div style="font-size:12px; color:#64748b; margin-top:4px;">
-                            Mendukung Laporan BKU Penatausahaan Siskeudes (PDF resmi hingga 100+ halaman atau file Excel)
+                            Mendukung Laporan BKU Penatausahaan dan Buku Pembantu Pajak Per Jenis Siskeudes (PDF resmi hingga 100+ halaman atau file Excel)
                         </div>
                         <input type="file" id="bkuFileInput" accept=".pdf,.xlsx,.xls" style="display:none;" onchange="handleBkuFileSelected(this)">
                     </div>
@@ -1327,6 +1327,12 @@ function tampilkanPratinjauBKU(data) {
     renderTableSPP();
     renderTablePajak();
     updateLiveTally();
+
+    if (data.is_buku_pajak || ((!data.kegiatan || data.kegiatan.length === 0) && data.pajak && data.pajak.length > 0)) {
+        switchPreviewSubTab('pajak');
+    } else {
+        switchPreviewSubTab('spp');
+    }
 
     // Switch view
     document.getElementById('bkuStepUpload').style.display = 'none';

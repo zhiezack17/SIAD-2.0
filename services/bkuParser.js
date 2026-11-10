@@ -8,9 +8,17 @@ function cleanNumber(val) {
     return parseFloat(str) || 0;
 }
 
+function cleanUraian(rawUraian) {
+    if (!rawUraian) return '';
+    return rawUraian
+        .replace(/\b(?:1\s*2\s*3\s*4|5\s*6|7\s*8\s*9|1\s*2\s*3\s*4\s*5\s*6\s*7\s*8\s*9|Transaksi\s*\(Rp\))\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 function cleanNamaKegiatan(rawUraian, fallbackRek) {
     if (!rawUraian) return fallbackRek || 'Kegiatan Belanja';
-    let clean = rawUraian
+    let clean = cleanUraian(rawUraian)
         .replace(/^(?:Penarikan Dana.*?Kas di Bendahara\s*|Pengembalian Sisa Dana.*?Kas di Bendahara\s*)/i, '')
         .replace(/^Pembayaran\s+(?:Kegiatan\s+|Belanja\s+)?/i, '')
         .replace(/\s+/g, ' ')
@@ -171,23 +179,28 @@ function tentukanSumberDana(namaKegiatan, kodeRekening) {
     return 'DDS (Dana Desa)';
 }
 
-function tentukanJenisPajak(namaRekening, uraian) {
-    const str = `${namaRekening || ''} ${uraian || ''}`.toLowerCase();
-    if (str.includes('ppn')) return 'PPN';
-    if (str.includes('21')) return 'PPh 21';
-    if (str.includes('22')) return 'PPh 22';
-    if (str.includes('23')) return 'PPh 23';
-    if (str.includes('restoran') || str.includes('rumah makan') || str.includes('daerah') || str.includes('galian')) {
-        return 'Pajak Daerah / Restoran';
-    }
-    return 'Pajak Lainnya';
+function tentukanJenisPajak(kodeRekening, uraian) {
+    const rek = String(kodeRekening || '');
+    if (rek.startsWith('7.1.1.01')) return 'PPN';
+    if (rek.startsWith('7.1.1.02')) return 'PPh 21';
+    if (rek.startsWith('7.1.1.03')) return 'PPh 22';
+    if (rek.startsWith('7.1.1.04')) return 'PPh 23';
+    if (rek.startsWith('7.1.2')) return 'Pajak Daerah / Restoran';
+
+    const str = `${rek} ${uraian || ''}`.toLowerCase();
+    if (/restoran|rumah makan|daerah|galian/i.test(str)) return 'Pajak Daerah / Restoran';
+    if (/ppn/i.test(str)) return 'PPN';
+    if (/pph\s*21|pasal\s*21/i.test(str)) return 'PPh 21';
+    if (/pph\s*22|pasal\s*22/i.test(str)) return 'PPh 22';
+    if (/pph\s*23|pasal\s*23/i.test(str)) return 'PPh 23';
+    return 'Pajak Daerah / Restoran';
 }
 
 /**
  * PARSER UTAMA DARI BUFFER PDF SISKEUDES
  */
-async function parseBkuPdf(buffer) {
-    const data = await pdf(buffer);
+async function parseBkuPdf(buffer, preParsedData = null) {
+    const data = preParsedData || (await pdf(buffer));
     const text = data.text;
     const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
@@ -263,7 +276,7 @@ async function parseBkuPdf(buffer) {
                 }
             }
 
-            let uraianText = uraianParts.join(' ').trim();
+            let uraianText = cleanUraian(uraianParts.join(' '));
             if (!uraianText) uraianText = prevNamaRek || 'Belanja Kegiatan';
 
             if (noBukti.includes('/SPP/')) {
@@ -295,7 +308,7 @@ async function parseBkuPdf(buffer) {
                     item.realisasi_anggaran += nominal;
                 }
             } else if (noBukti.includes('/KWT/')) {
-                const jenisPajak = tentukanJenisPajak(prevNamaRek, uraianText);
+                const jenisPajak = tentukanJenisPajak(prevRekening, uraianText);
                 kwtMap.set(noBukti, {
                     no_bukti: noBukti,
                     tanggal: currentDate,
@@ -306,7 +319,7 @@ async function parseBkuPdf(buffer) {
                     nominal
                 });
             } else if (noBukti.includes('/SSP/')) {
-                const jenisPajak = tentukanJenisPajak(prevNamaRek, uraianText);
+                const jenisPajak = tentukanJenisPajak(prevRekening, uraianText);
                 sspMap.set(noBukti, {
                     no_bukti: noBukti,
                     tanggal: currentDate,
@@ -318,6 +331,62 @@ async function parseBkuPdf(buffer) {
                 });
             }
             continue;
+        }
+
+        // 2. Deteksi Baris Penyetoran Pajak Rekening 7.1. TANPA Nomor Bukti eksplisit pada printout Siskeudes
+        // Format di Siskeudes BKU: "0,00 300.000,00 (300.000,00) 166.308.052,00"
+        if (/^0,00\d+(?:\.\d{3})*,\d{2}\(\d+(?:\.\d{3})*,\d{2}\)/.test(line)) {
+            let prevRekening = '';
+            let prevNamaRek = '';
+            if (i > 0) {
+                const rekMatch = lines[i - 1].match(/^(7\.\d\.\d\.\d{2}\.)(.*)$/);
+                if (rekMatch) {
+                    prevRekening = rekMatch[1];
+                    prevNamaRek = rekMatch[2].trim();
+                }
+            }
+
+            if (prevRekening.startsWith('7.1.')) {
+                const amounts = line.match(/\d+(?:\.\d{3})*,\d{2}/g);
+                const nominal = amounts && amounts.length >= 2 ? cleanNumber(amounts[1]) : 0;
+
+                let dateLineIdx = -1;
+                for (let j = i - 1; j >= Math.max(0, i - 6); j--) {
+                    if (/^\d{2}\/\d{2}\/\d{4}\d*/.test(lines[j])) {
+                        dateLineIdx = j;
+                        break;
+                    }
+                }
+                const currentDate = dateLineIdx >= 0 ? lines[dateLineIdx].substring(0, 10) : '';
+
+                let uraianParts = [];
+                if (dateLineIdx > 0) {
+                    for (let j = dateLineIdx - 1; j >= Math.max(0, dateLineIdx - 4); j--) {
+                        const prev = lines[j];
+                        if (/^\d\.\d\.\d\.\d{2}\./.test(prev)) break;
+                        if (/SPP|KWT|SSP|TBP|STS/.test(prev)) break;
+                        if (/\d+,\d{2}/.test(prev) && prev.length > 15) break;
+                        if (/1\s*2\s*3\s*4|5\s*6|7\s*8\s*9|Transaksi\s*\(Rp\)/i.test(prev)) continue;
+                        uraianParts.unshift(prev);
+                    }
+                }
+                let uraianText = cleanUraian(uraianParts.join(' '));
+                if (!uraianText) uraianText = prevNamaRek || 'Penyetoran Pajak BKU';
+
+                const jenisPajak = tentukanJenisPajak(prevRekening, uraianText);
+                const virtualBukti = `SSP-BKU-${sspMap.size + 1}/${prevRekening}/${tahun}`;
+
+                sspMap.set(virtualBukti, {
+                    no_bukti: virtualBukti,
+                    tanggal: currentDate,
+                    uraian: uraianText,
+                    jenis_pajak: jenisPajak,
+                    kode_rekening: prevRekening,
+                    nama_rekening: prevNamaRek,
+                    nominal
+                });
+                continue;
+            }
         }
 
         // Sub-baris rekening lanjutan pada SPP multi-line
@@ -495,6 +564,141 @@ function buildSummaryResponse(meta, kegiatanList, kwtList, sspList) {
 }
 
 /**
+ * PARSER KHUSUS BUKU KAS PEMBANTU PAJAK PER JENIS PAJAK (SISKEUDES PDF)
+ */
+async function parseBukuPajakPdf(buffer, rawText = null) {
+    const text = rawText || (await pdf(buffer)).text;
+    const rawLines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+    let desa = '';
+    let tahun = new Date().getFullYear();
+    let periode = '';
+
+    for (let i = 0; i < Math.min(rawLines.length, 30); i++) {
+        const l = rawLines[i];
+        if (/PEMERINTAH DESA/i.test(l)) {
+            desa = l.replace(/PEMERINTAH DESA/i, '').trim();
+        }
+        if (/TAHUN ANGGARAN/i.test(l)) {
+            const m = l.match(/\d{4}/);
+            if (m) tahun = parseInt(m[0]);
+        }
+        if (/Periode/i.test(l)) {
+            periode = l.replace(/Periode/i, '').trim();
+        }
+    }
+
+    const kwtMap = new Map();
+    const sspMap = new Map();
+    let currentKodeRek = '';
+    let currentNamaRek = '';
+
+    for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i];
+
+        const rekMatch = line.match(/(.*)(7\.\d\.\d\.\d{2}\.)/);
+        if (rekMatch) {
+            currentNamaRek = rekMatch[1].trim();
+            currentKodeRek = rekMatch[2].trim();
+            continue;
+        }
+
+        const buktiMatch = line.match(/(\d{4,5}\/(?:KWT|SSP)\/[0-9.]+\/\d{4})/);
+        if (buktiMatch) {
+            const noBukti = buktiMatch[1];
+            const isKwt = noBukti.includes('/KWT/');
+            const isSsp = noBukti.includes('/SSP/');
+
+            let tanggal = '';
+            let dateIdx = -1;
+            for (let j = i - 1; j >= Math.max(0, i - 6); j--) {
+                const dm = rawLines[j].match(/^(\d{2}\/\d{2}\/\d{4})/);
+                if (dm) {
+                    tanggal = dm[1];
+                    dateIdx = j;
+                    break;
+                }
+            }
+
+            let uraianParts = [];
+            if (dateIdx >= 0) {
+                for (let j = dateIdx + 1; j < i; j++) {
+                    const txt = rawLines[j];
+                    if (!/^\d+$/.test(txt) && !txt.includes('7.1.')) {
+                        uraianParts.push(txt);
+                    }
+                }
+            }
+            let uraian = cleanUraian(uraianParts.join(' '));
+
+            let numbersLine = '';
+            for (let j = i + 1; j <= Math.min(rawLines.length - 1, i + 3); j++) {
+                if (/\d+,\d{2}/.test(rawLines[j])) {
+                    numbersLine = rawLines[j];
+                    break;
+                }
+            }
+
+            let nominal = 0;
+            const moneyMatches = numbersLine.match(/\d+(?:\.\d{3})*,\d{2}/g);
+            if (moneyMatches && moneyMatches.length >= 2) {
+                if (isKwt) {
+                    nominal = cleanNumber(moneyMatches[0]);
+                } else if (isSsp) {
+                    if (moneyMatches.length >= 3) {
+                        nominal = cleanNumber(moneyMatches[1]);
+                    } else {
+                        nominal = cleanNumber(moneyMatches[0]);
+                    }
+                }
+            }
+
+            const jenisPajak = tentukanJenisPajak(currentKodeRek, uraian);
+
+            const record = {
+                no_bukti: noBukti,
+                tanggal,
+                uraian: uraian || currentNamaRek || 'Transaksi Pajak',
+                jenis_pajak: jenisPajak,
+                kode_rekening: currentKodeRek,
+                nama_rekening: currentNamaRek,
+                nominal
+            };
+
+            if (isKwt) {
+                kwtMap.set(noBukti, record);
+            } else if (isSsp) {
+                sspMap.set(noBukti, record);
+            }
+        }
+    }
+
+    const sspList = Array.from(sspMap.values());
+    const kwtList = Array.from(kwtMap.values());
+    let totalSetoran = 0;
+    sspList.forEach(s => totalSetoran += s.nominal);
+    let totalPotongan = 0;
+    kwtList.forEach(k => totalPotongan += k.nominal);
+
+    return {
+        is_buku_pajak: true,
+        meta: { desa, tahun, periode },
+        kegiatan: [],
+        pajak_potongan: kwtList,
+        pajak_setoran: sspList,
+        summary: {
+            total_kegiatan: 0,
+            total_realisasi: 0,
+            total_potongan_pajak: totalSetoran > 0 ? totalSetoran : totalPotongan,
+            count_potongan_pajak: kwtList.length,
+            total_setoran_pajak: totalSetoran,
+            count_setoran_pajak: sspList.length,
+            sisa_hutang_pajak: 0
+        }
+    };
+}
+
+/**
  * AUTO DISPATCHER SESUAI FORMAT BERKAS
  */
 async function parseBku(buffer, filename = '', mimetype = '') {
@@ -502,16 +706,23 @@ async function parseBku(buffer, filename = '', mimetype = '') {
     if (isExcel) {
         return parseBkuExcel(buffer);
     }
-    return parseBkuPdf(buffer);
+    const data = await pdf(buffer);
+    if (/BUKU (?:KAS )?PEMBANTU PAJAK/i.test(data.text)) {
+        return parseBukuPajakPdf(buffer, data.text);
+    }
+    return parseBkuPdf(buffer, data);
 }
 
 module.exports = {
     parseBku,
     parseBkuPdf,
+    parseBukuPajakPdf,
     parseBkuExcel,
     cleanNumber,
     cleanNamaKegiatan,
+    cleanUraian,
     tentukanBidang,
     tentukanSubBidang,
-    tentukanSumberDana
+    tentukanSumberDana,
+    tentukanJenisPajak
 };

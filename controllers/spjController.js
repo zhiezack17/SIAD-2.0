@@ -70,7 +70,7 @@ const spjController = {
             }
 
             if (filterTahun) {
-                pSql += ` AND (sk.tahun = $${pIdx} OR (sk.tahun IS NULL AND EXTRACT(YEAR FROM sp.created_at) = $${pIdx}))`;
+                pSql += ` AND (sk.tahun = $${pIdx} OR EXTRACT(YEAR FROM sp.tanggal_setor) = $${pIdx} OR (sp.tanggal_setor IS NULL AND EXTRACT(YEAR FROM sp.created_at) = $${pIdx}))`;
                 pP.push(filterTahun);
                 pIdx++;
             }
@@ -1284,7 +1284,7 @@ const spjController = {
                 SELECT sp.*, sk.nama_kegiatan, sk.tahun
                 FROM spj_pajak sp
                 LEFT JOIN spj_kegiatan sk ON sp.kegiatan_id = sk.id
-                WHERE (sk.tahun = $1 OR (sk.tahun IS NULL AND EXTRACT(YEAR FROM sp.created_at) = $1))
+                WHERE (sk.tahun = $1 OR EXTRACT(YEAR FROM sp.tanggal_setor) = $1 OR (sp.tanggal_setor IS NULL AND EXTRACT(YEAR FROM sp.created_at) = $1))
             `;
             let pP = [tahun];
             let idx = 2;
@@ -1455,7 +1455,8 @@ const spjController = {
                 kegiatan: kegiatanEnriched,
                 pajak: pajakEnriched,
                 user_desa: ac.getDesaNama(req, 'Desa'),
-                is_historis: Number(tahun) <= 2025
+                is_historis: Number(tahun) <= 2025,
+                is_buku_pajak: Boolean(parsed.is_buku_pajak)
             });
 
         } catch (error) {
@@ -1631,6 +1632,11 @@ const spjController = {
                         if (parts.length === 3) {
                             tglSetor = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
                         }
+                    } else if (p.tanggal && p.tanggal.includes('-')) {
+                        tglSetor = p.tanggal;
+                    }
+                    if (!tglSetor && tahunNum) {
+                        tglSetor = `${tahunNum}-12-31`;
                     }
 
                     // Kaitkan dengan kegiatan jika ada kecocokan uraian
@@ -1643,21 +1649,55 @@ const spjController = {
                         }
                     }
 
-                    await db.query(`
-                        INSERT INTO spj_pajak 
-                        (kegiatan_id, jenis_pajak, nominal, kepenghuluan_id, ntpn, kode_billing, tanggal_setor, uraian)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                    `, [
-                        matchedKegId,
-                        p.jenis_pajak || 'PPN',
-                        nom,
-                        did || null,
-                        p.no_bukti || null,
-                        p.kode_rekening || null,
-                        tglSetor || new Date(),
-                        `[SSP: ${p.no_bukti || '-'}] ${p.uraian || 'Penyetoran Pajak BKU'}`
-                    ]);
-                    insertedPajak++;
+                    // Cek duplikasi agar idempotent saat sinkronisasi ulang
+                    let existingPajakId = null;
+                    if (p.no_bukti && did) {
+                        try {
+                            const checkDup = await db.query(
+                                `SELECT id FROM spj_pajak WHERE kepenghuluan_id = $1 AND (ntpn = $2 OR uraian ILIKE $3) LIMIT 1`,
+                                [did, p.no_bukti, `%${p.no_bukti}%`]
+                            );
+                            if (checkDup.rows.length > 0) {
+                                existingPajakId = checkDup.rows[0].id;
+                            }
+                        } catch (errDup) {
+                            console.warn('[postImportBku:checkDupPajak]', errDup.message);
+                        }
+                    }
+
+                    if (existingPajakId) {
+                        await db.query(`
+                            UPDATE spj_pajak 
+                            SET jenis_pajak = $1, nominal = $2, kode_billing = $3, tanggal_setor = $4, 
+                                uraian = $5, kegiatan_id = COALESCE($6, kegiatan_id)
+                            WHERE id = $7
+                        `, [
+                            p.jenis_pajak || 'Pajak Daerah / Restoran',
+                            nom,
+                            p.kode_rekening || null,
+                            tglSetor,
+                            `[SSP: ${p.no_bukti || '-'}] ${p.uraian || 'Penyetoran Pajak BKU'}`,
+                            matchedKegId,
+                            existingPajakId
+                        ]);
+                        insertedPajak++;
+                    } else {
+                        await db.query(`
+                            INSERT INTO spj_pajak 
+                            (kegiatan_id, jenis_pajak, nominal, kepenghuluan_id, ntpn, kode_billing, tanggal_setor, uraian)
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                        `, [
+                            matchedKegId,
+                            p.jenis_pajak || 'PPN',
+                            nom,
+                            did || null,
+                            p.no_bukti || null,
+                            p.kode_rekening || null,
+                            tglSetor || new Date(),
+                            `[SSP: ${p.no_bukti || '-'}] ${p.uraian || 'Penyetoran Pajak BKU'}`
+                        ]);
+                        insertedPajak++;
+                    }
                 }
             }
 
