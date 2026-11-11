@@ -88,13 +88,24 @@ const saveFileLocal = (fileObj, subfolder = 'spj') => {
 
 /**
  * Upload ke Google Drive dengan jaminan Anti-Gagal (Local Server Fallback)
- * 1. Simpan instan ke server lokal sebagai jaminan kecepatan & keandalan
- * 2. Coba sinkronisasi ke Google Apps Script (timeout 5 detik)
- * 3. Jika Google Drive sukses -> kembalikan link Drive
- * 4. Jika Google Drive gagal/timeout/404 -> kembalikan link lokal tanpa error
+ * Mendukung pembentukan folder berjenjang otomatis:
+ * Kepenghuluan -> SPJ [Tahun] -> [Bidang] -> [Sub Bidang / Kegiatan] -> [Dokumen / Dokumentasi / Pajak]
  */
-const uploadToDrive = async (fileObj, kepenghuluan = 'Air Hitam', kegiatan = 'Umum', modul = 'SPJ') => {
-    // Normalisasi argumen jika dipanggil dengan format (buffer, originalname, mimetype, subfolder)
+const uploadToDrive = async (fileObj, metaOrDesa = 'Air Hitam', kegiatan = 'Umum', modul = 'SPJ') => {
+    // Normalisasi argumen: bisa berupa object metadata atau string legacy
+    let meta = {};
+    if (metaOrDesa && typeof metaOrDesa === 'object' && !Buffer.isBuffer(metaOrDesa)) {
+        meta = metaOrDesa;
+    } else {
+        meta = {
+            kepenghuluan: metaOrDesa,
+            kegiatan: kegiatan,
+            modul: modul,
+            kategori: modul
+        };
+    }
+
+    // Normalisasi file
     let buffer = null;
     let fileName = 'file.dat';
     let mimeType = 'application/octet-stream';
@@ -102,8 +113,8 @@ const uploadToDrive = async (fileObj, kepenghuluan = 'Air Hitam', kegiatan = 'Um
 
     if (Buffer.isBuffer(fileObj)) {
         buffer = fileObj;
-        fileName = String(kepenghuluan || 'file.dat');
-        mimeType = String(kegiatan || 'application/octet-stream');
+        fileName = String(meta.kepenghuluan || 'file.dat');
+        mimeType = String(meta.kegiatan || 'application/octet-stream');
         normalizedFile = { buffer, originalname: fileName, mimetype: mimeType };
     } else if (fileObj && fileObj.buffer) {
         buffer = fileObj.buffer;
@@ -112,7 +123,7 @@ const uploadToDrive = async (fileObj, kepenghuluan = 'Air Hitam', kegiatan = 'Um
     }
 
     // 1. Simpan salinan lokal terlebih dahulu (Instan & Pasti Sukses)
-    const localResult = saveFileLocal(normalizedFile, modul || 'spj');
+    const localResult = saveFileLocal(normalizedFile, meta.modul || meta.kategori || 'spj');
 
     // 2. Coba upload ke Google Drive via GAS dengan timeout aman (5000ms)
     try {
@@ -129,14 +140,18 @@ const uploadToDrive = async (fileObj, kepenghuluan = 'Air Hitam', kegiatan = 'Um
             file: buffer.toString('base64'),
             fileName: String(fileName),
             mimeType: String(mimeType),
-            kepenghuluan: String(kepenghuluan),
-            modul: String(modul),
-            kegiatan: String(kegiatan).split('/').join('-')
+            kepenghuluan: String(meta.kepenghuluan || 'Umum'),
+            tahun: String(meta.tahun || '2025'),
+            bidang: String(meta.bidang || 'Bidang Umum'),
+            sub_bidang: String(meta.sub_bidang || meta.kegiatan || 'Umum'),
+            kegiatan: String(meta.kegiatan || 'Umum').split('/').join('-'),
+            kategori: String(meta.kategori || meta.modul || 'Dokumen SPJ'),
+            modul: String(meta.modul || 'SPJ')
         };
 
         const response = await axios.post(GAS_URL, payload, {
             headers: { 'Content-Type': 'application/json' },
-            timeout: 5000, // Timeout 5 detik agar user tidak menunggu lama jika GAS offline
+            timeout: 5000,
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         });
@@ -159,7 +174,6 @@ const uploadToDrive = async (fileObj, kepenghuluan = 'Air Hitam', kegiatan = 'Um
         const status = gasError.response ? gasError.response.status : gasError.message;
         console.warn(`[uploadToDrive] ⚠️ Google Drive sync offline/error (${status}). Beralih ke penyimpanan lokal.`);
         
-        // JIKA GOOGLE DRIVE ERROR / 404 / TIMEOUT, KEMBALIKAN BERKAS LOKAL TANPA MELEMPAR EXCEPTION
         if (localResult) {
             return localResult;
         }

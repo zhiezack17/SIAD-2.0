@@ -612,9 +612,23 @@ const spjController = {
             const did = ac.getDesaId(req);
             let driveUrl = '';
 
+            let keg = {};
+            if (kegiatan_id) {
+                const kRes = await db.query('SELECT nama_kegiatan, tahun, bidang, sub_bidang FROM spj_kegiatan WHERE id = $1', [kegiatan_id]);
+                if (kRes.rows.length > 0) keg = kRes.rows[0];
+            }
+
             if (req.file) {
                 try {
-                    const driveData = await uploadToDrive(req.file, userDesa, 'SPJ', 'Dokumen SPJ');
+                    const driveData = await uploadToDrive(req.file, {
+                        kepenghuluan: userDesa,
+                        tahun: keg.tahun || '2025',
+                        bidang: keg.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa',
+                        sub_bidang: keg.sub_bidang || keg.nama_kegiatan || 'Umum',
+                        kegiatan: keg.nama_kegiatan || 'Umum',
+                        kategori: 'Dokumen SPJ',
+                        modul: 'SPJ'
+                    });
                     if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
                 } catch (errDrive) {
                     console.error('[SPJ:postUploadDokumen:uploadToDrive]', errDrive.message);
@@ -673,14 +687,15 @@ const spjController = {
             const did = ac.getDesaId(req);
 
             const kegRes = await db.query(`
-                SELECT sk.nama_kegiatan, k.nama AS kepenghuluan_nama
+                SELECT sk.nama_kegiatan, sk.tahun, sk.bidang, sk.sub_bidang, k.nama AS kepenghuluan_nama
                 FROM spj_kegiatan sk
                 LEFT JOIN kepenghuluan k ON sk.kepenghuluan_id = k.id
                 WHERE sk.id = $1
             `, [kegiatan_id]);
 
-            const namaKegiatan = kegRes.rows[0]?.nama_kegiatan || 'SPJ';
-            const userDesa = kegRes.rows[0]?.kepenghuluan_nama || ac.getDesaNama(req, 'Desa');
+            const keg = kegRes.rows[0] || {};
+            const namaKegiatan = keg.nama_kegiatan || 'SPJ';
+            const userDesa = keg.kepenghuluan_nama || ac.getDesaNama(req, 'Desa');
 
             const files = req.files || (req.file ? [req.file] : []);
             if (files.length === 0) {
@@ -690,7 +705,15 @@ const spjController = {
             for (const file of files) {
                 let driveUrl = '';
                 try {
-                    const driveData = await uploadToDrive(file, userDesa, namaKegiatan, 'Dokumentasi SPJ');
+                    const driveData = await uploadToDrive(file, {
+                        kepenghuluan: userDesa,
+                        tahun: keg.tahun || '2025',
+                        bidang: keg.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa',
+                        sub_bidang: keg.sub_bidang || namaKegiatan || 'Umum',
+                        kegiatan: namaKegiatan,
+                        kategori: 'Dokumentasi SPJ',
+                        modul: 'SPJ'
+                    });
                     if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
                 } catch (errDrive) {
                     console.error('[SPJ:uploadToDriveFoto]', errDrive.message);
@@ -791,9 +814,23 @@ const spjController = {
             const did = ac.getDesaId(req);
             let driveUrl = '';
 
+            let keg = {};
+            if (kegiatan_id) {
+                const kRes = await db.query('SELECT nama_kegiatan, tahun, bidang, sub_bidang FROM spj_kegiatan WHERE id = $1', [kegiatan_id]);
+                if (kRes.rows.length > 0) keg = kRes.rows[0];
+            }
+
             if (req.file) {
                 try {
-                    const driveData = await uploadToDrive(req.file, userDesa, 'SPJ', 'Pajak SPJ');
+                    const driveData = await uploadToDrive(req.file, {
+                        kepenghuluan: userDesa,
+                        tahun: keg.tahun || '2025',
+                        bidang: keg.bidang || 'Bidang 1: Penyelenggaraan Pemerintahan Desa',
+                        sub_bidang: keg.sub_bidang || keg.nama_kegiatan || 'Umum',
+                        kegiatan: keg.nama_kegiatan || 'Umum',
+                        kategori: 'Pajak SPJ',
+                        modul: 'SPJ'
+                    });
                     if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
                 } catch (errDrive) {
                     console.error('[SPJ:postTambahPajak:uploadToDrive]', errDrive.message);

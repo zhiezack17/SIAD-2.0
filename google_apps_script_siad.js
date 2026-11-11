@@ -1,14 +1,19 @@
 /**
  * ====================================================================
- * GOOGLE APPS SCRIPT (GAS) - SIAD 2.0 GOOGLE DRIVE CONNECTOR (V6)
+ * GOOGLE APPS SCRIPT (GAS) - SIAD 2.0 GOOGLE DRIVE CONNECTOR (V7)
  * ====================================================================
  * Salin dan tempel kode ini ke editor Google Apps Script di:
  * https://script.google.com/
  * 
- * Fitur:
- * 1. Upload berkas otomatis ke folder terstruktur (Kepenghuluan -> Modul -> Kegiatan).
- * 2. Hapus berkas otomatis (Memindahkan ke Sampah / Trash Google Drive) saat
- *    pengguna menghapus SPJ, Bukti Pajak, Foto Dokumentasi, atau Surat di SIAD 2.0.
+ * Fitur & Struktur Hierarki Otomatis:
+ * SIAD 2.0
+ *   └── [Nama Kepenghuluan] (misal: Bantaian Baru)
+ *       └── SPJ [Tahun] (misal: SPJ 2025 / SPJ 2023)
+ *           └── [Bidang APBDes] (misal: Bidang 3 - Pembinaan Kemasyarakatan)
+ *               └── [Sub Bidang / Kegiatan] (misal: Insentif Guru Tahfiz)
+ *                   ├── Dokumen SPJ (Kwitansi, SPP, BKU, Berkas PDF)
+ *                   ├── Dokumentasi SPJ (Foto 0%, 50%, 100%)
+ *                   └── Pajak SPJ (Bukti SSP Setoran Pajak)
  * ====================================================================
  */
 
@@ -31,7 +36,7 @@ function doPost(e) {
 
       try {
         var targetFile = DriveApp.getFileById(fileId);
-        targetFile.setTrashed(true); // Memindahkan file ke Sampah Google Drive (Aman, bisa direstore dalam 30 hari)
+        targetFile.setTrashed(true); // Memindahkan file ke Sampah Google Drive
         return responseJson({ 
           status: 'success', 
           message: 'Berkas berhasil dipindahkan ke Sampah Google Drive', 
@@ -47,10 +52,10 @@ function doPost(e) {
     }
 
     // ================================================================
-    // 2. FITUR UPLOAD BERKAS KE GOOGLE DRIVE
+    // 2. FITUR UPLOAD BERKAS KE GOOGLE DRIVE DENGAN SUBFOLDER HIERARKI RAPI
     // ================================================================
     if (data.file) {
-      var folderRootId = '18jQB_3bSXtmno5MgD5cft2F-1vvPm3ie'; // Folder Induk SIAD 2.0
+      var folderRootId = '18jQB_3bSXtmno5MgD5c4t2F-1vvPm3ie'; // Folder Induk SIAD 2.0
       var rootFolder;
       try {
         rootFolder = DriveApp.getFolderById(folderRootId);
@@ -59,16 +64,29 @@ function doPost(e) {
       }
       
       var desaName = data.kepenghuluan || 'Umum';
-      var modulName = data.modul || 'SPJ';
-      var kegiatanName = data.kegiatan || 'Umum';
+      var tahun = data.tahun ? ('SPJ ' + data.tahun) : 'SPJ 2025';
+      
+      // Normalisasi nama bidang agar tidak ada karakter terlarang di nama folder
+      var bidang = data.bidang || 'Bidang 1 - Penyelenggaraan Pemerintahan Desa';
+      bidang = String(bidang).replace(/[:]/g, ' -').trim();
 
-      // Buat struktur subfolder rapi per desa & kegiatan
+      // Normalisasi sub-bidang / nama kegiatan
+      var subBidang = data.sub_bidang || data.kegiatan || 'Kegiatan Umum';
+      subBidang = String(subBidang).replace(/[\/\\:*?"<>|]/g, '-').trim();
+      if (subBidang.length > 80) subBidang = subBidang.substring(0, 80);
+
+      // Kategori dokumen: Dokumen SPJ, Dokumentasi SPJ, Pajak SPJ, Surat Masuk, dll.
+      var kategori = data.kategori || data.modul || 'Dokumen SPJ';
+
+      // ==============================================================
+      // MEMBUAT STRUKTUR FOLDER SESUAI KEINGINAN:
+      // Kepenghuluan -> SPJ [Tahun] -> Bidang -> Sub Bidang / Kegiatan -> Kategori
+      // ==============================================================
       var desaFolder = getOrCreateFolder(rootFolder, desaName);
-      var modulFolder = getOrCreateFolder(desaFolder, modulName);
-      var targetFolder = modulFolder;
-      if (kegiatanName && kegiatanName !== 'Umum') {
-        targetFolder = getOrCreateFolder(modulFolder, kegiatanName);
-      }
+      var tahunFolder = getOrCreateFolder(desaFolder, tahun);
+      var bidangFolder = getOrCreateFolder(tahunFolder, bidang);
+      var subBidangFolder = getOrCreateFolder(bidangFolder, subBidang);
+      var targetFolder = getOrCreateFolder(subBidangFolder, kategori);
 
       // Decode base64 dan simpan file
       var decodedBytes = Utilities.base64Decode(data.file);
@@ -80,7 +98,8 @@ function doPost(e) {
         status: 'success',
         id: newFile.getId(),
         name: newFile.getName(),
-        url: newFile.getUrl()
+        url: newFile.getUrl(),
+        folderPath: desaName + ' / ' + tahun + ' / ' + bidang + ' / ' + subBidang + ' / ' + kategori
       });
     }
 
@@ -104,4 +123,3 @@ function responseJson(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
-
