@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { google } = require('googleapis');
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyO2T5KDAijIJHwkFNoO2-C7gD-_S94AkLIHsS5t3J1b6IatjBNeCqdzHobS24y08TVkw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwMt8_Nu3cH4vIsamg52tBEQM9mFuNBNcZku0k1RUrSl6iLM1bYpkaiKHEjvlzFapY/exec';
 const TRASH_FOLDER_ID = '1Ca69EF_LI9wUiLU_qY4RkJ4KNHc6TKrH'; // Folder 📁 Sampah SIAD (Trash) di Google Drive
 
 // Direktori root penyimpanan lokal server
