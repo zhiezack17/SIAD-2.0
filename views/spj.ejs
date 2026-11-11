@@ -1290,6 +1290,11 @@ async function prosesAnalisisBKU() {
             body: formData
         });
 
+        if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`Server status ${resp.status}`);
+        }
+
         const res = await resp.json();
         if (!res.success) {
             alert('Gagal menganalisis berkas BKU: ' + (res.message || 'Format tidak sesuai'));
@@ -1631,6 +1636,11 @@ async function eksekusiImportBKU() {
                 fast_track: fastTrack
             })
         });
+
+        if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`Server status ${resp.status}`);
+        }
 
         const res = await resp.json();
         if (!res.success) {
