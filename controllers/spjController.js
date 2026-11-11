@@ -613,8 +613,12 @@ const spjController = {
             let driveUrl = '';
 
             if (req.file) {
-                const driveData = await uploadToDrive(req.file, userDesa, 'SPJ', 'Dokumen SPJ');
-                if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
+                try {
+                    const driveData = await uploadToDrive(req.file, userDesa, 'SPJ', 'Dokumen SPJ');
+                    if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
+                } catch (errDrive) {
+                    console.error('[SPJ:postUploadDokumen:uploadToDrive]', errDrive.message);
+                }
             }
 
             await db.query(
@@ -788,8 +792,12 @@ const spjController = {
             let driveUrl = '';
 
             if (req.file) {
-                const driveData = await uploadToDrive(req.file, userDesa, 'SPJ', 'Pajak SPJ');
-                if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
+                try {
+                    const driveData = await uploadToDrive(req.file, userDesa, 'SPJ', 'Pajak SPJ');
+                    if (driveData && driveData.webViewLink) driveUrl = driveData.webViewLink;
+                } catch (errDrive) {
+                    console.error('[SPJ:postTambahPajak:uploadToDrive]', errDrive.message);
+                }
             }
 
             await db.query(
