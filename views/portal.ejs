@@ -537,7 +537,7 @@
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </a>
             <% } else { %>
-                <a href="/login" class="user-action-btn btn-portal-login">
+                <a href="/login?module=Administrasi%20Umum&redirect=/dashboard" class="user-action-btn btn-portal-login">
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                     <span>Masuk Petugas</span>
                 </a>
@@ -585,7 +585,7 @@
         <!-- 6 Core Cards Grid -->
         <div class="tiles-grid">
             <!-- 1. Administrasi & Tata Usaha -->
-            <a href="/surat" class="tile-card">
+            <a href="<%= user ? '/surat' : '/login?module=Administrasi%20Umum&redirect=/surat' %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-adm">
@@ -610,7 +610,7 @@
             </a>
 
             <!-- 2. Keuangan & SPJ Siskeudes -->
-            <a href="/spj" class="tile-card">
+            <a href="<%= user ? '/spj' : '/login?module=Keuangan%20%26%20SPJ&redirect=/spj' %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-keu">
@@ -635,7 +635,7 @@
             </a>
 
             <!-- 3. Perpajakan PBB-P2 -->
-            <a href="/pajak-pbb?desa=<%= kepInfo.id %>" class="tile-card">
+            <a href="<%= user ? '/pajak-pbb?desa=' + kepInfo.id : '/login?module=Perpajakan%20PBB-P2&redirect=' + encodeURIComponent('/pajak-pbb?desa=' + kepInfo.id) %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-pbb">
@@ -660,7 +660,7 @@
             </a>
 
             <!-- 4. Bantuan Sosial (Bansos) -->
-            <a href="/bansos?desa=<%= kepInfo.id %>" class="tile-card">
+            <a href="<%= user ? '/bansos?desa=' + kepInfo.id : '/login?module=Bantuan%20Sosial&redirect=' + encodeURIComponent('/bansos?desa=' + kepInfo.id) %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-ban">
@@ -685,7 +685,7 @@
             </a>
 
             <!-- 5. Resepsionis & Buku Tamu Digital -->
-            <a href="/resepsionis" class="tile-card">
+            <a href="<%= user ? '/resepsionis' : '/login?module=Resepsionis%20%26%20Tamu&redirect=/resepsionis' %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-res">

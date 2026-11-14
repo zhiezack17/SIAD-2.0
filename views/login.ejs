@@ -4,131 +4,395 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
-        :root { --primary: #1e40af; --primary-dark: #1e3a8a; --accent: #3b82f6; --text-main: #0f172a; --text-muted: #64748b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { 
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
-            min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+        :root {
+            --primary-orange: #f59e0b;
+            --primary-orange-dark: #d97706;
+            --emerald-dark: #064e3b;
         }
-        
-        .login-wrapper {
-            background: white; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
-            display: flex; width: 1050px; max-width: 95%; min-height: 600px; overflow: hidden;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
-        
-        .login-banner {
-            flex: 1.2; 
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            padding: 4.5rem; color: white; display: flex; flex-direction: column; justify-content: center; position: relative;
-            overflow: hidden;
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            position: relative;
+            overflow-x: hidden;
+            padding: 1.5rem;
+            /* Scenic Natural Indonesian Landscape with Emerald Mist - Identik dengan Portal Hub */
+            background: 
+                linear-gradient(180deg, 
+                    rgba(15, 23, 42, 0.75) 0%, 
+                    rgba(15, 23, 42, 0.55) 40%, 
+                    rgba(6, 78, 59, 0.70) 75%,
+                    rgba(15, 23, 42, 0.90) 100%),
+                radial-gradient(circle at center, rgba(16, 185, 129, 0.20) 0%, transparent 65%),
+                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat fixed;
+            background-color: #0f172a;
         }
-        .login-banner::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            z-index: 1; pointer-events: none;
+
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 10;
         }
-        .login-banner-content { position: relative; z-index: 2; }
-        
-        .badge {
-            background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3);
-            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px;
-            display: inline-block; margin-bottom: 1.5rem; text-transform: uppercase;
+
+        /* Top Brand Logo & Badge */
+        .brand-logo-wrapper {
+            position: relative;
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        
-        .login-banner h1 { font-size: 3.2rem; margin-bottom: 1.5rem; line-height: 1.15; font-weight: 800; letter-spacing: -1px; }
-        .login-banner p { color: #e2e8f0; line-height: 1.7; font-size: 1.15rem; font-weight: 300; }
-        
-        .login-form-area {
-            flex: 1; padding: 4.5rem; display: flex; flex-direction: column; justify-content: center; background: white;
+
+        .logo-box {
+            width: 82px;
+            height: 82px;
+            background: #ffffff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px;
         }
-        .header-form { text-align: center; margin-bottom: 2.5rem; }
-        
-        /* ILMU SIHIR CSS UNTUK LOGO TRANSPARAN */
-        .logo-img { 
-            height: 75px; margin-bottom: 1.5rem; 
-            mix-blend-mode: multiply; /* Menghilangkan background putih */
-            filter: contrast(1.1); /* Mempertegas warna */
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
-        
-        .header-form h2 { color: var(--text-main); font-size: 1.8rem; margin-bottom: 0.5rem; font-weight: 700; letter-spacing: -0.5px; }
-        .header-form p { color: var(--text-muted); font-size: 0.95rem; }
-        
-        .input-group { margin-bottom: 1.5rem; }
-        .input-group label { display: block; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600; font-size: 0.9rem; }
-        .input-box { position: relative; }
-        .input-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem; }
-        .input-box input {
-            width: 100%; padding: 15px 15px 15px 48px; border: 2px solid #e2e8f0; border-radius: 12px;
-            font-size: 1rem; outline: none; transition: all 0.3s; font-weight: 500; color: var(--text-main);
-            background: #f8fafc;
+
+        .gold-ribbon {
+            margin-top: -12px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 4px 16px;
+            border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
         }
-        .input-box input:focus { border-color: var(--accent); background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
-        .input-box input::placeholder { color: #cbd5e1; font-weight: 400; }
-        
-        .btn-masuk {
-            width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 12px;
-            font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 1rem;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+
+        /* Header Titles */
+        .title-main {
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
-        .btn-masuk:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); }
-        
-        .alert-error { 
-            background: #fef2f2; color: #dc2626; padding: 14px 16px; border-radius: 12px; 
-            margin-bottom: 1.5rem; font-size: 0.9rem; border: 1px solid #fecaca; display: flex; align-items: center; font-weight: 500;
+
+        .title-sub {
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.92);
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
         }
-        
-        /* Dekorasi Icon Latar Belakang */
-        .bg-icon { position: absolute; bottom: -40px; right: -40px; font-size: 16rem; color: rgba(255,255,255,0.05); z-index: 1; transform: rotate(-15deg); }
+
+        /* Form Wrapper */
+        .login-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            text-align: left;
+        }
+
+        .form-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            padding-left: 0.5rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .input-pill {
+            width: 100%;
+            background: #ffffff;
+            color: #0f172a;
+            border: none;
+            outline: none;
+            padding: 0.95rem 1.6rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .input-pill:focus {
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.35), 0 8px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .input-pill::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-container .input-pill {
+            padding-right: 3.25rem;
+        }
+
+        .eye-toggle-btn {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.05rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s ease;
+        }
+
+        .eye-toggle-btn:hover {
+            color: #0f172a;
+        }
+
+        /* Options Row: Tetap Masuk & Kembali */
+        .form-options-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 0.5rem;
+            margin-top: -0.25rem;
+        }
+
+        .remember-checkbox {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 500;
+            cursor: pointer;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .remember-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-orange);
+            cursor: pointer;
+        }
+
+        .back-link {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .back-link:hover {
+            color: #fde68a;
+            text-decoration: underline;
+        }
+
+        /* Action Submit Button (Oranye Digides) */
+        .btn-submit-container {
+            margin-top: 1.25rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-masuk-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #ffffff;
+            border: none;
+            outline: none;
+            padding: 0.85rem 3.5rem;
+            border-radius: 999px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(217, 119, 6, 0.45);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+        }
+
+        .btn-masuk-orange:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(217, 119, 6, 0.6);
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+        }
+
+        .btn-masuk-orange:active {
+            transform: translateY(0);
+        }
+
+        /* Alert Error Banner */
+        .alert-error-box {
+            width: 100%;
+            background: rgba(239, 68, 68, 0.9);
+            border: 1px solid #f87171;
+            color: #ffffff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Subtle Footer */
+        .footer-note {
+            margin-top: 2.5rem;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="login-wrapper">
-        <div class="login-banner">
-            <i class="fa-solid fa-shield-halved bg-icon"></i>
-            <div class="login-banner-content">
-                <span class="badge">E-Government</span>
-                <h1>Sistem Informasi Arsip Digital</h1>
-                <p>Tingkatkan efisiensi dan transparansi pelayanan masyarakat dengan tata kelola digital. Akses persuratan, arsip, pelaporan, hingga regulasi kepenghuluan hanya dalam satu platform cerdas.</p>
+
+    <div class="login-container">
+        <!-- Logo Rohil & Ribbon SIAD -->
+        <div class="brand-logo-wrapper">
+            <div class="logo-box">
+                <img src="/img/logo.png" alt="Logo Pemkab Rohil" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lambang_Kabupaten_Rokan_Hilir.png/240px-Lambang_Kabupaten_Rokan_Hilir.png'">
+            </div>
+            <div class="gold-ribbon">
+                SIAD 2.0 KEPENGHULUAN
             </div>
         </div>
-        
-        <div class="login-form-area">
-            <div class="header-form">
-                <!-- Foto logo dibuat transparan otomatis oleh CSS -->
-                <img src="/img/logo.png" class="logo-img" alt="Logo Desa" onerror="this.style.display='none'">
-                <h2>Selamat Datang, Aparatur Kepenghuluan!</h2>
-                <p>Silakan masuk menggunakan kredensial Anda</p>
-            </div>
-            
-            <% if (typeof error !== 'undefined' && error) { %>
-                <div class="alert-error"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 10px; font-size: 1.2rem;"></i> <%= error %></div>
-            <% } %>
 
-            <form action="/login" method="POST">
-                <div class="input-group">
-                    <label>ID Pengguna atau Email</label>
-                    <div class="input-box">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text" name="username" placeholder="Masukkan ID Pengguna..." required autocomplete="off">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Kata Sandi Keamanan</label>
-                    <div class="input-box">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" name="password" placeholder="••••••••" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn-masuk"><i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Buka Sistem</button>
-            </form>
-            
-            <div style="text-align: center; margin-top: 3rem; color: #94a3b8; font-size: 0.8rem; font-weight: 500;">
-                &copy; <%= new Date().getFullYear() %> SIAD 2.0 &bull; Hak Cipta Dilindungi
+        <!-- Titles -->
+        <h1 class="title-main">SIAD 2.0 ROKAN HILIR</h1>
+        <h2 class="title-sub"><%= typeof targetTitle !== 'undefined' ? targetTitle : 'Login ke Halaman Administrasi Umum' %></h2>
+
+        <!-- Alert Error (Jika salah password atau akun nonaktif) -->
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert-error-box">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span><%= error %></span>
             </div>
+        <% } %>
+
+        <!-- Login Form -->
+        <form action="/login" method="POST" class="login-form">
+            <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' && redirect ? redirect : '/dashboard' %>">
+            <input type="hidden" name="moduleName" value="<%= typeof moduleName !== 'undefined' && moduleName ? moduleName : 'Administrasi Umum' %>">
+
+            <!-- Field Username -->
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input 
+                    type="text" 
+                    name="username" 
+                    class="input-pill" 
+                    placeholder="masukkan username" 
+                    required 
+                    autofocus 
+                    autocomplete="username"
+                >
+            </div>
+
+            <!-- Field Password -->
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="password-container">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="passwordField" 
+                        class="input-pill" 
+                        placeholder="masukkan password" 
+                        required 
+                        autocomplete="current-password"
+                    >
+                    <button type="button" class="eye-toggle-btn" onclick="togglePasswordVisibility()" title="Lihat Kata Sandi">
+                        <i class="fa-regular fa-eye-slash" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Options Row -->
+            <div class="form-options-row">
+                <label class="remember-checkbox">
+                    <input type="checkbox" name="remember" checked>
+                    <span>Tetap Masuk</span>
+                </label>
+                <a href="/portal" class="back-link">Kembali</a>
+            </div>
+
+            <!-- Submit Button (Masuk) -->
+            <div class="btn-submit-container">
+                <button type="submit" class="btn-masuk-orange">
+                    Masuk
+                </button>
+            </div>
+        </form>
+
+        <div class="footer-note">
+            Pemerintah Kabupaten Rokan Hilir &bull; Sistem Informasi & Administrasi Desa Terpadu
         </div>
     </div>
+
+    <!-- Toggle Password Script -->
+    <script>
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById('passwordField');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+    </script>
 </body>
 </html>

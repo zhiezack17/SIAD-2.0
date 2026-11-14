@@ -12,17 +12,38 @@ const isAdmin = (user) => {
 
 const authController = {
     getLogin: (req, res) => {
+        const redirect = req.query.redirect || req.body?.redirect || '/dashboard';
         if (req.session && req.session.userId) {
-            return res.redirect('/portal');
+            return res.redirect(redirect || '/portal');
         }
-        res.render('login', { title: 'Masuk Sistem - SIAD 2.0', error: false, layout: false });
+        const moduleName = req.query.module || 'Administrasi Umum';
+        const targetTitle = `Login ke Halaman ${moduleName}`;
+        res.render('login', { 
+            title: `${targetTitle} - SIAD 2.0`, 
+            targetTitle,
+            moduleName,
+            redirect,
+            error: req.query.error || false, 
+            layout: false 
+        });
     },
 
     postLogin: async (req, res) => {
-        const { username, password } = req.body;
+        const { username, password, redirect } = req.body;
+        const moduleName = req.body.moduleName || req.query.module || 'Administrasi Umum';
+        const targetTitle = `Login ke Halaman ${moduleName}`;
+        const activeRedirect = redirect || req.query.redirect || '/dashboard';
+
         try {
             if (!username || !password) {
-                return res.render('login', { title: 'Masuk Sistem - SIAD 2.0', error: 'Username dan password wajib diisi.', layout: false });
+                return res.render('login', { 
+                    title: `${targetTitle} - SIAD 2.0`, 
+                    targetTitle,
+                    moduleName,
+                    redirect: activeRedirect,
+                    error: 'Username dan password wajib diisi.', 
+                    layout: false 
+                });
             }
 
             const result = await db.query(
@@ -41,7 +62,10 @@ const authController = {
                 if (user.aktif === false || (user.status && String(user.status).toUpperCase() === 'NONAKTIF')) {
                     recordFailedLogin(req);
                     return res.render('login', { 
-                        title: 'Masuk Sistem - SIAD 2.0', 
+                        title: `${targetTitle} - SIAD 2.0`, 
+                        targetTitle,
+                        moduleName,
+                        redirect: activeRedirect,
                         error: 'Akun Anda sedang dinonaktifkan. Silakan hubungi Administrator.', 
                         layout: false 
                     });
@@ -100,6 +124,11 @@ const authController = {
                         wajib_ganti_password: user.wajib_ganti_password === true
                     };
 
+                    let targetRedirect = activeRedirect;
+                    if (typeof targetRedirect !== 'string' || !targetRedirect.startsWith('/') || targetRedirect.startsWith('//') || targetRedirect.includes('\\')) {
+                        targetRedirect = '/dashboard';
+                    }
+
                     // Regenerate session ID untuk mencegah serangan session fixation
                     return req.session.regenerate((err) => {
                         if (err) {
@@ -111,10 +140,10 @@ const authController = {
                             action: 'LOGIN_SUCCESS', 
                             entity: 'PENGGUNA', 
                             recordId: user.id, 
-                            details: `Login berhasil sebagai ${user.username} (${sessionUserData.peran})` 
+                            details: `Login berhasil sebagai ${user.username} (${sessionUserData.peran}) menuju ${targetRedirect}` 
                         });
                         req.session.save(() => {
-                            return res.redirect('/portal');
+                            return res.redirect(targetRedirect);
                         });
                     });
                 }
@@ -127,11 +156,25 @@ const authController = {
                 recordId: username,
                 details: `Percobaan login gagal untuk username: ${username}`
             });
-            return res.render('login', { title: 'Masuk Sistem - SIAD 2.0', error: 'Username atau password salah!', layout: false });
+            return res.render('login', { 
+                title: `${targetTitle} - SIAD 2.0`, 
+                targetTitle,
+                moduleName,
+                redirect: activeRedirect,
+                error: 'Username atau password salah!', 
+                layout: false 
+            });
 
         } catch (error) {
             console.error('Error saat verifikasi Login:', error);
-            return res.render('login', { title: 'Masuk Sistem - SIAD 2.0', error: 'Terjadi gangguan koneksi ke database: ' + (error.message || ''), layout: false });
+            return res.render('login', { 
+                title: `${targetTitle} - SIAD 2.0`, 
+                targetTitle,
+                moduleName,
+                redirect: activeRedirect,
+                error: 'Terjadi gangguan koneksi ke database: ' + (error.message || ''), 
+                layout: false 
+            });
         }
     },
 
@@ -249,7 +292,17 @@ const authController = {
             res.locals.activeDesaId = req.session.active_kepenghuluan_id || u.kepenghuluan_id;
             return next();
         }
-        res.redirect('/login');
+        
+        const currentUrl = req.originalUrl || req.url || '';
+        let moduleName = 'Administrasi Umum';
+        if (currentUrl.startsWith('/surat')) moduleName = 'Administrasi Umum';
+        else if (currentUrl.startsWith('/spj')) moduleName = 'Keuangan & SPJ';
+        else if (currentUrl.startsWith('/pajak-pbb')) moduleName = 'Perpajakan PBB-P2';
+        else if (currentUrl.startsWith('/bansos')) moduleName = 'Bantuan Sosial';
+        else if (currentUrl.startsWith('/resepsionis')) moduleName = 'Resepsionis & Tamu';
+        else if (currentUrl.startsWith('/dashboard')) moduleName = 'Sistem Workspace';
+
+        return res.redirect(`/login?module=${encodeURIComponent(moduleName)}&redirect=${encodeURIComponent(currentUrl || '/dashboard')}`);
     },
 
     // Endpoint untuk ganti desa aktif khusus Super Admin / Auditor
