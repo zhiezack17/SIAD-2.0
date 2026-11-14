@@ -1,8 +1,8 @@
 const db = require('../config/db');
 
 const isAdmin = (req) => {
-    if (!req || !req.session || !req.session.user) return false;
-    const u = req.session.user;
+    if (!req) return false;
+    const u = (req.session && req.session.user) ? req.session.user : (req.user || req);
     if (u.is_admin === true) return true;
     if (u.is_admin === false) return false;
     const roleOrPeran = String((u.peran || u.role || '')).toLowerCase();
@@ -11,14 +11,14 @@ const isAdmin = (req) => {
 
 const isSuperAdmin = (req) => {
     if (!isAdmin(req)) return false;
-    const u = req.session.user;
+    const u = (req.session && req.session.user) ? req.session.user : (req.user || req);
     const id = u.kepenghuluan_id;
     return id === undefined || id === null;
 };
 
 const isAdminDesa = (req) => {
     if (!isAdmin(req)) return false;
-    const u = req.session.user;
+    const u = (req.session && req.session.user) ? req.session.user : (req.user || req);
     const id = u.kepenghuluan_id;
     return id !== undefined && id !== null;
 };
@@ -26,18 +26,17 @@ const isAdminDesa = (req) => {
 const getDesaId = (req) => {
     if (!req || !req.session || !req.session.user) return null;
     const u = req.session.user;
-    // Jika Super Admin Kabupaten sedang menginspeksi desa tertentu melalui dropdown switcher
     if (isSuperAdmin(req)) {
         return req.session.active_kepenghuluan_id ? Number(req.session.active_kepenghuluan_id) : null;
     }
-    // Jika Admin Desa atau Perangkat Desa, selalu kembalikan kepenghuluan_id mereka
     const id = u.kepenghuluan_id;
     return (id === undefined || id === null) ? null : Number(id);
 };
 
 const getUserRole = (req) => {
-    if (!req || !req.session || !req.session.user) return 'guest';
-    const u = req.session.user;
+    if (!req) return 'guest';
+    const u = (req.session && req.session.user) ? req.session.user : (req.user || req);
+    if (!u) return 'guest';
     return String(u.role || u.peran || 'operator').toLowerCase();
 };
 
@@ -103,7 +102,6 @@ const buildTenantFilter = (req, columnName = 'kepenghuluan_id', paramIndex = 1) 
         }
         return { sql: '', params: [], nextIndex: paramIndex };
     }
-    // Non-superadmin (Admin Desa & Perangkat) SELALU dikunci ke desa miliknya
     if (did) {
         return {
             sql: ` AND ${columnName} = $${paramIndex}`,
@@ -146,22 +144,124 @@ const listKepForSelect = async (req) => {
     }
 };
 
-const isKaurUmum = (req) => {
+// ========================================================
+// ROLE CHECKERS UNTUK APARATUR DESA
+// ========================================================
+const isPimpinanOrSekdes = (req) => {
     const r = getUserRole(req);
-    return r === 'kaur_umum' || r === 'kaur umum';
+    return r.includes('penghulu') || r.includes('pimpinan') || r.includes('kades') || r.includes('sekretaris') || r.includes('sekdes');
 };
 
-const blockKaurUmum = (req, res, next) => {
-    if (isKaurUmum(req)) {
-        if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
-            return res.status(403).json({ 
-                error: 'Akses Ditolak: Akun Kaur Umum hanya berwenang mengelola Modul Persuratan.' 
-            });
-        }
-        return res.redirect('/surat?tab=masuk&error=' + encodeURIComponent('Akses Ditolak: Akun Kaur Umum hanya berwenang mengelola Modul Persuratan demi menjaga kerahasiaan data keuangan & aset kepenghuluan.'));
-    }
-    next();
+const isKeuangan = (req) => {
+    const r = getUserRole(req);
+    return r.includes('bendahara') || r === 'kaur' || r.includes('keuangan') || r.includes('operator');
 };
+
+const isKaurUmum = (req) => {
+    const r = getUserRole(req);
+    return r === 'kaur_umum' || r.includes('kaur_umum') || r.includes('kaur umum') || r.includes('tata usaha');
+};
+
+const isAset = (req) => {
+    const r = getUserRole(req);
+    return r.includes('aset') || r.includes('pengelola_aset');
+};
+
+// Generic Role-Guard Generator
+const requireRoleAccess = (allowedChecks, moduleName) => {
+    return (req, res, next) => {
+        // Admin Kabupaten & Admin Desa selalu punya akses bypass untuk manajemen & inspeksi
+        if (isAdmin(req)) return next();
+
+        const user = req.session && req.session.user;
+        if (!user) {
+            return res.redirect('/login');
+        }
+
+        // Cek apakah user memenuhi minimal salah satu syarat
+        let granted = false;
+        for (const check of allowedChecks) {
+            if (typeof check === 'function' && check(req)) {
+                granted = true;
+                break;
+            }
+        }
+
+        if (granted) return next();
+
+        // Tentukan fallback URL yang paling sesuai dengan tugas user
+        let targetFallback = '/dashboard';
+        if (isKeuangan(req)) {
+            targetFallback = '/spj';
+        } else if (isKaurUmum(req)) {
+            targetFallback = '/surat?tab=masuk';
+        } else if (isAset(req)) {
+            targetFallback = '/aset';
+        } else if (isPimpinanOrSekdes(req)) {
+            targetFallback = '/dashboard';
+        }
+
+        const jabatanNama = (user.peran || user.role || 'Aparatur').toUpperCase();
+        const pesan = `Akses Ditolak: Akun Anda (${jabatanNama}) tidak memiliki wewenang untuk mengakses ${moduleName}. Silakan gunakan akun yang berwenang.`;
+
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
+            return res.status(403).json({ error: pesan });
+        }
+
+        const separator = targetFallback.includes('?') ? '&' : '?';
+        return res.redirect(`${targetFallback}${separator}error=${encodeURIComponent(pesan)}`);
+    };
+};
+
+// ========================================================
+// MIDDLEWARE GUARDS PER MODUL
+// ========================================================
+
+// 1. Persuratan: Admin, Pimpinan, Sekdes, Kaur Umum
+const requireSurat = requireRoleAccess([isPimpinanOrSekdes, isKaurUmum], 'Modul Persuratan (Tata Naskah Dinas)');
+
+// 2. Resepsionis: Admin, Pimpinan, Sekdes, Kaur Umum
+const requireResepsionis = requireRoleAccess([isPimpinanOrSekdes, isKaurUmum], 'Modul Resepsionis & Buku Tamu');
+
+// 3. Keuangan & SPJ: Admin, Pimpinan, Sekdes, Bendahara, Kaur Keuangan
+const requireKeuangan = requireRoleAccess([isPimpinanOrSekdes, isKeuangan], 'Modul Keuangan & SPJ');
+
+// 4. Pajak PBB-P2: Admin, Pimpinan, Sekdes, Bendahara, Kaur Keuangan
+const requirePbb = requireRoleAccess([isPimpinanOrSekdes, isKeuangan], 'Modul Perpajakan PBB-P2');
+
+// 5. Bantuan Sosial: Admin, Pimpinan, Sekdes, Kaur Umum
+const requireBansos = requireRoleAccess([isPimpinanOrSekdes, isKaurUmum], 'Modul Bantuan Sosial (Bansos & BLT-DD)');
+
+// 6. Aset: Admin, Pimpinan, Sekdes, Pengelola Aset
+const requireAset = requireRoleAccess([isPimpinanOrSekdes, isAset], 'Modul Aset Kepenghuluan');
+
+// 7. Produk Hukum: Admin, Pimpinan, Sekdes, Kaur Umum
+const requireProdukHukum = requireRoleAccess([isPimpinanOrSekdes, isKaurUmum], 'Modul Produk Hukum (Perdes & SK)');
+
+// 8. BUMDes: Admin, Pimpinan, Sekdes
+const requireBumdes = requireRoleAccess([isPimpinanOrSekdes], 'Modul Pengawasan BUMDes');
+
+// 9. Musdes: Admin, Pimpinan, Sekdes, Kaur Umum
+const requireMusdes = requireRoleAccess([isPimpinanOrSekdes, isKaurUmum], 'Modul Musyawarah Desa');
+
+// 10. Arsip Vital: Admin, Pimpinan, Sekdes
+const requireArsip = requireRoleAccess([isPimpinanOrSekdes], 'Modul Arsip Dokumen Vital');
+
+// 11. Laporan: Admin, Pimpinan, Sekdes, Bendahara, Pengelola Aset
+const requireLaporan = requireRoleAccess([isPimpinanOrSekdes, isKeuangan, isAset], 'Modul Laporan & Rekapitulasi');
+
+// 12. Master Data & Pengaturan: Hanya Administrator (Admin Desa & Admin Kabupaten)
+const requireAdmin = (req, res, next) => {
+    if (isAdmin(req)) return next();
+    const pesan = 'Akses Ditolak: Halaman ini hanya diperuntukkan bagi Administrator Sistem.';
+    if (req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
+        return res.status(403).json({ error: pesan });
+    }
+    return res.redirect('/dashboard?error=' + encodeURIComponent(pesan));
+};
+
+// Legacy compatibility
+const blockKaurUmum = requireRoleAccess([isPimpinanOrSekdes, isKeuangan, isAset], 'Modul Terbatas');
 
 module.exports = {
     isAdmin,
@@ -169,8 +269,24 @@ module.exports = {
     isAdminDesa,
     getDesaId,
     getUserRole,
+    isPimpinanOrSekdes,
+    isKeuangan,
     isKaurUmum,
+    isAset,
     blockKaurUmum,
+    requireRoleAccess,
+    requireSurat,
+    requireResepsionis,
+    requireKeuangan,
+    requirePbb,
+    requireBansos,
+    requireAset,
+    requireProdukHukum,
+    requireBumdes,
+    requireMusdes,
+    requireArsip,
+    requireLaporan,
+    requireAdmin,
     hasRole,
     getDesaNama,
     appendFilter,

@@ -291,6 +291,8 @@ const authController = {
 
             res.locals.user = req.session.user;
             res.locals.activeDesaId = req.session.active_kepenghuluan_id || u.kepenghuluan_id;
+            res.locals.error = req.query.error || null;
+            res.locals.success = req.query.success || null;
             return next();
         }
         

@@ -72,24 +72,24 @@ router.get('/buku-tamu', resepsionisController.getPublicForm);
 router.get('/buku-tamu/:desaId', resepsionisController.getPublicForm);
 router.post('/buku-tamu', resepsionisController.submitPublicForm);
 
-router.get('/resepsionis', requireAuth, resepsionisController.getDashboard);
-router.post('/resepsionis/:id/status', requireAuth, resepsionisController.updateStatus);
-router.get('/resepsionis/standing-qr', requireAuth, resepsionisController.getStandingQR);
-router.post('/resepsionis/manual', requireAuth, resepsionisController.postTamuManual);
-router.post('/resepsionis/:id/hapus', requireAuth, resepsionisController.hapusTamu);
+router.get('/resepsionis', requireAuth, ac.requireResepsionis, resepsionisController.getDashboard);
+router.post('/resepsionis/:id/status', requireAuth, ac.requireResepsionis, resepsionisController.updateStatus);
+router.get('/resepsionis/standing-qr', requireAuth, ac.requireResepsionis, resepsionisController.getStandingQR);
+router.post('/resepsionis/manual', requireAuth, ac.requireResepsionis, resepsionisController.postTamuManual);
+router.post('/resepsionis/:id/hapus', requireAuth, ac.requireResepsionis, resepsionisController.hapusTamu);
 
 // --- Rute Perpajakan PBB-P2 ---
-router.get('/pajak-pbb', requireAuth, ac.blockKaurUmum, pbbController.getDashboard);
-router.post('/pajak-pbb/setor', requireAuth, ac.blockKaurUmum, pbbController.tambahSetoran);
-router.get('/pajak-pbb/cetak/:id', requireAuth, ac.blockKaurUmum, pbbController.cetakKuitansi);
-router.post('/pajak-pbb/:id/hapus', requireAuth, ac.blockKaurUmum, pbbController.hapusSetoran);
+router.get('/pajak-pbb', requireAuth, ac.requirePbb, pbbController.getDashboard);
+router.post('/pajak-pbb/setor', requireAuth, ac.requirePbb, pbbController.tambahSetoran);
+router.get('/pajak-pbb/cetak/:id', requireAuth, ac.requirePbb, pbbController.cetakKuitansi);
+router.post('/pajak-pbb/:id/hapus', requireAuth, ac.requirePbb, pbbController.hapusSetoran);
 
 // --- Rute Bantuan Sosial (Bansos & BLT Dana Desa) ---
-router.get('/bansos', requireAuth, ac.blockKaurUmum, bansosController.getDashboard);
-router.post('/bansos/tambah', requireAuth, ac.blockKaurUmum, bansosController.tambahKpm);
-router.post('/bansos/:id/salur', requireAuth, ac.blockKaurUmum, bansosController.updatePenyaluran);
-router.get('/bansos/cetak-tanda-terima', requireAuth, ac.blockKaurUmum, bansosController.cetakTandaTerima);
-router.post('/bansos/:id/hapus', requireAuth, ac.blockKaurUmum, bansosController.hapusKpm);
+router.get('/bansos', requireAuth, ac.requireBansos, bansosController.getDashboard);
+router.post('/bansos/tambah', requireAuth, ac.requireBansos, bansosController.tambahKpm);
+router.post('/bansos/:id/salur', requireAuth, ac.requireBansos, bansosController.updatePenyaluran);
+router.get('/bansos/cetak-tanda-terima', requireAuth, ac.requireBansos, bansosController.cetakTandaTerima);
+router.post('/bansos/:id/hapus', requireAuth, ac.requireBansos, bansosController.hapusKpm);
 
 // --- Rute Utama ---
 router.get('/', (req, res) => {
@@ -298,91 +298,91 @@ const uploadPH = upload;
 router.get('/cari', requireAuth, searchController.getPencarianGlobal);
 
 // --- Rute Modul Surat ---
-router.get('/surat', requireAuth, suratController.getIndex);
-router.post('/surat/masuk', requireAuth, upload.single('file_surat'), suratController.postSuratMasuk);
-router.post('/surat/keluar', requireAuth, upload.single('file_surat'), suratController.postSuratKeluar);
-router.post('/surat/delete', requireAuth, suratController.deleteSurat);
-router.post('/surat/edit', requireAuth, upload.single('file_surat'), suratController.editSurat);
-router.post('/surat/disposisi', requireAuth, suratController.postDisposisi);
-router.get('/surat/disposisi/cetak/:id', requireAuth, suratController.getCetakDisposisi);
-router.get('/surat/agenda/cetak', requireAuth, suratController.getCetakAgenda);
-router.get('/surat/agenda/excel', requireAuth, suratController.getExportAgendaExcel);
+router.get('/surat', requireAuth, ac.requireSurat, suratController.getIndex);
+router.post('/surat/masuk', requireAuth, ac.requireSurat, upload.single('file_surat'), suratController.postSuratMasuk);
+router.post('/surat/keluar', requireAuth, ac.requireSurat, upload.single('file_surat'), suratController.postSuratKeluar);
+router.post('/surat/delete', requireAuth, ac.requireSurat, suratController.deleteSurat);
+router.post('/surat/edit', requireAuth, ac.requireSurat, upload.single('file_surat'), suratController.editSurat);
+router.post('/surat/disposisi', requireAuth, ac.requireSurat, suratController.postDisposisi);
+router.get('/surat/disposisi/cetak/:id', requireAuth, ac.requireSurat, suratController.getCetakDisposisi);
+router.get('/surat/agenda/cetak', requireAuth, ac.requireSurat, suratController.getCetakAgenda);
+router.get('/surat/agenda/excel', requireAuth, ac.requireSurat, suratController.getExportAgendaExcel);
 
 // --- Rute Modul Layanan Administrasi Kependudukan (Surat Pengantar Warga) ---
-router.get('/surat/layanan', requireAuth, pelayananController.getIndex);
-router.post('/surat/layanan/buat', requireAuth, pelayananController.postBuat);
-router.get('/surat/layanan/cetak/:id', requireAuth, pelayananController.getCetak);
-router.post('/surat/layanan/hapus', requireAuth, pelayananController.postHapus);
+router.get('/surat/layanan', requireAuth, ac.requireSurat, pelayananController.getIndex);
+router.post('/surat/layanan/buat', requireAuth, ac.requireSurat, pelayananController.postBuat);
+router.get('/surat/layanan/cetak/:id', requireAuth, ac.requireSurat, pelayananController.getCetak);
+router.post('/surat/layanan/hapus', requireAuth, ac.requireSurat, pelayananController.postHapus);
 router.get('/validasi/surat/:id', pelayananController.getValidasiPublik);
 
 // --- Rute SPJ (GET) ---
-router.get('/spj', requireAuth, ac.blockKaurUmum, spjController.getIndex);
-router.post('/spj/tambah', requireAuth, ac.blockKaurUmum, spjController.postTambah);
-router.post('/spj/edit', requireAuth, ac.blockKaurUmum, spjController.postEdit);
-router.post('/spj/delete', requireAuth, ac.blockKaurUmum, spjController.postDelete);
-router.post('/spj/verifikasi', requireAuth, ac.blockKaurUmum, spjController.postVerifikasi);
-router.get('/spj/cetak-rekap', requireAuth, ac.blockKaurUmum, spjController.getCetakRekapitulasi);
-router.get('/spj/cetak-sptjb/:id', requireAuth, ac.blockKaurUmum, spjController.getCetakSptjb);
-router.get('/spj/cetak/:id', requireAuth, ac.blockKaurUmum, spjController.getCetakVerifikasi);
+router.get('/spj', requireAuth, ac.requireKeuangan, spjController.getIndex);
+router.post('/spj/tambah', requireAuth, ac.requireKeuangan, spjController.postTambah);
+router.post('/spj/edit', requireAuth, ac.requireKeuangan, spjController.postEdit);
+router.post('/spj/delete', requireAuth, ac.requireKeuangan, spjController.postDelete);
+router.post('/spj/verifikasi', requireAuth, ac.requireKeuangan, spjController.postVerifikasi);
+router.get('/spj/cetak-rekap', requireAuth, ac.requireKeuangan, spjController.getCetakRekapitulasi);
+router.get('/spj/cetak-sptjb/:id', requireAuth, ac.requireKeuangan, spjController.getCetakSptjb);
+router.get('/spj/cetak/:id', requireAuth, ac.requireKeuangan, spjController.getCetakVerifikasi);
 router.get('/validasi/spj/:id', spjController.getValidasiPublik);
 
 // --- Rute Arsip (GET) ---
-router.get('/arsip', requireAuth, ac.blockKaurUmum, arsipController.getIndex);
+router.get('/arsip', requireAuth, ac.requireArsip, arsipController.getIndex);
 
-router.get('/spj/dokumen/:id', requireAuth, ac.blockKaurUmum, spjController.getDokumen);
-router.post('/spj/dokumen/upload', requireAuth, ac.blockKaurUmum, upload.single('file_dokumen'), spjController.postUploadDokumen);
-router.post('/spj/dokumen/hapus', requireAuth, ac.blockKaurUmum, spjController.postDeleteDokumen);
+router.get('/spj/dokumen/:id', requireAuth, ac.requireKeuangan, spjController.getDokumen);
+router.post('/spj/dokumen/upload', requireAuth, ac.requireKeuangan, upload.single('file_dokumen'), spjController.postUploadDokumen);
+router.post('/spj/dokumen/hapus', requireAuth, ac.requireKeuangan, spjController.postDeleteDokumen);
 
 // --- Rute Foto Dokumentasi Kegiatan SPJ (Multi-Upload) ---
-router.post('/spj/foto/upload', requireAuth, ac.blockKaurUmum, upload.array('foto_kegiatan', 10), spjController.postUploadFoto);
-router.post('/spj/foto/hapus', requireAuth, ac.blockKaurUmum, spjController.postDeleteFoto);
+router.post('/spj/foto/upload', requireAuth, ac.requireKeuangan, upload.array('foto_kegiatan', 10), spjController.postUploadFoto);
+router.post('/spj/foto/hapus', requireAuth, ac.requireKeuangan, spjController.postDeleteFoto);
 
-router.get('/spj/pajak/cetak-buku', requireAuth, ac.blockKaurUmum, spjController.getCetakBukuPajak);
-router.get('/spj/pajak/:id', requireAuth, ac.blockKaurUmum, spjController.getPajak);
-router.post('/spj/pajak/tambah', requireAuth, ac.blockKaurUmum, upload.single('file_bukti'), spjController.postTambahPajak);
-router.post('/spj/pajak/hapus', requireAuth, ac.blockKaurUmum, spjController.postDeletePajak);
+router.get('/spj/pajak/cetak-buku', requireAuth, ac.requireKeuangan, spjController.getCetakBukuPajak);
+router.get('/spj/pajak/:id', requireAuth, ac.requireKeuangan, spjController.getPajak);
+router.post('/spj/pajak/tambah', requireAuth, ac.requireKeuangan, upload.single('file_bukti'), spjController.postTambahPajak);
+router.post('/spj/pajak/hapus', requireAuth, ac.requireKeuangan, spjController.postDeletePajak);
 
 // --- Rute Import BKU Siskeudes (PDF & Excel) ---
-router.post('/spj/bku/preview', requireAuth, ac.blockKaurUmum, upload.single('file_bku'), spjController.postPreviewBku);
-router.post('/spj/bku/import', requireAuth, ac.blockKaurUmum, express.json({ limit: '20mb' }), spjController.postImportBku);
+router.post('/spj/bku/preview', requireAuth, ac.requireKeuangan, upload.single('file_bku'), spjController.postPreviewBku);
+router.post('/spj/bku/import', requireAuth, ac.requireKeuangan, express.json({ limit: '20mb' }), spjController.postImportBku);
 
 
 
-router.get('/produk-hukum', requireAuth, ac.blockKaurUmum, produkHukumController.getIndex);
-router.post('/produk-hukum/tambah', requireAuth, ac.blockKaurUmum, uploadPH.single('file_pdf'), produkHukumController.postTambah);
-router.post('/produk-hukum/edit', requireAuth, ac.blockKaurUmum, uploadPH.single('file_pdf'), produkHukumController.postEdit);
-router.post('/produk-hukum/hapus', requireAuth, ac.blockKaurUmum, produkHukumController.postDelete);
+router.get('/produk-hukum', requireAuth, ac.requireProdukHukum, produkHukumController.getIndex);
+router.post('/produk-hukum/tambah', requireAuth, ac.requireProdukHukum, uploadPH.single('file_pdf'), produkHukumController.postTambah);
+router.post('/produk-hukum/edit', requireAuth, ac.requireProdukHukum, uploadPH.single('file_pdf'), produkHukumController.postEdit);
+router.post('/produk-hukum/hapus', requireAuth, ac.requireProdukHukum, produkHukumController.postDelete);
 
 // === ARSIP UPLOAD ROUTE ===
-router.post('/arsip/upload', requireAuth, ac.blockKaurUmum, upload.single('file'), arsipController.postUpload);
+router.post('/arsip/upload', requireAuth, ac.requireArsip, upload.single('file'), arsipController.postUpload);
 
 // === WORKSPACE ROUTES ===
-router.get('/workspace', requireAuth, ac.blockKaurUmum, workspaceController.getIndex);
-router.post('/workspace/tambah', requireAuth, ac.blockKaurUmum, workspaceController.postTambah);
-router.post('/workspace/delete', requireAuth, ac.blockKaurUmum, workspaceController.postDelete);
-router.get('/workspace/:id', requireAuth, ac.blockKaurUmum, workspaceController.getDetail);
-router.post('/workspace/:id/upload', requireAuth, ac.blockKaurUmum, upload.single('file'), workspaceController.postDocument);
+router.get('/workspace', requireAuth, ac.requireArsip, workspaceController.getIndex);
+router.post('/workspace/tambah', requireAuth, ac.requireArsip, workspaceController.postTambah);
+router.post('/workspace/delete', requireAuth, ac.requireArsip, workspaceController.postDelete);
+router.get('/workspace/:id', requireAuth, ac.requireArsip, workspaceController.getDetail);
+router.post('/workspace/:id/upload', requireAuth, ac.requireArsip, upload.single('file'), workspaceController.postDocument);
 
 // === LAPORAN ROUTES ===
-router.get('/laporan', requireAuth, ac.blockKaurUmum, laporanController.getIndex);
-router.post('/laporan/upload', requireAuth, ac.blockKaurUmum, upload.single('file_laporan'), laporanController.postUpload);
+router.get('/laporan', requireAuth, ac.requireLaporan, laporanController.getIndex);
+router.post('/laporan/upload', requireAuth, ac.requireLaporan, upload.single('file_laporan'), laporanController.postUpload);
 
 // === MASTER DATA ROUTES ===
-router.get('/master_data', requireAuth, ac.blockKaurUmum, masterController.getIndex);
-router.post('/master_data/rekening', requireAuth, ac.blockKaurUmum, masterController.postRekening);
-router.post('/master_data/klasifikasi', requireAuth, ac.blockKaurUmum, masterController.postKlasifikasi);
-router.post('/master_data/perangkat', requireAuth, ac.blockKaurUmum, upload.single('file_sk'), masterController.postPerangkat);
-router.post('/master_data/delete', requireAuth, ac.blockKaurUmum, masterController.deleteData);
+router.get('/master_data', requireAuth, ac.requireAdmin, masterController.getIndex);
+router.post('/master_data/rekening', requireAuth, ac.requireAdmin, masterController.postRekening);
+router.post('/master_data/klasifikasi', requireAuth, ac.requireAdmin, masterController.postKlasifikasi);
+router.post('/master_data/perangkat', requireAuth, ac.requireAdmin, upload.single('file_sk'), masterController.postPerangkat);
+router.post('/master_data/delete', requireAuth, ac.requireAdmin, masterController.deleteData);
 
 // === PENGATURAN ROUTES ===
-router.get('/pengaturan', requireAuth, ac.blockKaurUmum, pengaturanController.getIndex);
-router.post('/pengaturan/update', requireAuth, ac.blockKaurUmum, pengaturanController.postUpdate);
-router.post('/pengaturan/inisialisasi-desa', requireAuth, ac.blockKaurUmum, pengaturanController.postInisialisasiDesa);
-router.post('/pengaturan/nonaktifkan-desa', requireAuth, ac.blockKaurUmum, pengaturanController.postNonaktifkanDesa);
-router.post('/pengaturan/tambah-pengguna', requireAuth, ac.blockKaurUmum, pengaturanController.postTambahPengguna);
+router.get('/pengaturan', requireAuth, ac.requireAdmin, pengaturanController.getIndex);
+router.post('/pengaturan/update', requireAuth, ac.requireAdmin, pengaturanController.postUpdate);
+router.post('/pengaturan/inisialisasi-desa', requireAuth, ac.requireAdmin, pengaturanController.postInisialisasiDesa);
+router.post('/pengaturan/nonaktifkan-desa', requireAuth, ac.requireAdmin, pengaturanController.postNonaktifkanDesa);
+router.post('/pengaturan/tambah-pengguna', requireAuth, ac.requireAdmin, pengaturanController.postTambahPengguna);
 
 // === ASET ROUTES (Modul Aset Desa) ===
-router.get('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
+router.get('/aset', requireAuth, ac.requireAset, async (req, res) => {
     try {
         const did = ac.getDesaId(req);
         let sql = `SELECT * FROM aset WHERE 1=1`;
@@ -405,7 +405,7 @@ router.get('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
     }
 });
 
-router.post('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
+router.post('/aset', requireAuth, ac.requireAset, async (req, res) => {
     try {
         const did = ac.getDesaId(req);
         const userId = req.session.userId;
@@ -470,7 +470,7 @@ router.post('/aset', requireAuth, ac.blockKaurUmum, async (req, res) => {
 });
 
 // --- RUTE CETAK STIKER LABEL QR CODE ASET FISIK (Fase 3) ---
-router.get('/aset/label/:id', requireAuth, ac.blockKaurUmum, async (req, res) => {
+router.get('/aset/label/:id', requireAuth, ac.requireAset, async (req, res) => {
     try {
         const id = req.params.id;
         const did = ac.getDesaId(req);
@@ -542,7 +542,7 @@ router.get('/validasi/aset/:id', async (req, res) => {
     }
 });
 
-router.post('/aset/hapus/:id', requireAuth, ac.blockKaurUmum, async (req, res) => {
+router.post('/aset/hapus/:id', requireAuth, ac.requireAset, async (req, res) => {
     try {
         const id = req.params.id;
         const did = ac.getDesaId(req);
@@ -563,21 +563,21 @@ router.post('/aset/hapus/:id', requireAuth, ac.blockKaurUmum, async (req, res) =
 // === BUMDes ROUTES (Modul BUMDes Sesuai PP 11/2021) ===
 
 // --- RUTE MODUL MUSYAWARAH DESA / MUSDES (Fase 4) ---
-router.get('/musdes', requireAuth, musdesController.getIndex);
-router.post('/musdes/tambah', requireAuth, upload.fields([
+router.get('/musdes', requireAuth, ac.requireMusdes, musdesController.getIndex);
+router.post('/musdes/tambah', requireAuth, ac.requireMusdes, upload.fields([
     { name: 'file_berita_acara', maxCount: 1 },
     { name: 'file_notulensi', maxCount: 1 },
     { name: 'file_daftar_hadir', maxCount: 1 }
 ]), musdesController.postTambah);
-router.post('/musdes/hapus/:id', requireAuth, musdesController.postHapus);
-router.get('/musdes/cetak/:id', requireAuth, musdesController.getCetakBeritaAcara);
+router.post('/musdes/hapus/:id', requireAuth, ac.requireMusdes, musdesController.postHapus);
+router.get('/musdes/cetak/:id', requireAuth, ac.requireMusdes, musdesController.getCetakBeritaAcara);
 
-router.get('/bumdes', requireAuth, ac.blockKaurUmum, bumdesController.getIndex);
-router.post('/bumdes/profil', requireAuth, ac.blockKaurUmum, upload.single('file_ad_art'), bumdesController.postProfil);
-router.post('/bumdes/pengurus', requireAuth, ac.blockKaurUmum, upload.single('file_sk'), bumdesController.postPengurus);
-router.post('/bumdes/pengurus/delete', requireAuth, ac.blockKaurUmum, bumdesController.deletePengurus);
-router.post('/bumdes/unit-usaha', requireAuth, ac.blockKaurUmum, bumdesController.postUnitUsaha);
-router.post('/bumdes/unit-usaha/delete', requireAuth, ac.blockKaurUmum, bumdesController.deleteUnitUsaha);
+router.get('/bumdes', requireAuth, ac.requireBumdes, bumdesController.getIndex);
+router.post('/bumdes/profil', requireAuth, ac.requireBumdes, upload.single('file_ad_art'), bumdesController.postProfil);
+router.post('/bumdes/pengurus', requireAuth, ac.requireBumdes, upload.single('file_sk'), bumdesController.postPengurus);
+router.post('/bumdes/pengurus/delete', requireAuth, ac.requireBumdes, bumdesController.deletePengurus);
+router.post('/bumdes/unit-usaha', requireAuth, ac.requireBumdes, bumdesController.postUnitUsaha);
+router.post('/bumdes/unit-usaha/delete', requireAuth, ac.requireBumdes, bumdesController.deleteUnitUsaha);
 
 module.exports = router;
 

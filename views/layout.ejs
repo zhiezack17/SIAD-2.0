@@ -344,20 +344,42 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
         </div>
         <%
             const _r = (typeof userRole !== 'undefined' && userRole ? userRole : (user && (user.peran || user.role) ? (user.peran || user.role) : '')).toLowerCase();
+            const _isAdmin = user && (user.is_admin === true || _r.includes('admin') || _r.includes('super') || _r.includes('auditor'));
             const _isPimpinan = _r.includes('penghulu') || _r.includes('pimpinan') || _r.includes('kades');
             const _isSekdes = _r.includes('sekretaris') || _r.includes('sekdes');
             const _isPimpinanOrSekdes = _isPimpinan || _isSekdes;
-            const _isAdmin = user && (user.is_admin === true || _r.includes('admin') || _r.includes('super'));
-            const _isKaurUmum = _r === 'kaur_umum' || _r.includes('kaur_umum') || _r.includes('kaur umum');
+            
+            const _isKeuangan = _r.includes('bendahara') || _r === 'kaur' || _r.includes('keuangan') || _r.includes('operator');
+            const _isKaurUmum = _r === 'kaur_umum' || _r.includes('kaur_umum') || _r.includes('kaur umum') || _r.includes('tata usaha');
+            const _isAset = _r.includes('aset') || _r.includes('pengelola_aset');
+
+            // Izin visibilitas menu sidebar
+            const _showResepsionis = _isAdmin || _isPimpinanOrSekdes || _isKaurUmum;
+            const _showSurat = _isAdmin || _isPimpinanOrSekdes || _isKaurUmum;
+            const _showSPJ = _isAdmin || _isPimpinanOrSekdes || _isKeuangan;
+            const _showPBB = _isAdmin || _isPimpinanOrSekdes || _isKeuangan;
+            const _showBansos = _isAdmin || _isPimpinanOrSekdes || _isKaurUmum;
+            const _showProdukHukum = _isAdmin || _isPimpinanOrSekdes || _isKaurUmum;
+            const _showBUMDes = _isAdmin || _isPimpinanOrSekdes;
+            const _showAset = _isAdmin || _isPimpinanOrSekdes || _isAset;
+            const _showMusdes = _isAdmin || _isPimpinanOrSekdes || _isKaurUmum;
+            const _showArsip = _isAdmin || _isPimpinanOrSekdes;
+            const _showLaporan = _isAdmin || _isPimpinanOrSekdes || _isKeuangan || _isAset;
+            const _showMasterData = _isAdmin;
+            const _showPengaturan = _isAdmin;
         %>
         <nav class="sidebar-nav">
             <a href="/dashboard" class="nav-item" title="Dashboard"><i class="fa-solid fa-house"></i> <span class="nav-text">Dashboard</span></a>
+            
+            <% if (_showResepsionis) { %>
             <a href="/resepsionis" class="nav-item" title="Resepsionis & Buku Tamu"><i class="fa-solid fa-clipboard-user"></i> <span class="nav-text">Resepsionis (Buku Tamu)</span></a>
-            <% if (!_isKaurUmum) { %>
-                <% if (!_isPimpinanOrSekdes) { %>
-                <a href="/workspace" class="nav-item" title="Workspace"><i class="fa-solid fa-folder-tree"></i> <span class="nav-text">Workspace</span></a>
-                <% } %>
             <% } %>
+
+            <% if (_showArsip && !_isPimpinanOrSekdes) { %>
+            <a href="/workspace" class="nav-item" title="Workspace"><i class="fa-solid fa-folder-tree"></i> <span class="nav-text">Workspace</span></a>
+            <% } %>
+
+            <% if (_showSurat) { %>
             <div>
                 <div class="nav-item" onclick="const m=document.getElementById('surat-menu'); const ic=document.getElementById('surat-icon'); const isNowHidden=m.classList.toggle('hidden'); if(isNowHidden){ ic.className='fa-solid fa-plus'; } else { ic.className='fa-solid fa-minus'; }" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
                     <span><i class="fa-solid fa-envelope"></i> <span class="nav-text">Surat</span></span>
@@ -369,23 +391,51 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
                     <a href="/surat/layanan" class="nav-item" title="Layanan Surat Warga"><i class="fa-solid fa-id-card"></i> <span class="nav-text">Layanan Surat Warga</span></a>
                 </div>
             </div>
-            <% if (!_isKaurUmum) { %>
+            <% } %>
+
+            <% if (_showSPJ) { %>
             <a href="/spj" class="nav-item" title="Kegiatan (SPJ)"><i class="fa-solid fa-briefcase"></i> <span class="nav-text">Kegiatan (SPJ)</span></a>
             <a href="/spj?tab=pajak" class="nav-item" title="Rekap Pajak (Buku)"><i class="fa-solid fa-receipt"></i> <span class="nav-text">Rekap Pajak (Buku)</span></a>
+            <% } %>
+
+            <% if (_showPBB) { %>
             <a href="/pajak-pbb" class="nav-item" title="Perpajakan (PBB-P2)"><i class="fa-solid fa-file-invoice-dollar"></i> <span class="nav-text">Perpajakan PBB-P2</span></a>
+            <% } %>
+
+            <% if (_showBansos) { %>
             <a href="/bansos" class="nav-item" title="Bantuan Sosial (Bansos)"><i class="fa-solid fa-hand-holding-heart"></i> <span class="nav-text">Bansos & BLT-DD</span></a>
+            <% } %>
+
+            <% if (_showProdukHukum) { %>
             <a href="/produk-hukum" class="nav-item" title="Produk Hukum"><i class="fa-solid fa-scale-balanced"></i> <span class="nav-text">Produk Hukum</span></a>
+            <% } %>
+
+            <% if (_showBUMDes) { %>
             <a href="/bumdes" class="nav-item" title="BUMDes"><i class="fa-solid fa-store"></i> <span class="nav-text">BUMDes</span></a>
+            <% } %>
+
+            <% if (_showAset) { %>
             <a href="/aset" class="nav-item" title="Aset"><i class="fa-solid fa-screwdriver-wrench"></i> <span class="nav-text">Aset</span></a>
+            <% } %>
+
+            <% if (_showMusdes) { %>
             <a href="/musdes" class="nav-item" title="Musyawarah Desa"><i class="fa-solid fa-users-rectangle"></i> <span class="nav-text">Musyawarah Desa</span></a>
-            <% if (!_isPimpinanOrSekdes) { %>
+            <% } %>
+
+            <% if (_showArsip && !_isPimpinanOrSekdes) { %>
             <a href="/arsip" class="nav-item" title="Arsip Lainnya"><i class="fa-solid fa-box-archive"></i> <span class="nav-text">Arsip Lainnya</span></a>
             <% } %>
+
+            <% if (_showLaporan) { %>
             <a href="/laporan" class="nav-item" title="Laporan"><i class="fa-solid fa-chart-pie"></i> <span class="nav-text">Laporan</span></a>
-            <% if (_isAdmin) { %>
-            <a href="/master_data" class="nav-item" title="Master Data"><i class="fa-solid fa-database"></i> <span class="nav-text">Master Data</span></a>
-            <a href="/pengaturan" class="nav-item" title="Pengaturan"><i class="fa-solid fa-gear"></i> <span class="nav-text">Pengaturan</span></a>
             <% } %>
+
+            <% if (_showMasterData) { %>
+            <a href="/master_data" class="nav-item" title="Master Data"><i class="fa-solid fa-database"></i> <span class="nav-text">Master Data</span></a>
+            <% } %>
+
+            <% if (_showPengaturan) { %>
+            <a href="/pengaturan" class="nav-item" title="Pengaturan"><i class="fa-solid fa-gear"></i> <span class="nav-text">Pengaturan</span></a>
             <% } %>
         </nav>
         <form action="/cari" method="GET" class="sidebar-search" style="margin: 0 14px 14px; position: relative;">
@@ -504,6 +554,18 @@ table.data-table tbody tr:hover td { background: rgba(46,91,255,0.02) !important
             </div>
         </header>
         <div class="dashboard-content">
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px; color: #ef4444;"></i>
+                    <span><%= error %></span>
+                </div>
+            <% } %>
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                    <i class="fa-solid fa-circle-check" style="font-size: 18px; color: #10b981;"></i>
+                    <span><%= success %></span>
+                </div>
+            <% } %>
             <%- body %>
         </div>
     </main>
