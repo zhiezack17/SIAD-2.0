@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2.5rem 1rem;
+        }
+
+        .action-bar {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-print {
+            background: #d97706;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-back {
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Printable Receipt Card */
+        .receipt-card {
+            width: 100%;
+            max-width: 680px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2.5rem 2.25rem;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.1);
+            border: 1.5px solid #e2e8f0;
+            position: relative;
+        }
+
+        .receipt-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #d97706, #f59e0b, #059669);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .kop-header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kop-logo {
+            width: 68px;
+            height: 68px;
+            object-fit: contain;
+        }
+
+        .kop-text h3 {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .kop-text h2 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0.15rem 0;
+        }
+
+        .kop-text p {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .receipt-title {
+            text-align: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .receipt-title h1 {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: underline;
+        }
+
+        .receipt-title p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #d97706;
+            margin-top: 0.25rem;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            font-size: 0.88rem;
+        }
+
+        .receipt-table td {
+            padding: 0.65rem 0;
+            vertical-align: top;
+        }
+
+        .receipt-table td.label {
+            width: 32%;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .receipt-table td.colon {
+            width: 3%;
+            color: #94a3b8;
+        }
+
+        .receipt-table td.value {
+            width: 65%;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .amount-box {
+            background: #fef3c7;
+            border: 1.5px solid #fde68a;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .amount-box .lbl {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #92400e;
+            text-transform: uppercase;
+        }
+
+        .amount-box .val {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: #b45309;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .signature-section {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .qr-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .qr-section img {
+            width: 90px;
+            height: 90px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .qr-desc {
+            font-size: 0.72rem;
+            color: #64748b;
+            max-width: 170px;
+            line-height: 1.4;
+        }
+
+        .sign-box {
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .sign-box p.date {
+            font-size: 0.82rem;
+            color: #475569;
+            margin-bottom: 0.35rem;
+        }
+
+        .sign-box p.role {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4rem;
+        }
+
+        .sign-box p.name {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #0f172a;
+            text-decoration: underline;
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .action-bar { display: none !important; }
+            .receipt-card { box-shadow: none; border: 1px solid #cbd5e1; max-width: 100%; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-bar">
+        <a href="/pajak-pbb" class="btn-action btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Modul PBB
+        </a>
+        <button onclick="window.print()" class="btn-action btn-print">
+            <i class="fa-solid fa-print"></i> Cetak Tanda Terima
+        </button>
+    </div>
+
+    <div class="receipt-card">
+        <!-- Kop Surat -->
+        <div class="kop-header">
+            <img src="/img/logo.png" alt="Logo Pemkab Rohil" class="kop-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lambang_Kabupaten_Rokan_Hilir.png/240px-Lambang_Kabupaten_Rokan_Hilir.png'">
+            <div class="kop-text">
+                <h3>Pemerintah Kabupaten Rokan Hilir</h3>
+                <h2>KEPENGHULUAN <%= pbb.kepenghuluan_nama.toUpperCase() %></h2>
+                <p>Kecamatan <%= pbb.kecamatan_nama %> - Provinsi Riau</p>
+            </div>
+        </div>
+
+        <!-- Judul Kuitansi -->
+        <div class="receipt-title">
+            <h1>Tanda Terima Setoran PBB-P2</h1>
+            <p>No: <%= pbb.nomor_tanda_terima %></p>
+        </div>
+
+        <!-- Tabel Rincian -->
+        <table class="receipt-table">
+            <tr>
+                <td class="label">Telah Diterima Dari</td>
+                <td class="colon">:</td>
+                <td class="value"><%= pbb.nama_wajib_pajak %></td>
+            </tr>
+            <tr>
+                <td class="label">Nomor Objek Pajak (NOP)</td>
+                <td class="colon">:</td>
+                <td class="value" style="font-family:'JetBrains Mono', monospace;"><%= pbb.nop || '-' %></td>
+            </tr>
+            <tr>
+                <td class="label">Lokasi Objek Pajak</td>
+                <td class="colon">:</td>
+                <td class="value"><%= pbb.dusun %>, RT/RW: <%= pbb.rt_rw || '-' %></td>
+            </tr>
+            <tr>
+                <td class="label">Tahun Pajak</td>
+                <td class="colon">:</td>
+                <td class="value">Tahun Anggaran <%= pbb.tahun_pajak %></td>
+            </tr>
+            <tr>
+                <td class="label">Tanggal Pembayaran</td>
+                <td class="colon">:</td>
+                <td class="value"><%= new Date(pbb.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></td>
+            </tr>
+            <tr>
+                <td class="label">Kolektor Pemungut</td>
+                <td class="colon">:</td>
+                <td class="value"><%= pbb.nama_kolektor %> (SK Penghulu)</td>
+            </tr>
+            <% if (pbb.catatan) { %>
+            <tr>
+                <td class="label">Catatan Tambahan</td>
+                <td class="colon">:</td>
+                <td class="value"><%= pbb.catatan %></td>
+            </tr>
+            <% } %>
+        </table>
+
+        <!-- Amount Box -->
+        <div class="amount-box">
+            <span class="lbl"><i class="fa-solid fa-circle-check"></i> Jumlah Setoran Lunas</span>
+            <span class="val">Rp <%= Number(pbb.jumlah_pbb).toLocaleString('id-ID') %></span>
+        </div>
+
+        <!-- Footer Tanda Tangan & QR -->
+        <div class="signature-section">
+            <div class="qr-section">
+                <img src="<%= qrDataUrl %>" alt="QR Verifikasi">
+                <div class="qr-desc">
+                    <strong>Verifikasi Sah</strong><br>
+                    Scan QR ini untuk memverifikasi keaslian bukti setor resmi PBB-P2 SIAD 2.0.
+                </div>
+            </div>
+
+            <div class="sign-box">
+                <p class="date"><%= pbb.kepenghuluan_nama %>, <%= new Date(pbb.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+                <p class="role">Petugas Kolektor PBB-P2,</p>
+                <p class="name"><%= pbb.nama_kolektor %></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -635,7 +635,7 @@
             </a>
 
             <!-- 3. Perpajakan PBB-P2 -->
-            <a href="/resepsionis" class="tile-card" onclick="alert('Modul Pengelolaan PBB-P2 sedang disinkronkan ke SK Petugas Pajak Kepenghuluan. Mengalihkan ke sistem...');">
+            <a href="/pajak-pbb?desa=<%= kepInfo.id %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-pbb">
@@ -660,7 +660,7 @@
             </a>
 
             <!-- 4. Bantuan Sosial (Bansos) -->
-            <a href="/resepsionis" class="tile-card" onclick="alert('Modul Bantuan Sosial (BLT-DD) siap dikonfigurasi untuk Kasi Kesejahteraan.');">
+            <a href="/bansos?desa=<%= kepInfo.id %>" class="tile-card">
                 <div>
                     <div class="tile-header">
                         <div class="tile-icon-box icon-ban">

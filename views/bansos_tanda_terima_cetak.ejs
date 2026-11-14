@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2.5rem 1rem;
+        }
+
+        .action-bar {
+            width: 100%;
+            max-width: 950px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-print {
+            background: #059669;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-back {
+            background: #ffffff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Printable Document Sheet (A4 Landscape / Folio Proportion) */
+        .doc-sheet {
+            width: 100%;
+            max-width: 950px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.1);
+            border: 1.5px solid #e2e8f0;
+            position: relative;
+        }
+
+        .kop-header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border-bottom: 2.5px solid #0f172a;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kop-logo {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+        }
+
+        .kop-text {
+            text-align: center;
+            width: 100%;
+        }
+
+        .kop-text h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .kop-text h2 {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0.2rem 0;
+            letter-spacing: -0.3px;
+        }
+
+        .kop-text p {
+            font-size: 0.84rem;
+            color: #64748b;
+        }
+
+        .doc-title {
+            text-align: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .doc-title h1 {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-decoration: underline;
+        }
+
+        .doc-title p {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #e11d48;
+            margin-top: 0.35rem;
+            text-transform: uppercase;
+        }
+
+        .kpm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            font-size: 0.82rem;
+        }
+
+        .kpm-table th {
+            background: #f8fafc;
+            border: 1px solid #0f172a;
+            padding: 0.65rem 0.5rem;
+            text-align: center;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .kpm-table td {
+            border: 1px solid #0f172a;
+            padding: 0.65rem 0.6rem;
+            vertical-align: middle;
+        }
+
+        .kpm-table td.center { text-align: center; }
+        .kpm-table td.right { text-align: right; }
+
+        .sign-col {
+            width: 170px;
+            height: 48px;
+            font-size: 0.78rem;
+            color: #64748b;
+            vertical-align: top !important;
+            padding: 4px 6px !important;
+        }
+
+        .signature-footer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2.5rem;
+            text-align: center;
+        }
+
+        .sign-box p.role {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4.5rem;
+        }
+
+        .sign-box p.name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #0f172a;
+            text-decoration: underline;
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .action-bar { display: none !important; }
+            .doc-sheet { box-shadow: none; border: none; max-width: 100%; padding: 1.5cm 1cm; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-bar">
+        <a href="/bansos" class="btn-action btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Modul Bansos
+        </a>
+        <button onclick="window.print()" class="btn-action btn-print">
+            <i class="fa-solid fa-print"></i> Cetak Daftar Tanda Terima (SPJ)
+        </button>
+    </div>
+
+    <div class="doc-sheet">
+        <!-- Kop Surat -->
+        <div class="kop-header">
+            <img src="/img/logo.png" alt="Logo Pemkab Rohil" class="kop-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lambang_Kabupaten_Rokan_Hilir.png/240px-Lambang_Kabupaten_Rokan_Hilir.png'">
+            <div class="kop-text">
+                <h3>Pemerintah Kabupaten Rokan Hilir</h3>
+                <h2>KEPENGHULUAN <%= kepInfo.nama.toUpperCase() %></h2>
+                <p>Kecamatan <%= kepInfo.kecamatan %> - Provinsi Riau</p>
+            </div>
+        </div>
+
+        <!-- Judul Berita Acara -->
+        <div class="doc-title">
+            <h1>Daftar Tanda Terima Penyaluran Bantuan Tunai (BLT)</h1>
+            <p><%= jenis.replace(/_/g, ' ') %> &bull; <%= tahap.replace(/_/g, ' ') %> &bull; TAHUN ANGGARAN <%= tahun %></p>
+        </div>
+
+        <!-- Tabel Tanda Terima -->
+        <table class="kpm-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">No</th>
+                    <th>Nama Penerima (KPM)</th>
+                    <th style="width: 140px;">NIK</th>
+                    <th style="width: 140px;">No. KK</th>
+                    <th>Dusun / Wilayah</th>
+                    <th style="width: 110px;">Nominal (Rp)</th>
+                    <th style="width: 180px;">Tanda Tangan / Cap Jempol KPM</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (kpmList.length === 0) { %>
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding: 2rem; color:#64748b;">
+                            Belum ada data KPM terdaftar untuk periode ini.
+                        </td>
+                    </tr>
+                <% } else { %>
+                    <% kpmList.forEach((kpm, idx) => { %>
+                        <tr>
+                            <td class="center font-weight-bold"><%= idx + 1 %></td>
+                            <td style="font-weight: 800;"><%= kpm.nama_kpm %></td>
+                            <td class="center" style="font-family:'JetBrains Mono', monospace;"><%= kpm.nik %></td>
+                            <td class="center" style="font-family:'JetBrains Mono', monospace;"><%= kpm.no_kk || '-' %></td>
+                            <td><%= kpm.dusun %>, RT <%= kpm.rt_rw || '-' %></td>
+                            <td class="right" style="font-weight: 800; font-family:'JetBrains Mono', monospace;">
+                                <%= Number(kpm.nominal_bantuan).toLocaleString('id-ID') %>
+                            </td>
+                            <td class="sign-col">
+                                <% if (idx % 2 === 0) { %>
+                                    <span><%= idx + 1 %>. ........................</span>
+                                <% } else { %>
+                                    <div style="text-align: right; margin-right: 10px;">
+                                        <span><%= idx + 1 %>. ........................</span>
+                                    </div>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                    <tr style="background: #f8fafc; font-weight: 800;">
+                        <td colspan="5" style="text-align: right; padding: 0.75rem;">TOTAL PENYALURAN :</td>
+                        <td class="right" style="font-size: 0.95rem; color: #059669; font-family:'JetBrains Mono', monospace;">
+                            Rp <%= Number(totalNominal).toLocaleString('id-ID') %>
+                        </td>
+                        <td class="center" style="font-size: 0.75rem; color: #64748b;">Sah Sebagai Bukti SPJ</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- Signatures (Tupoksi 3 Pejabat: Kasi Kesra, Bendahara, Penghulu) -->
+        <div class="signature-footer">
+            <div class="sign-box">
+                <p class="role">Diverifikasi & Disalurkan Oleh:<br>Kasi Kesejahteraan,</p>
+                <p class="name">( .................................................. )</p>
+            </div>
+            <div class="sign-box">
+                <p class="role">Dibayarkan Oleh:<br>Kaur Keuangan (Bendahara),</p>
+                <p class="name">( .................................................. )</p>
+            </div>
+            <div class="sign-box">
+                <p class="role">Mengetahui & Menyetujui:<br>Datuk Penghulu <%= kepInfo.nama %>,</p>
+                <p class="name">( .................................................. )</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

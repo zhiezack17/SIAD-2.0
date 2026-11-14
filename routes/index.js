@@ -16,6 +16,8 @@ const pelayananController = require('../controllers/pelayananController');
 const musdesController = require('../controllers/musdesController');
 const portalController = require('../controllers/portalController');
 const resepsionisController = require('../controllers/resepsionisController');
+const pbbController = require('../controllers/pbbController');
+const bansosController = require('../controllers/bansosController');
 const ac = require('../middleware/access');
 
 const requireAuth = authController.requireAuth;
@@ -75,6 +77,19 @@ router.post('/resepsionis/:id/status', requireAuth, resepsionisController.update
 router.get('/resepsionis/standing-qr', requireAuth, resepsionisController.getStandingQR);
 router.post('/resepsionis/manual', requireAuth, resepsionisController.postTamuManual);
 router.post('/resepsionis/:id/hapus', requireAuth, resepsionisController.hapusTamu);
+
+// --- Rute Perpajakan PBB-P2 ---
+router.get('/pajak-pbb', requireAuth, pbbController.getDashboard);
+router.post('/pajak-pbb/setor', requireAuth, pbbController.tambahSetoran);
+router.get('/pajak-pbb/cetak/:id', requireAuth, pbbController.cetakKuitansi);
+router.post('/pajak-pbb/:id/hapus', requireAuth, pbbController.hapusSetoran);
+
+// --- Rute Bantuan Sosial (Bansos & BLT Dana Desa) ---
+router.get('/bansos', requireAuth, bansosController.getDashboard);
+router.post('/bansos/tambah', requireAuth, bansosController.tambahKpm);
+router.post('/bansos/:id/salur', requireAuth, bansosController.updatePenyaluran);
+router.get('/bansos/cetak-tanda-terima', requireAuth, bansosController.cetakTandaTerima);
+router.post('/bansos/:id/hapus', requireAuth, bansosController.hapusKpm);
 
 // --- Rute Utama ---
 router.get('/', (req, res) => {
