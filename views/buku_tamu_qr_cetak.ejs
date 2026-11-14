@@ -19,19 +19,19 @@
         }
 
         body {
-            background: #e2e8f0;
+            background: #f1f5f9;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
+            justify-content: flex-start;
+            padding: 2rem 1rem 4rem;
         }
 
         /* Top Action Bar (hidden on print) */
         .action-bar {
             width: 100%;
-            max-width: 650px;
+            max-width: 600px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -44,9 +44,9 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.7rem 1.4rem;
+            padding: 0.65rem 1.25rem;
             border-radius: 12px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 700;
             text-decoration: none;
             cursor: pointer;
@@ -78,15 +78,20 @@
         /* The Printable Acrylic Sheet (A4 Proportion) */
         .acrylic-sheet {
             width: 100%;
-            max-width: 650px;
+            max-width: 600px;
             background: #ffffff;
             border-radius: 28px;
             padding: 3rem 2.5rem;
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.18);
-            border: 2px solid #e2e8f0;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.12);
+            border: 1.5px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
             position: relative;
             overflow: hidden;
+            margin: 0 auto;
         }
 
         /* Decorative border gradient */
@@ -96,120 +101,169 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 10px;
+            height: 8px;
             background: linear-gradient(90deg, #059669, #10b981, #3b82f6);
         }
 
         .logo-box {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.25rem;
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 1.25rem auto;
+            display: block;
             object-fit: contain;
         }
 
+        .kop-pemerintah {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
         .kop-pemerintah h3 {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 800;
             color: #475569;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            text-align: center;
         }
 
         .kop-pemerintah h2 {
             font-size: 1.35rem;
             font-weight: 900;
             color: #0f172a;
-            margin: 0.25rem 0;
+            margin: 0.35rem 0;
             letter-spacing: -0.3px;
+            text-align: center;
         }
 
         .kop-pemerintah p {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: #64748b;
             font-weight: 600;
+            text-align: center;
         }
 
         .divider {
             width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
-            margin: 1.75rem 0;
+            height: 1.5px;
+            background: #e2e8f0;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .badge-wrap {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.25rem;
         }
 
         .qr-hero-badge {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
             background: #ecfdf5;
             border: 1.5px solid #a7f3d0;
             color: #065f46;
-            padding: 0.45rem 1.25rem;
+            padding: 0.4rem 1.25rem;
             border-radius: 999px;
-            font-size: 0.88rem;
+            font-size: 0.82rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 1.25rem;
+            letter-spacing: 0.6px;
+            margin: 0 auto;
+        }
+
+        /* Centered QR Box Container */
+        .qr-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 1.5rem auto;
         }
 
         .qr-card-frame {
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: #ffffff;
             border: 3px solid #0f172a;
             border-radius: 24px;
-            padding: 1rem;
-            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.15);
-            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.12);
+            margin: 0 auto;
         }
 
         .qr-card-frame img {
             width: 250px;
             height: 250px;
             display: block;
+            margin: 0 auto;
             border-radius: 12px;
+        }
+
+        .scan-instructions {
+            width: 100%;
+            text-align: center;
         }
 
         .scan-instructions h4 {
             font-size: 1.2rem;
             font-weight: 800;
             color: #0f172a;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
+            text-align: center;
+        }
+
+        .scan-instructions p.desc {
+            font-size: 0.88rem;
+            color: #64748b;
+            max-width: 440px;
+            margin: 0 auto 1.25rem auto;
+            line-height: 1.5;
+            text-align: center;
         }
 
         .steps-list {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 1.5rem;
-            margin-top: 1rem;
-            text-align: left;
+            margin: 0 auto 1.5rem auto;
+            width: 100%;
+            flex-wrap: wrap;
         }
 
         .step-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.84rem;
-            font-weight: 600;
+            font-size: 0.82rem;
+            font-weight: 700;
             color: #334155;
         }
 
         .step-num {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: #059669;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 800;
             flex-shrink: 0;
         }
 
         .target-url-box {
-            margin-top: 1.75rem;
-            padding: 0.6rem 1rem;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0.65rem 1rem;
             background: #f8fafc;
             border-radius: 12px;
             border: 1px solid #e2e8f0;
@@ -217,6 +271,7 @@
             color: #64748b;
             font-family: monospace;
             word-break: break-all;
+            text-align: center;
         }
 
         /* Print Media Styles */
@@ -232,8 +287,8 @@
                 box-shadow: none;
                 border: 1px solid #cbd5e1;
                 max-width: 100%;
-                margin: 0;
-                padding: 2.5cm 2cm;
+                margin: 0 auto;
+                padding: 2cm 1.5cm;
             }
         }
     </style>
@@ -278,19 +333,23 @@
 
         <div class="divider"></div>
 
-        <div class="qr-hero-badge">
-            <i class="fa-solid fa-qrcode"></i>
-            <span>Buku Tamu Digital Resmi</span>
+        <div class="badge-wrap">
+            <div class="qr-hero-badge">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>Buku Tamu Digital Resmi</span>
+            </div>
         </div>
 
-        <!-- The Big Scannable QR -->
-        <div class="qr-card-frame">
-            <img src="<%= qrDataUrl %>" alt="QR Code Buku Tamu Kepenghuluan <%= kepInfo.nama %>">
+        <!-- The Big Scannable QR in Centered Flex Box -->
+        <div class="qr-container">
+            <div class="qr-card-frame">
+                <img src="<%= qrDataUrl %>" alt="QR Code Buku Tamu Kepenghuluan <%= kepInfo.nama %>">
+            </div>
         </div>
 
         <div class="scan-instructions">
             <h4>Selamat Datang di Kantor Kepenghuluan</h4>
-            <p style="font-size:0.9rem; color:#64748b; max-width:440px; margin:0 auto;">
+            <p class="desc">
                 Silakan scan QR Code di atas menggunakan kamera smartphone Anda untuk mengisi daftar kunjungan digital.
             </p>
 

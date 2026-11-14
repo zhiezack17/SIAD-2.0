@@ -252,8 +252,21 @@ exports.updateStatus = async (req, res) => {
 // 5. Cetak Standing Akrilik QR Code Meja Resepsionis
 exports.getStandingQR = async (req, res) => {
     try {
-        // Ambil desa: prioritas dari query ?desa=..., lalu sesi aktif, lalu kepenghuluan user, default 67 (Bantaian Baru)
-        let did = req.query.desa ? Number(req.query.desa) : (ac.getDesaId(req) || 67);
+        const user = req.session && req.session.user ? req.session.user : null;
+        const isSuper = ac.isSuperAdmin ? ac.isSuperAdmin(req) : false;
+
+        // 1. Jika akun Kepenghuluan login (bukan Super Admin), otomatis 100% mengikuti kepenghuluan akun tersebut!
+        // 2. Jika Super Admin dan ada parameter ?desa=..., ikuti parameter
+        // 3. Jika Super Admin dan ada desa aktif di switcher atas, ikuti switcher
+        // 4. Default: Bantaian Baru (id: 67)
+        let did = 67;
+        if (user && !isSuper && user.kepenghuluan_id) {
+            did = Number(user.kepenghuluan_id);
+        } else if (req.query.desa) {
+            did = Number(req.query.desa);
+        } else if (ac.getDesaId(req)) {
+            did = Number(ac.getDesaId(req));
+        }
 
         let kepInfo = {
             id: did,
@@ -279,18 +292,20 @@ exports.getStandingQR = async (req, res) => {
             }
         } catch (e) { /* fallback default */ }
 
-        // Ambil daftar seluruh kepenghuluan se-Rohil untuk selector di atas lembar cetak
+        // Ambil daftar seluruh kepenghuluan se-Rohil untuk selector di atas lembar cetak (HANYA untuk Super Admin)
         let kepList = [];
-        try {
-            const kl = await db.query(`
-                SELECT k.id, k.nama, kc.nama as kecamatan 
-                FROM kepenghuluan k 
-                LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
-                ORDER BY k.nama ASC
-            `);
-            kepList = kl.rows;
-        } catch (e) {
-            kepList = [kepInfo];
+        if (isSuper) {
+            try {
+                const kl = await db.query(`
+                    SELECT k.id, k.nama, kc.nama as kecamatan 
+                    FROM kepenghuluan k 
+                    LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                    ORDER BY k.nama ASC
+                `);
+                kepList = kl.rows;
+            } catch (e) {
+                kepList = [kepInfo];
+            }
         }
 
         // Host domain dinamis
