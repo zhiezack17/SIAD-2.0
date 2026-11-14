@@ -189,7 +189,8 @@ const authController = {
         }
         req.session.destroy((err) => {
             if (err) console.error('Error saat logout:', err);
-            res.redirect('/login');
+            const redirectUrl = req.query.redirect || '/login';
+            res.redirect(redirectUrl);
         });
     },
 

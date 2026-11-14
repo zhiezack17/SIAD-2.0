@@ -79,17 +79,17 @@ router.post('/resepsionis/manual', requireAuth, resepsionisController.postTamuMa
 router.post('/resepsionis/:id/hapus', requireAuth, resepsionisController.hapusTamu);
 
 // --- Rute Perpajakan PBB-P2 ---
-router.get('/pajak-pbb', requireAuth, pbbController.getDashboard);
-router.post('/pajak-pbb/setor', requireAuth, pbbController.tambahSetoran);
-router.get('/pajak-pbb/cetak/:id', requireAuth, pbbController.cetakKuitansi);
-router.post('/pajak-pbb/:id/hapus', requireAuth, pbbController.hapusSetoran);
+router.get('/pajak-pbb', requireAuth, ac.blockKaurUmum, pbbController.getDashboard);
+router.post('/pajak-pbb/setor', requireAuth, ac.blockKaurUmum, pbbController.tambahSetoran);
+router.get('/pajak-pbb/cetak/:id', requireAuth, ac.blockKaurUmum, pbbController.cetakKuitansi);
+router.post('/pajak-pbb/:id/hapus', requireAuth, ac.blockKaurUmum, pbbController.hapusSetoran);
 
 // --- Rute Bantuan Sosial (Bansos & BLT Dana Desa) ---
-router.get('/bansos', requireAuth, bansosController.getDashboard);
-router.post('/bansos/tambah', requireAuth, bansosController.tambahKpm);
-router.post('/bansos/:id/salur', requireAuth, bansosController.updatePenyaluran);
-router.get('/bansos/cetak-tanda-terima', requireAuth, bansosController.cetakTandaTerima);
-router.post('/bansos/:id/hapus', requireAuth, bansosController.hapusKpm);
+router.get('/bansos', requireAuth, ac.blockKaurUmum, bansosController.getDashboard);
+router.post('/bansos/tambah', requireAuth, ac.blockKaurUmum, bansosController.tambahKpm);
+router.post('/bansos/:id/salur', requireAuth, ac.blockKaurUmum, bansosController.updatePenyaluran);
+router.get('/bansos/cetak-tanda-terima', requireAuth, ac.blockKaurUmum, bansosController.cetakTandaTerima);
+router.post('/bansos/:id/hapus', requireAuth, ac.blockKaurUmum, bansosController.hapusKpm);
 
 // --- Rute Utama ---
 router.get('/', (req, res) => {
