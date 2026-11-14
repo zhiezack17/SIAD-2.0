@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %></title>
+    <!-- Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #ecfdf5;
+            --accent: #2563eb;
+            --bg-page: #f8fafc;
+            --card-border: #e2e8f0;
+            --text-title: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 30%, #f1f5f9 100%);
+            min-height: 100vh;
+            color: var(--text-body);
+            padding: 1.25rem 1rem 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .guest-container {
+            width: 100%;
+            max-width: 580px;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.75rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--card-border);
+            margin-bottom: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #10b981, #059669, #3b82f6);
+        }
+
+        .logo-wrap {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 0.75rem;
+            border-radius: 16px;
+            background: #fff;
+            padding: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-card h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-title);
+            letter-spacing: -0.3px;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-card p.sub {
+            font-size: 0.85rem;
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-card p.desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.75rem 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--card-border);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-group label span.req {
+            color: #ef4444;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i.prefix-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 0.9rem 0.75rem 2.65rem;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 0.92rem;
+            color: var(--text-title);
+            outline: none;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.15);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 2.5rem;
+        }
+
+        textarea.form-control {
+            padding-left: 0.9rem;
+            min-height: 85px;
+            resize: vertical;
+        }
+
+        /* Signature Canvas Box */
+        .sig-box {
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 14px;
+            background: #f8fafc;
+            padding: 0.5rem;
+            position: relative;
+            text-align: center;
+        }
+
+        #signaturePad {
+            width: 100%;
+            height: 140px;
+            background: #ffffff;
+            border-radius: 10px;
+            cursor: crosshair;
+            touch-action: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
+        }
+
+        .sig-tools {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.4rem;
+            padding: 0 0.25rem;
+        }
+
+        .btn-sig-clear {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .sig-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+            transition: all 0.25s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* Success Overlay Screen */
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .success-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 2.5rem 1.75rem;
+            text-align: center;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: zoomIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .success-icon-wrap {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ecfdf5;
+            color: #10b981;
+            font-size: 2.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25);
+        }
+
+        .success-card h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-card p {
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 1.75rem;
+        }
+
+        .btn-success-close {
+            background: #0f172a;
+            color: #fff;
+            border: none;
+            padding: 0.8rem 1.75rem;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.78rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="guest-container">
+        <!-- Header -->
+        <div class="header-card">
+            <div class="logo-wrap">
+                <img src="/img/logo.png" alt="Logo Rohil" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Lambang_Kabupaten_Rokan_Hilir.png/240px-Lambang_Kabupaten_Rokan_Hilir.png'">
+            </div>
+            <p class="sub">Buku Tamu Digital Resmi</p>
+            <h1>Kepenghuluan <%= kepInfo.nama %></h1>
+            <p class="desc">Kecamatan <%= kepInfo.kecamatan %>, Kabupaten Rokan Hilir - Riau</p>
+        </div>
+
+        <!-- Form Pengisian -->
+        <div class="form-card">
+            <form id="tamuForm">
+                <input type="hidden" name="kepenghuluan_id" value="<%= kepInfo.id %>">
+                <input type="hidden" name="tanda_tangan" id="tandaTanganInput">
+
+                <!-- Nama Lengkap -->
+                <div class="form-group">
+                    <label>Nama Lengkap Tamu <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user prefix-icon"></i>
+                        <input type="text" name="nama_tamu" class="form-control" placeholder="Contoh: Muhammad Ilham, S.STP" required autocomplete="name">
+                    </div>
+                </div>
+
+                <!-- No WhatsApp / HP -->
+                <div class="form-group">
+                    <label>Nomor WhatsApp / HP Aktif <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-brands fa-whatsapp prefix-icon"></i>
+                        <input type="tel" name="no_hp" class="form-control" placeholder="Contoh: 0812-3456-7890" required autocomplete="tel">
+                    </div>
+                </div>
+
+                <!-- Kategori Tamu -->
+                <div class="form-group">
+                    <label>Kategori Tamu / Pengunjung <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-id-card-clip prefix-icon"></i>
+                        <select name="kategori_tamu" class="form-control" required>
+                            <option value="WARGA" selected>Warga Pribadi / Masyarakat Desa</option>
+                            <option value="KECAMATAN_PEMDA">Pemerintah Kecamatan / Kabupaten (Dinas / Bapenda / DPMD)</option>
+                            <option value="INSPEKTORAT_BPK">Inspektorat / BPK / Auditor</option>
+                            <option value="TNI_POLRI">TNI / POLRI / Babinsa / Bhabinkamtibmas</option>
+                            <option value="INSTANSI_VERTIKAL">Instansi Vertikal (KUA, PLN, Puskesmas, dll)</option>
+                            <option value="SWASTA_REKANAN">Swasta / Rekanan / Perusahaan</option>
+                            <option value="PERS_LSM">Wartawan / Media / LSM</option>
+                            <option value="LAINNYA">Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Asal Instansi / Dusun -->
+                <div class="form-group">
+                    <label>Asal Dusun / Instansi / Lembaga <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-building-flag prefix-icon"></i>
+                        <input type="text" name="instansi_asal" class="form-control" placeholder="Contoh: Dusun Sukajadi / Kantor Camat Batu Hampar" required>
+                    </div>
+                </div>
+
+                <!-- Pejabat yang Dituju -->
+                <div class="form-group">
+                    <label>Pejabat / Perangkat yang Ingin Ditemui <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user-tie prefix-icon"></i>
+                        <select name="pejabat_dituju" class="form-control" required>
+                            <option value="Datuk Penghulu" selected>Datuk Penghulu (Kepala Desa)</option>
+                            <option value="Kerani (Sekdes)">Kerani / Sekretaris Desa</option>
+                            <option value="Kaur Keuangan (Bendahara)">Kaur Keuangan (Bendahara Desa)</option>
+                            <option value="Kaur Umum & Tata Usaha">Kaur Umum & Tata Usaha</option>
+                            <option value="Kasi Pemerintahan">Kasi Pemerintahan</option>
+                            <option value="Kasi Pelayanan">Kasi Pelayanan (Pengurusan Surat)</option>
+                            <option value="Kasi Kesejahteraan (Bansos)">Kasi Kesejahteraan (Bansos & BLT)</option>
+                            <option value="Petugas Pengelola PBB">Petugas Pengelola PBB-P2</option>
+                            <option value="Staf / Operator Kantor">Staf / Operator Pelayanan Kantor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Jumlah Rombongan -->
+                <div class="form-group">
+                    <label>Jumlah Tamu (Orang)</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-users prefix-icon"></i>
+                        <input type="number" name="jumlah_orang" class="form-control" value="1" min="1" max="50">
+                    </div>
+                </div>
+
+                <!-- Keperluan Kunjungan -->
+                <div class="form-group">
+                    <label>Maksud & Tujuan / Keperluan Kunjungan <span class="req">*</span></label>
+                    <textarea name="keperluan" class="form-control" placeholder="Jelaskan secara singkat urusan atau keperluan Anda di kantor kepenghuluan..." required></textarea>
+                </div>
+
+                <!-- Tanda Tangan Digital Touchscreen -->
+                <div class="form-group">
+                    <label>Tanda Tangan Digital Tamu (Sentuh di Layar)</label>
+                    <div class="sig-box">
+                        <canvas id="signaturePad"></canvas>
+                        <div class="sig-tools">
+                            <span class="sig-hint"><i class="fa-solid fa-pen-nib"></i> Coretkan tanda tangan Anda dengan jari</span>
+                            <button type="button" class="btn-sig-clear" id="btnClearSig">
+                                <i class="fa-solid fa-trash-can"></i> Hapus / Ulang
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Kirim -->
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Kirim & Catat Kunjungan</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="footer-note">
+            <p>&bull; Sistem Buku Tamu Elektronik SIAD 2.0 &bull; Rokan Hilir &bull;</p>
+        </div>
+    </div>
+
+    <!-- Success Modal Screen -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-card">
+            <div class="success-icon-wrap">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2>Kunjungan Tercatat!</h2>
+            <p>Terima kasih, data kunjungan Anda telah resmi tersimpan di Buku Tamu Digital Kepenghuluan <%= kepInfo.nama %>. Petugas resepsionis akan segera melayani Anda.</p>
+            <button class="btn-success-close" onclick="window.location.reload();">
+                Selesai / Tamu Baru
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas Signature Script -->
+    <script>
+        const canvas = document.getElementById('signaturePad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasSignature = false;
+
+        // Resize canvas to match CSS layout
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.scale(ratio, ratio);
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            hasSignature = true;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            e.preventDefault();
+        }
+
+        function stopDrawing(e) {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.closePath();
+            }
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        window.addEventListener('mouseup', stopDrawing);
+
+        // Touch events for mobile phones
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        window.addEventListener('touchend', stopDrawing);
+
+        // Clear signature
+        document.getElementById('btnClearSig').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            document.getElementById('tandaTanganInput').value = '';
+        });
+
+        // Form submit
+        const form = document.getElementById('tamuForm');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const successOverlay = document.getElementById('successOverlay');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Set signature data if drawn
+            if (hasSignature) {
+                document.getElementById('tandaTanganInput').value = canvas.toDataURL('image/png');
+            }
+
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan Kunjungan...';
+
+            try {
+                const res = await fetch('/buku-tamu', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    successOverlay.style.display = 'flex';
+                } else {
+                    alert('Gagal menyimpan: ' + (data.message || 'Terjadi kesalahan sistem.'));
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Catat Kunjungan';
+                }
+            } catch (err) {
+                alert('Koneksi terputus: ' + err.message);
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Catat Kunjungan';
+            }
+        });
+    </script>
+</body>
+</html>

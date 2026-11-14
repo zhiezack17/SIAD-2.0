@@ -1,0 +1,317 @@
+<div class="content-header" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.6rem;">
+                <i class="fa-solid fa-clipboard-user" style="color: #7c3aed;"></i>
+                <span>Resepsionis & Buku Tamu Digital</span>
+            </h1>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Monitor kunjungan tamu dinas, auditor, dan warga di Kantor Kepenghuluan <%= activeDesaNama %> secara real-time.
+            </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="/resepsionis/standing-qr" target="_blank" class="btn" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; font-weight: 700; border-radius: 10px; padding: 0.6rem 1.2rem; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>Cetak Standing QR Meja</span>
+            </a>
+            <button onclick="bukaModalManual()" class="btn" style="background: #059669; color: #fff; font-weight: 700; border-radius: 10px; padding: 0.6rem 1.2rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Catat Tamu Manual</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 4 Statistics Widgets -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
+    <!-- Total Hari Ini -->
+    <div style="background: #fff; border-radius: 16px; padding: 1.25rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="width: 50px; height: 50px; border-radius: 14px; background: #f3e8ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Tamu Hari Ini</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1.2;"><%= stats.total_hari_ini || 0 %></div>
+        </div>
+    </div>
+
+    <!-- Menunggu -->
+    <div style="background: #fff; border-radius: 16px; padding: 1.25rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="width: 50px; height: 50px; border-radius: 14px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Menunggu Giliran</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #d97706; line-height: 1.2;"><%= stats.menunggu || 0 %></div>
+        </div>
+    </div>
+
+    <!-- Sedang Dilayani -->
+    <div style="background: #fff; border-radius: 16px; padding: 1.25rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="width: 50px; height: 50px; border-radius: 14px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <i class="fa-solid fa-headset"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Sedang Dilayani</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #0284c7; line-height: 1.2;"><%= stats.dilayani || 0 %></div>
+        </div>
+    </div>
+
+    <!-- Selesai -->
+    <div style="background: #fff; border-radius: 16px; padding: 1.25rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="width: 50px; height: 50px; border-radius: 14px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Pelayanan Selesai</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #059669; line-height: 1.2;"><%= stats.selesai || 0 %></div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Table Card -->
+<div style="background: #fff; border-radius: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden;">
+    <!-- Filter Toolbar -->
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <form method="GET" action="/resepsionis" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Filter Tanggal:</label>
+            <input type="date" name="tanggal" value="<%= selectedTanggal %>" class="form-control" style="padding: 0.45rem 0.8rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.85rem;">
+            <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 8px; font-weight: 700; padding: 0.5rem 1rem;">
+                <i class="fa-solid fa-filter"></i> Terapkan
+            </button>
+            <% if (selectedTanggal) { %>
+                <a href="/resepsionis" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">Reset</a>
+            <% } %>
+        </form>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Menampilkan <strong><%= tamuList.length %></strong> kunjungan
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x: auto;">
+        <table class="table" style="width: 100%; margin-bottom: 0; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 0.82rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <th style="padding: 0.9rem 1.2rem; text-align: center; width: 50px;">No</th>
+                    <th style="padding: 0.9rem 1.2rem;">Waktu / Tanggal</th>
+                    <th style="padding: 0.9rem 1.2rem;">Nama Tamu & Kontak</th>
+                    <th style="padding: 0.9rem 1.2rem;">Asal Instansi / Dusun</th>
+                    <th style="padding: 0.9rem 1.2rem;">Ditujukan Ke</th>
+                    <th style="padding: 0.9rem 1.2rem;">Keperluan</th>
+                    <th style="padding: 0.9rem 1.2rem; text-align: center;">Ttd</th>
+                    <th style="padding: 0.9rem 1.2rem; text-align: center;">Status</th>
+                    <th style="padding: 0.9rem 1.2rem; text-align: center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.88rem; color: var(--text-primary);">
+                <% if (tamuList.length === 0) { %>
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 3rem 1rem; color: #94a3b8;">
+                            <i class="fa-solid fa-inbox" style="font-size: 2.5rem; margin-bottom: 0.75rem; color: #cbd5e1; display: block;"></i>
+                            <div style="font-weight: 700; font-size: 1rem; color: #64748b;">Belum ada catatan kunjungan tamu</div>
+                            <div style="font-size: 0.82rem; margin-top: 0.25rem;">Tamu yang mengisi melalui form QR Meja akan langsung muncul di sini secara otomatis.</div>
+                        </td>
+                    </tr>
+                <% } else { %>
+                    <% tamuList.forEach((t, idx) => { %>
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
+                            <td style="padding: 1rem 1.2rem; text-align: center; font-weight: 700; color: #94a3b8;"><%= idx + 1 %></td>
+                            <td style="padding: 1rem 1.2rem; white-space: nowrap;">
+                                <div style="font-weight: 700;"><%= new Date(t.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB</div>
+                                <div style="font-size: 0.78rem; color: #64748b;"><%= new Date(t.tanggal_kunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+                            </td>
+                            <td style="padding: 1rem 1.2rem;">
+                                <div style="font-weight: 800; color: #0f172a;"><%= t.nama_tamu %></div>
+                                <% if (t.no_hp && t.no_hp !== '-') { %>
+                                    <a href="https://wa.me/<%= t.no_hp.replace(/[^0-9]/g, '') %>" target="_blank" style="font-size: 0.8rem; color: #059669; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                        <i class="fa-brands fa-whatsapp"></i> <%= t.no_hp %>
+                                    </a>
+                                <% } else { %>
+                                    <span style="font-size: 0.78rem; color: #94a3b8;">-</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 1rem 1.2rem;">
+                                <div style="font-weight: 600;"><%= t.instansi_asal || 'Warga Pribadi' %></div>
+                                <span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: #f1f5f9; color: #475569; font-weight: 700;"><%= t.kategori_tamu %></span>
+                            </td>
+                            <td style="padding: 1rem 1.2rem;">
+                                <span style="font-weight: 700; color: #1e40af;"><%= t.pejabat_dituju %></span>
+                            </td>
+                            <td style="padding: 1rem 1.2rem; max-width: 250px;">
+                                <div style="line-height: 1.4; color: #334155;"><%= t.keperluan %></div>
+                                <% if (t.catatan_petugas) { %>
+                                    <div style="font-size: 0.76rem; color: #6b7280; margin-top: 0.35rem; font-style: italic;">
+                                        <i class="fa-solid fa-note-sticky"></i> <%= t.catatan_petugas %>
+                                    </div>
+                                <% } %>
+                            </td>
+                            <td style="padding: 1rem 1.2rem; text-align: center;">
+                                <% if (t.tanda_tangan) { %>
+                                    <button onclick="lihatTtd('<%= t.tanda_tangan %>', '<%= t.nama_tamu %>')" class="btn btn-sm" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:3px 8px;" title="Lihat Tanda Tangan">
+                                        <i class="fa-solid fa-signature" style="color:#059669;"></i>
+                                    </button>
+                                <% } else { %>
+                                    <span style="color:#cbd5e1; font-size:0.8rem;">-</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 1rem 1.2rem; text-align: center;">
+                                <select onchange="updateStatusTamu(<%= t.id %>, this.value)" style="padding: 0.35rem 0.65rem; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid transparent; 
+                                    <%= t.status === 'MENUNGGU' ? 'background:#fef3c7; color:#b45309; border-color:#fde68a;' : '' %>
+                                    <%= t.status === 'SEDANG_DILAYANI' ? 'background:#e0f2fe; color:#0369a1; border-color:#bae6fd;' : '' %>
+                                    <%= t.status === 'SELESAI' ? 'background:#ecfdf5; color:#047857; border-color:#a7f3d0;' : '' %>
+                                    <%= t.status === 'BATAL' ? 'background:#fee2e2; color:#b91c1c; border-color:#fecaca;' : '' %>
+                                ">
+                                    <option value="MENUNGGU" <%= t.status === 'MENUNGGU' ? 'selected' : '' %>>⏳ Menunggu</option>
+                                    <option value="SEDANG_DILAYANI" <%= t.status === 'SEDANG_DILAYANI' ? 'selected' : '' %>>🗣️ Dilayani</option>
+                                    <option value="SELESAI" <%= t.status === 'SELESAI' ? 'selected' : '' %>>✅ Selesai</option>
+                                    <option value="BATAL" <%= t.status === 'BATAL' ? 'selected' : '' %>>❌ Batal</option>
+                                </select>
+                            </td>
+                            <td style="padding: 1rem 1.2rem; text-align: center;">
+                                <button onclick="hapusTamu(<%= t.id %>)" class="btn btn-sm" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Hapus Kunjungan">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Catat Tamu Manual -->
+<div id="modalManual" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 1050; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #fff; border-radius: 18px; width: 100%; max-width: 520px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">Catat Tamu Manual (Resepsionis)</h3>
+            <button onclick="tutupModalManual()" style="background: none; border: none; font-size: 1.25rem; color: #94a3b8; cursor: pointer;">&times;</button>
+        </div>
+        <form id="formManual" style="padding: 1.5rem;">
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.35rem;">Nama Tamu *</label>
+                <input type="text" name="nama_tamu" class="form-control" placeholder="Nama lengkap tamu..." required style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #cbd5e1;">
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display:block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.35rem;">No. HP / WA</label>
+                    <input type="tel" name="no_hp" class="form-control" placeholder="08..." style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #cbd5e1;">
+                </div>
+                <div>
+                    <label style="display:block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.35rem;">Jumlah Rombongan</label>
+                    <input type="number" name="jumlah_orang" value="1" min="1" class="form-control" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #cbd5e1;">
+                </div>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.35rem;">Instansi Asal / Dusun</label>
+                <input type="text" name="instansi_asal" class="form-control" placeholder="Warga Dusun / Nama Dinas / Lembaga" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #cbd5e1;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.35rem;">Pejabat yang Dituju</label>
+                <select name="pejabat_dituju" class="form-control" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #cbd5e1;">
+                    <option value="Datuk Penghulu">Datuk Penghulu (Kepala Desa)</option>
+                    <option value="Kerani (Sekdes)">Kerani / Sekretaris Desa</option>
+                    <option value="Kaur Keuangan (Bendahara)">Kaur Keuangan (Bendahara Desa)</option>
+                    <option value="Kaur Umum & Tata Usaha" selected>Kaur Umum & Tata Usaha</option>
+                    <option value="Kasi Pemerintahan">Kasi Pemerintahan</option>
+                    <option value="Kasi Pelayanan">Kasi Pelayanan</option>
+                    <option value="Kasi Kesejahteraan (Bansos)">Kasi Kesejahteraan (Bansos)</option>
+                    <option value="Petugas Pengelola PBB">Petugas Pengelola PBB-P2</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.35rem;">Maksud & Keperluan *</label>
+                <textarea name="keperluan" class="form-control" placeholder="Tuliskan keperluan kunjungan..." required style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #cbd5e1; height:70px;"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" onclick="tutupModalManual()" class="btn btn-secondary" style="border-radius: 8px;">Batal</button>
+                <button type="submit" class="btn btn-primary" style="background:#059669; border:none; border-radius:8px; font-weight:700;">Simpan Data Tamu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Tinjau Tanda Tangan -->
+<div id="modalTtd" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 1060; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #fff; border-radius: 18px; width: 100%; max-width: 420px; padding: 1.5rem; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+        <h4 id="ttdJudul" style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem;">Tanda Tangan Tamu</h4>
+        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
+            <img id="ttdGambar" src="" alt="Tanda Tangan" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+        </div>
+        <button onclick="document.getElementById('modalTtd').style.display='none'" class="btn btn-dark" style="border-radius: 8px; width: 100%;">Tutup</button>
+    </div>
+</div>
+
+<script>
+    function bukaModalManual() {
+        document.getElementById('modalManual').style.display = 'flex';
+    }
+
+    function tutupModalManual() {
+        document.getElementById('modalManual').style.display = 'none';
+    }
+
+    function lihatTtd(src, nama) {
+        document.getElementById('ttdJudul').innerText = 'Tanda Tangan: ' + nama;
+        document.getElementById('ttdGambar').src = src;
+        document.getElementById('modalTtd').style.display = 'flex';
+    }
+
+    async function updateStatusTamu(id, status) {
+        try {
+            const res = await fetch(`/resepsionis/${id}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Gagal update status: ' + data.message);
+            }
+        } catch (e) {
+            alert('Kesalahan jaringan: ' + e.message);
+        }
+    }
+
+    async function hapusTamu(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus data kunjungan tamu ini?')) return;
+        try {
+            const res = await fetch(`/resepsionis/${id}/hapus`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Gagal menghapus: ' + data.message);
+            }
+        } catch (e) {
+            alert('Kesalahan jaringan: ' + e.message);
+        }
+    }
+
+    document.getElementById('formManual').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/resepsionis/manual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Gagal: ' + data.message);
+            }
+        } catch (err) {
+            alert('Kesalahan: ' + err.message);
+        }
+    });
+</script>

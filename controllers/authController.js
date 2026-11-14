@@ -13,7 +13,7 @@ const isAdmin = (user) => {
 const authController = {
     getLogin: (req, res) => {
         if (req.session && req.session.userId) {
-            return res.redirect('/dashboard');
+            return res.redirect('/portal');
         }
         res.render('login', { title: 'Masuk Sistem - SIAD 2.0', error: false, layout: false });
     },
@@ -114,7 +114,7 @@ const authController = {
                             details: `Login berhasil sebagai ${user.username} (${sessionUserData.peran})` 
                         });
                         req.session.save(() => {
-                            return res.redirect('/dashboard');
+                            return res.redirect('/portal');
                         });
                     });
                 }

@@ -14,6 +14,8 @@ const bumdesController = require('../controllers/bumdesController');
 const searchController = require('../controllers/searchController');
 const pelayananController = require('../controllers/pelayananController');
 const musdesController = require('../controllers/musdesController');
+const portalController = require('../controllers/portalController');
+const resepsionisController = require('../controllers/resepsionisController');
 const ac = require('../middleware/access');
 
 const requireAuth = authController.requireAuth;
@@ -60,10 +62,24 @@ router.all('/switch-desa', requireAuth, authController.switchDesa);
 router.all('/set-kepenghuluan', requireAuth, authController.switchDesa);
 router.post('/ganti-password', requireAuth, authController.postGantiPassword);
 
+// --- Rute Portal Hub (Layer 1 Command Hub ala Digides) ---
+router.get('/portal', portalController.getPortal);
+
+// --- Rute Buku Tamu Digital (Resepsionis Publik & Internal) ---
+router.get('/buku-tamu', resepsionisController.getPublicForm);
+router.get('/buku-tamu/:desaId', resepsionisController.getPublicForm);
+router.post('/buku-tamu', resepsionisController.submitPublicForm);
+
+router.get('/resepsionis', requireAuth, resepsionisController.getDashboard);
+router.post('/resepsionis/:id/status', requireAuth, resepsionisController.updateStatus);
+router.get('/resepsionis/standing-qr', requireAuth, resepsionisController.getStandingQR);
+router.post('/resepsionis/manual', requireAuth, resepsionisController.postTamuManual);
+router.post('/resepsionis/:id/hapus', requireAuth, resepsionisController.hapusTamu);
+
 // --- Rute Utama ---
 router.get('/', (req, res) => {
     if (req.session && req.session.userId) {
-        return res.redirect('/dashboard');
+        return res.redirect('/portal');
     }
     res.render('landing', { title: 'SIAD 2.0 - Portal Kepenghuluan', layout: false });
 });
