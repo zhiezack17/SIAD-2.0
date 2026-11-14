@@ -31,11 +31,13 @@
         /* Top Action Bar (hidden on print) */
         .action-bar {
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
 
         .btn-action {
@@ -76,7 +78,7 @@
         /* The Printable Acrylic Sheet (A4 Proportion) */
         .acrylic-sheet {
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             background: #ffffff;
             border-radius: 28px;
             padding: 3rem 2.5rem;
@@ -114,15 +116,15 @@
         }
 
         .kop-pemerintah h2 {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 900;
             color: #0f172a;
-            margin: 0.2rem 0;
+            margin: 0.25rem 0;
             letter-spacing: -0.3px;
         }
 
         .kop-pemerintah p {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #64748b;
             font-weight: 600;
         }
@@ -239,13 +241,28 @@
 <body>
     <!-- Top Action Toolbar -->
     <div class="action-bar">
-        <a href="/portal" class="btn-action btn-back">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Kembali ke Portal</span>
-        </a>
+        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <a href="/portal" class="btn-action btn-back">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Kembali ke Portal</span>
+            </a>
+            <% if (typeof kepList !== 'undefined' && kepList.length > 0) { %>
+            <form method="GET" action="/resepsionis/standing-qr" style="display:flex; align-items:center; gap:6px;">
+                <label style="font-size:0.82rem; font-weight:700; color:#334155; white-space:nowrap;">Pilih Desa:</label>
+                <select name="desa" onchange="this.form.submit()" style="padding:0.6rem 0.9rem; border-radius:10px; border:1px solid #cbd5e1; font-size:0.85rem; font-weight:700; background:#fff; color:#0f172a; cursor:pointer; max-width:280px; text-overflow:ellipsis;">
+                    <% kepList.forEach(k => { %>
+                        <option value="<%= k.id %>" <%= String(k.id) === String(kepInfo.id) ? 'selected' : '' %>>
+                            <%= k.nama %> (Kec. <%= k.kecamatan %>)
+                        </option>
+                    <% }) %>
+                </select>
+            </form>
+            <% } %>
+        </div>
+
         <button onclick="window.print()" class="btn-action btn-print">
             <i class="fa-solid fa-print"></i>
-            <span>Cetak Lembar Standing Meja</span>
+            <span>Cetak Lembar Standing</span>
         </button>
     </div>
 

@@ -511,6 +511,18 @@
         </a>
 
         <div class="header-actions">
+            <% if (typeof kepList !== 'undefined' && kepList.length > 0) { %>
+            <form method="GET" action="/portal" style="display:flex; align-items:center; gap:6px;">
+                <select name="desa" onchange="this.form.submit()" style="padding: 0.45rem 0.8rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25); background: rgba(15,23,42,0.65); color: #fff; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer; max-width: 230px; text-overflow: ellipsis; backdrop-filter: blur(8px);">
+                    <% kepList.forEach(k => { %>
+                        <option value="<%= k.id %>" <%= String(k.id) === String(kepInfo.id) ? 'selected' : '' %> style="background:#0f172a; color:#fff;">
+                            <%= k.nama %> (<%= k.kecamatan %>)
+                        </option>
+                    <% }) %>
+                </select>
+            </form>
+            <% } %>
+
             <div class="live-clock" id="liveClock">
                 <i class="fa-regular fa-clock" style="color:#6ee7b7;"></i>
                 <span id="clockText">Memuat waktu...</span>

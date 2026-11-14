@@ -6,24 +6,41 @@ const QRCode = require('qrcode');
 exports.getPublicForm = async (req, res) => {
     try {
         let desaId = req.query.desa || req.params.desaId || null;
+        let did = desaId ? Number(desaId) : 67; // Default: Bantaian Baru (id: 67)
+
         let kepInfo = {
-            id: 1,
+            id: 67,
             nama: 'Bantaian Baru',
             kecamatan: 'Batu Hampar',
             kabupaten: 'Rokan Hilir'
         };
 
-        if (desaId) {
-            try {
-                const r = await db.query('SELECT id, nama, kecamatan FROM kepenghuluan WHERE id = $1 LIMIT 1', [Number(desaId)]);
-                if (r.rows.length > 0) kepInfo = r.rows[0];
-            } catch (e) { /* fallback default */ }
-        }
+        try {
+            const r = await db.query(`
+                SELECT k.id, k.nama, kc.nama as kecamatan 
+                FROM kepenghuluan k 
+                LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                WHERE k.id = $1 LIMIT 1
+            `, [did]);
+            if (r.rows.length > 0) {
+                kepInfo = {
+                    id: r.rows[0].id,
+                    nama: r.rows[0].nama,
+                    kecamatan: r.rows[0].kecamatan || 'Batu Hampar',
+                    kabupaten: 'Rokan Hilir'
+                };
+            }
+        } catch (e) { /* fallback default */ }
 
         // Ambil daftar seluruh kepenghuluan jika tamu ingin ganti desa
         let kepList = [];
         try {
-            const klRes = await db.query('SELECT id, nama, kecamatan FROM kepenghuluan ORDER BY nama ASC');
+            const klRes = await db.query(`
+                SELECT k.id, k.nama, kc.nama as kecamatan 
+                FROM kepenghuluan k 
+                LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                ORDER BY k.nama ASC
+            `);
             kepList = klRes.rows;
         } catch (e) {
             kepList = [kepInfo];
@@ -70,7 +87,7 @@ exports.submitPublicForm = async (req, res) => {
         `;
 
         const values = [
-            kepenghuluan_id ? Number(kepenghuluan_id) : 1,
+            kepenghuluan_id ? Number(kepenghuluan_id) : 67,
             nama_tamu.trim(),
             instansi_asal ? instansi_asal.trim() : 'Warga Pribadi',
             kategori_tamu || 'WARGA',
@@ -97,7 +114,7 @@ exports.submitPublicForm = async (req, res) => {
 // 3. Dashboard Resepsionis Internal (Kaur Umum & Petugas Piket)
 exports.getDashboard = async (req, res) => {
     try {
-        const did = ac.getDesaId(req);
+        let did = req.query.desa ? Number(req.query.desa) : (ac.getDesaId(req) || 67);
         const isSuper = ac.isSuperAdmin ? ac.isSuperAdmin(req) : false;
         const selectedTanggal = req.query.tanggal || ''; // format YYYY-MM-DD atau kosong = semua
 
@@ -109,6 +126,10 @@ exports.getDashboard = async (req, res) => {
             whereClause += ` AND (b.kepenghuluan_id = $${pIdx} OR b.kepenghuluan_id IS NULL)`;
             params.push(did);
             pIdx++;
+        } else if (isSuper && req.query.desa) {
+            whereClause += ` AND b.kepenghuluan_id = $${pIdx}`;
+            params.push(did);
+            pIdx++;
         }
 
         if (selectedTanggal) {
@@ -118,9 +139,10 @@ exports.getDashboard = async (req, res) => {
         }
 
         const queryStr = `
-            SELECT b.*, k.nama as kepenghuluan_nama
+            SELECT b.*, k.nama as kepenghuluan_nama, kc.nama as kecamatan_nama
             FROM buku_tamu b
             LEFT JOIN kepenghuluan k ON b.kepenghuluan_id = k.id
+            LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id
             ${whereClause}
             ORDER BY b.created_at DESC
             LIMIT 200
@@ -133,6 +155,9 @@ exports.getDashboard = async (req, res) => {
         let countWhere = 'WHERE tanggal_kunjungan = CURRENT_DATE';
         if (!isSuper && did) {
             countWhere += ' AND (kepenghuluan_id = $1 OR kepenghuluan_id IS NULL)';
+            countParams.push(did);
+        } else if (isSuper && req.query.desa) {
+            countWhere += ' AND kepenghuluan_id = $1';
             countParams.push(did);
         }
 
@@ -150,9 +175,32 @@ exports.getDashboard = async (req, res) => {
 
         // Ambil data kepenghuluan aktif
         let activeDesaNama = 'Bantaian Baru';
+        let activeKecNama = 'Batu Hampar';
         if (did) {
-            const kRes = await db.query('SELECT nama FROM kepenghuluan WHERE id = $1 LIMIT 1', [did]);
-            if (kRes.rows.length > 0) activeDesaNama = kRes.rows[0].nama;
+            const kRes = await db.query(`
+                SELECT k.nama, kc.nama as kecamatan 
+                FROM kepenghuluan k 
+                LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                WHERE k.id = $1 LIMIT 1
+            `, [did]);
+            if (kRes.rows.length > 0) {
+                activeDesaNama = kRes.rows[0].nama;
+                activeKecNama = kRes.rows[0].kecamatan || 'Batu Hampar';
+            }
+        }
+
+        // Ambil seluruh daftar kepenghuluan untuk filter super admin
+        let kepList = [];
+        if (isSuper) {
+            try {
+                const kl = await db.query(`
+                    SELECT k.id, k.nama, kc.nama as kecamatan 
+                    FROM kepenghuluan k 
+                    LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                    ORDER BY k.nama ASC
+                `);
+                kepList = kl.rows;
+            } catch (e) { /* noop */ }
         }
 
         res.render('resepsionis', {
@@ -161,8 +209,10 @@ exports.getDashboard = async (req, res) => {
             tamuList: rows,
             stats: stats,
             selectedTanggal: selectedTanggal,
-            activeDesaId: did || 1,
-            activeDesaNama: activeDesaNama
+            activeDesaId: did,
+            activeDesaNama: activeDesaNama,
+            activeKecNama: activeKecNama,
+            kepList: kepList
         });
     } catch (err) {
         console.error('getDashboard error:', err);
@@ -202,7 +252,9 @@ exports.updateStatus = async (req, res) => {
 // 5. Cetak Standing Akrilik QR Code Meja Resepsionis
 exports.getStandingQR = async (req, res) => {
     try {
-        const did = ac.getDesaId(req) || 1;
+        // Ambil desa: prioritas dari query ?desa=..., lalu sesi aktif, lalu kepenghuluan user, default 67 (Bantaian Baru)
+        let did = req.query.desa ? Number(req.query.desa) : (ac.getDesaId(req) || 67);
+
         let kepInfo = {
             id: did,
             nama: 'Bantaian Baru',
@@ -211,16 +263,35 @@ exports.getStandingQR = async (req, res) => {
         };
 
         try {
-            const kRes = await db.query('SELECT * FROM kepenghuluan WHERE id = $1 LIMIT 1', [did]);
+            const kRes = await db.query(`
+                SELECT k.id, k.nama, kc.nama as kecamatan 
+                FROM kepenghuluan k 
+                LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                WHERE k.id = $1 LIMIT 1
+            `, [did]);
             if (kRes.rows.length > 0) {
                 kepInfo = {
                     id: kRes.rows[0].id,
-                    nama: kRes.rows[0].nama || 'Bantaian Baru',
+                    nama: kRes.rows[0].nama,
                     kecamatan: kRes.rows[0].kecamatan || 'Batu Hampar',
                     kabupaten: 'Rokan Hilir'
                 };
             }
         } catch (e) { /* fallback default */ }
+
+        // Ambil daftar seluruh kepenghuluan se-Rohil untuk selector di atas lembar cetak
+        let kepList = [];
+        try {
+            const kl = await db.query(`
+                SELECT k.id, k.nama, kc.nama as kecamatan 
+                FROM kepenghuluan k 
+                LEFT JOIN kecamatan kc ON k.kecamatan_id = kc.id 
+                ORDER BY k.nama ASC
+            `);
+            kepList = kl.rows;
+        } catch (e) {
+            kepList = [kepInfo];
+        }
 
         // Host domain dinamis
         const host = req.get('host');
@@ -242,6 +313,7 @@ exports.getStandingQR = async (req, res) => {
             title: `Standing QR Buku Tamu - Kepenghuluan ${kepInfo.nama}`,
             layout: false,
             kepInfo: kepInfo,
+            kepList: kepList,
             targetUrl: targetUrl,
             qrDataUrl: qrDataUrl
         });
@@ -254,7 +326,7 @@ exports.getStandingQR = async (req, res) => {
 // 6. Input Tamu Manual oleh Petugas Resepsionis / Kaur Umum
 exports.postTamuManual = async (req, res) => {
     try {
-        const did = ac.getDesaId(req) || 1;
+        const did = req.body.kepenghuluan_id ? Number(req.body.kepenghuluan_id) : (ac.getDesaId(req) || 67);
         const {
             nama_tamu,
             instansi_asal,
